@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   const requestUrl = req.url || '';
 
   // ---------------------------------------------------------
-  // ১. M3U প্লেলিস্ট রিকোয়েস্ট (যেমন: /api/proxy/playlist-expire=48436844.m3u)
+  // ১. M3U প্লেলিস্ট রিকোয়েস্ট 
   // ---------------------------------------------------------
   if (!req.query.url && (requestUrl.includes('.m3u') || requestUrl.includes('playlist-expire'))) {
     
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
       }
 
       const content = await response.text();
-      const baseUrl = response.url; // Redirect সামলানোর জন্য
+      const baseUrl = response.url; 
 
       // প্লেলিস্টের প্রতিটি চ্যানেলকে প্রক্সি লিংকে রূপান্তর
       const lines = content.split('\n');
@@ -52,7 +52,7 @@ export default async function handler(req, res) {
         if (trimmed && !trimmed.startsWith('#')) {
           try {
             const absUrl = new URL(trimmed, baseUrl).href;
-            return `${protocol}://${host}/api/proxy?url=${encodeURIComponent(absUrl)}`;
+            return `${protocol}://${host}/?url=${encodeURIComponent(absUrl)}`;
           } catch (e) {
             return line;
           }
@@ -117,13 +117,12 @@ export default async function handler(req, res) {
           const trimmed = line.trim();
           if (!trimmed) return line;
 
-          // #EXT-X-KEY (AES Encryption) ও #EXT-X-MEDIA ট্যাগের URI প্রক্সি রিরাইট
           if (trimmed.startsWith('#')) {
             if (trimmed.includes('URI=')) {
               return trimmed.replace(/URI=["']([^"']+)["']/g, (match, uri) => {
                 try {
                   const abs = new URL(uri, finalUrl).href;
-                  return `URI="${protocol}://${host}/api/proxy?url=${encodeURIComponent(abs)}"`;
+                  return `URI="${protocol}://${host}/?url=${encodeURIComponent(abs)}"`;
                 } catch (e) {
                   return match;
                 }
@@ -132,10 +131,9 @@ export default async function handler(req, res) {
             return line;
           }
 
-          // ভিডিও সেগমেন্ট (.ts) বা সাব-প্লেলিস্ট রিরাইট
           try {
             const abs = new URL(trimmed, finalUrl).href;
-            return `${protocol}://${host}/api/proxy?url=${encodeURIComponent(abs)}`;
+            return `${protocol}://${host}/?url=${encodeURIComponent(abs)}`;
           } catch (e) {
             return line;
           }
