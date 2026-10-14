@@ -4,7 +4,7 @@
 const EXPIRE_CODE = "48436844"; 
 
 // মূল M3U প্লেলিস্ট URL
-const PLAYLIST_URL = 'https://raw.githubusercontent.com/boddj24-glitch/my-website/refs/heads/main/playlist.m3u';
+const PLAYLIST_URL = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/refs/heads/main/playlist.m3u';
 // ===================================================
 
 export default async function handler(req, res) {
