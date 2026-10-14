@@ -1,7 +1,6 @@
 export default async function handler(req, res) {
-  // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
 
   if (req.method === 'OPTIONS') {
@@ -17,7 +16,6 @@ export default async function handler(req, res) {
   try {
     const parsedTarget = new URL(targetUrl);
 
-    // Target Request Headers (IPTV Bypass)
     const response = await fetch(targetUrl, {
       method: req.method,
       headers: {
@@ -34,7 +32,6 @@ export default async function handler(req, res) {
 
     const contentType = response.headers.get('content-type') || '';
 
-    // M3U8 Manifest Processing
     if (targetUrl.includes('.m3u8') || contentType.includes('mpegurl') || contentType.includes('m3u8')) {
       const text = await response.text();
       const host = req.headers.host;
@@ -71,7 +68,6 @@ export default async function handler(req, res) {
       return res.status(200).send(rewritten.join('\n'));
     }
 
-    // Binary Streaming (.ts segments)
     res.setHeader('Content-Type', 'video/mp2t');
     const arrayBuffer = await response.arrayBuffer();
     return res.status(200).send(Buffer.from(arrayBuffer));
