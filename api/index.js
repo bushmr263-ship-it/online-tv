@@ -21,6 +21,28 @@ export default async function handler(req, res) {
   const protocol = req.headers['x-forwarded-proto'] || 'https';
   const requestUrl = req.url || '';
 
+  // যদি শুধু রুট ডোমেইন ভিজিট করা হয় (কোনো প্যারামিটার বা পাথ ছাড়া)
+  if (!req.query.url && requestUrl === '/') {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html lang="bn">
+      <head>
+          <meta charset="UTF-8">
+          <title>SHAWON TV Proxy</title>
+          <style>
+              body { background: #121212; color: #fff; font-family: Arial, sans-serif; text-align: center; padding-top: 100px; }
+              h1 { color: #f39c12; }
+          </style>
+      </head>
+      <body>
+          <h1>SHAWON TV Proxy Server is Running!</h1>
+          <p>Use your playlist link or stream URL parameter to watch.</p>
+      </body>
+      </html>
+    `);
+  }
+
   // ---------------------------------------------------------
   // ১. M3U প্লেলিস্ট রিকোয়েস্ট 
   // ---------------------------------------------------------
@@ -45,7 +67,6 @@ export default async function handler(req, res) {
       const content = await response.text();
       const baseUrl = response.url; 
 
-      // প্লেলিস্টের প্রতিটি চ্যানেলকে প্রক্সি লিংকে রূপান্তর
       const lines = content.split('\n');
       const rewrittenLines = lines.map(line => {
         const trimmed = line.trim();
@@ -102,7 +123,6 @@ export default async function handler(req, res) {
     const contentType = response.headers.get('content-type') || '';
     const finalUrl = response.url; 
 
-    // M3U8 বা সাব-প্লেলিস্ট চেক
     const isPlaylist = targetUrl.includes('.m3u') || 
                        contentType.includes('mpegurl') || 
                        contentType.includes('m3u') || 
@@ -147,7 +167,6 @@ export default async function handler(req, res) {
       return res.status(200).send(text);
     }
 
-    // TS/AAC/MP4 ভিডিও সেগমেন্ট প্লেয়ারে পাঠানো
     const arrayBuffer = await response.arrayBuffer();
     res.setHeader('Content-Type', contentType || 'video/mp2t');
     res.setHeader('Cache-Control', 'public, max-age=3600');
