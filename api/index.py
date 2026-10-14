@@ -1,11 +1,10 @@
 from http.server import BaseHTTPRequestHandler
 import urllib.parse
 import urllib.request
-import re
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        # URL থেকে query parameters পার্স করা
+        # URL theke query parameters parse kora
         parsed_path = urllib.parse.urlparse(self.path)
         query_params = urllib.parse.parse_qs(parsed_path.query)
         
@@ -19,7 +18,7 @@ class handler(BaseHTTPRequestHandler):
             return
 
         try:
-            # টার্গেট লিংকে রিকোয়েস্ট পাঠানোর জন্য ইউজার-এজেন্ট সেট করা
+            # Target link-e request pathanor jonno User-Agent set kora
             req = urllib.request.Request(
                 target_url,
                 headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
@@ -29,34 +28,35 @@ class handler(BaseHTTPRequestHandler):
                 content_type = response.headers.get('Content-Type', 'application/octet-stream')
                 body = response.read()
 
-                # যদি রেসপন্সটি m3u8 প্লেলিস্ট হয়, তবে ভেতরের .ts বা চ্যাঙ্ক লিংকগুলো রিরাইট করতে হবে
-                if 'mpegurl' in content_type.lower() or target_url.endswith('.m3u8'):
+                # Jodi response-ti m3u8 playlist hoy, tahobe vetor er chunk/ts link gulo rewrite korte hobe
+                if 'mpegurl' in content_type.lower() or target_url.endswith('.m3u8') or '.m3u8' in target_url:
                     text_content = body.decode('utf-8', errors='ignore')
                     
-                    # মূল লিংকের বেস ইউআরএল বের করা (যেমন: http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/9258/)
+                    # Target link-er base URL ber kora
                     base_url = target_url.rsplit('/', 1)[0] + '/'
                     
-                    # রিলেটিভ পাথগুলোকে অ্যাবসোলিউট (Absolute) লিংকে রূপান্তর করা
-                    def rewrite_line(match):
-                        line = match.group(0)
-                        if line.startswith('http://') or line.startswith('https://'):
-                            return line
-                        elif line.startswith('/'):
-                            # যদি রুট থেকে শুরু হয়
-                            parsed_base = urllib.parse.urlparse(target_url)
-                            return f"{parsed_base.scheme}://{parsed_base.netloc}{line}"
-                        else:
-                            return base_url + line
-
-                    # এমথিউইট ফাইলের কমেন্ট বা ট্যাগ ছাড়া লাইনগুলোতে লিংক রিরাইট করা
+                    # Current Vercel host detect kora
+                    host = self.headers.get('Host', 'online-tv-rho.vercel.app')
+                    
                     lines = text_content.splitlines()
                     new_lines = []
                     for line in lines:
-                        if line and not line.startswith('#'):
-                            # লাইনটি যদি পূর্ণাঙ্গ লিংক না হয়, তবে বেস ইউআরএল যুক্ত করবে
-                            if not line.startswith('http://') and not line.startswith('https://'):
-                                line = base_url + line
-                        new_lines.append(line)
+                        line_str = line.strip()
+                        if line_str and not line_str.startswith('#'):
+                            # Absolute URL toiri kora
+                            if line_str.startswith('http://') or line_str.startswith('https://'):
+                                abs_url = line_str
+                            elif line_str.startswith('/'):
+                                parsed_target = urllib.parse.urlparse(target_url)
+                                abs_url = f"{parsed_target.scheme}://{parsed_target.netloc}{line_str}"
+                            else:
+                                abs_url = base_url + line_str
+                            
+                            # Proxy URL-er sathe wrap kora
+                            proxy_wrapped_url = f"https://{host}/?url={urllib.parse.quote(abs_url, safe='')}"
+                            new_lines.append(proxy_wrapped_url)
+                        else:
+                            new_lines.append(line)
                     
                     body = "\n".join(new_lines).encode('utf-8')
                     content_type = 'application/x-mpegURL'
