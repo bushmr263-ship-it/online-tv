@@ -1,6 +1,6 @@
- export default async function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
 
   if (req.method === 'OPTIONS') {
@@ -9,33 +9,36 @@
 
   const { url: targetUrl } = req.query;
 
+  // যদি সরাসরি ডোমেইন ভিজিট করা হয় (কোনো url param না থাকে), তবে ক্র্যাশ না করে শুধু মেসেজ দেখাবে
   if (!targetUrl) {
-    return res.status(400).json({ error: 'No URL provided' });
+    return res.status(200).json({ error: "No URL provided. Use ?url=STREAM_LINK" });
   }
 
   try {
     const parsedTarget = new URL(targetUrl);
 
+    const headers = {
+      'User-Agent': 'VLC/3.0.18 LibVLC/3.0.18',
+      'Referer': parsedTarget.origin + '/',
+      'Origin': parsedTarget.origin,
+      'Accept': '*/*'
+    };
+
     const response = await fetch(targetUrl, {
-      method: req.method,
-      headers: {
-        'User-Agent': 'VLC/3.0.18 LibVLC/3.0.18',
-        'Referer': parsedTarget.origin + '/',
-        'Origin': parsedTarget.origin,
-        'Accept': '*/*'
-      }
+      method: 'GET',
+      headers: headers
     });
 
     if (!response.ok) {
       return res.status(response.status).json({ error: `Stream HTTP ${response.status}` });
     }
 
-    const contentType = response.headers.get('content-type') || '';
+    const contentType = response.headers.get('content-type'] || '';
 
     if (targetUrl.includes('.m3u8') || contentType.includes('mpegurl') || contentType.includes('m3u8')) {
       const text = await response.text();
-      const host = req.headers.host;
-      const protocol = 'https';
+      const host = req.headers['x-forwarded-host'] || req.headers.host;
+      const protocol = req.headers['x-forwarded-proto'] || 'https';
 
       const lines = text.split('\n');
       const rewritten = lines.map(line => {
@@ -68,7 +71,7 @@
       return res.status(200).send(rewritten.join('\n'));
     }
 
-    res.setHeader('Content-Type', 'video/mp2t');
+    res.setHeader('Content-Type', contentType || 'video/mp2t');
     const arrayBuffer = await response.arrayBuffer();
     return res.status(200).send(Buffer.from(arrayBuffer));
 
