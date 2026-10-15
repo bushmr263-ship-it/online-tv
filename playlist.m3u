@@ -380,6 +380,9 @@ https://tvsen7.aynaott.com/disney/index.m3u8
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/G2F8757j/20240823_021053.png" group-title="Cartoon",Rongeen
 https://server.thelegitpro.in/rongeentv/rongeentv/tracks-v1a1/mono.m3u8
 
+#EXTINF:-1, group-title="Cartoon",sonic hd
+https://robitv.com/rn/http%3A%2F%2F103.185.24.134%3A3001%2FSONIC%2Ftracks-v1a1%2Fmono.m3u8
+
 #EXTINF:-1 tvg-id="019de785-3bf4-757f-8e66-683777e40ff6" tvg-name="CGTN Documentary" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_99873e9c7dfcfc8c5f5e7ee1874b7f91_playmist_cgtn_documentary_400x400.jpg" group-title="Documentary",CGTN Documentary
 https://english-livebkali.cgtn.com/live/doccgtn_1.m3u8
 
