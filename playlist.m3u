@@ -576,13 +576,13 @@ https://tvsen7.aynaott.com/disney/index.m3u8
 https://my-website-69ndd02fb-bushmr263-ship-it.vercel.app/?url=http://103.185.24.134:3001/Star-Movies/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-id="" tvg-name="Star Movies HD" tvg-logo="" group-title="Movies",Star Movies HD
-https://my-website-69ndd02fb-bushmr263-ship-it.vercel.app/?url=http://103.185.24.134:3001/STAR-MOVIES-SEL-HD/tracks-v1a1/mono.m3u8
+https://robitv.com/rn/http://103.185.24.134:3001/STAR-MOVIES-SEL-HD/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-id="019de785-3bac-72a7-b7ff-9d20d69bb27d" tvg-name="Nat Geo TV" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_25b786047244481532eb505dfba85580_playmist_nat_geo_tv_400x400.jpg" group-title="English",Nat Geo bangla
 https://my-website-69ndd02fb-bushmr263-ship-it.vercel.app/?url=http://103.185.24.134:3001/NATGEO-HD/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-id="" tvg-name="Ayna OTT Hindi Movies" tvg-logo="" group-title="Movies",Hindi Movies
-https://my-website-69ndd02fb-bushmr263-ship-it.vercel.app/?url=https://vods2.aynaott.com/hindimovies/tracks-v1a1/mono.ts.m3u8
+https://vods2.aynaott.com/hindimovies/tracks-v1a1/mono.ts.m3u8
 
 #EXTINF:-1 tvg-id="" tvg-name="Akcia TV" tvg-logo="" group-title="Documentary",National Geographic
 https://my-website-69ndd02fb-bushmr263-ship-it.vercel.app/?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/7321/index.m3u8
@@ -602,8 +602,8 @@ https://live-dangal.akamaized.net/liveabr/pub-iodang10p4al/live_720p/chunks.m3u8
 #EXTINF:-1 tvg-id="DANGAL2 HIndi" tvg-logo="https://static.wikia.nocookie.net/logopedia/images/a/ac/Dangal_2.png" group-title="DANGAL2 hindi",DANGAL2
 https://live-dangal2.akamaized.net/liveabr/playlist.m3u8
 
-#EXTINF:-1 tvg-name="Star Plus hindi" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Star_Plus_HD.png" group-title="Star Plus HD",Star Plus HD
-https://my-website-69ndd02fb-bushmr263-ship-it.vercel.app/?url=https://d1rc86nwwc9fag.cloudfront.net/260723/starplusuk_2500/chunklist.m3u8
+#EXTINF:-1 tvg-name="Star Plus hindi" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Star_Plus_HD.png" group-title="Star Plus hindi",Star Plus HD
+https://d1rc86nwwc9fag.cloudfront.net/260723/starplusuk_2500/chunklist.m3u8
 
 #EXTINF:-1 tvg-name="Sony PIX HD MOVEIS" tvg-logo="https://assets-prod.services.toffeelive.com/Ly6C-JQBv9knK3AHOjXt/posters/252e64ca-8d99-46e7-a951-e10c1703c11d.webp" group-title="Movies",Sony PIX HD moveis
 https://my-website-69ndd02fb-bushmr263-ship-it.vercel.app/?url=https://drk6xq0vhn.gpcdn.net/live/pix_hd_abr/live/sony_pix_hd_720/chunks.m3u8
