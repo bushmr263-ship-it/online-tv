@@ -665,8 +665,10 @@
             renderChannels();
         }
 
-        // Categorization Engine & Multi-Server Parser
-        fetch('https://raw.githubusercontent.com/boddj24-glitch/my-website/refs/heads/main/playlist.m3u')
+        // Categorization Engine & Multi-Server Parser with Cache Bypass (Your Own Repo)
+        const playlistUrl = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/main/playlist.m3u?t=' + new Date().getTime();
+
+        fetch(playlistUrl, { cache: 'no-store' })
             .then(response => response.text())
             .then(data => {
                 const lines = data.split(/\r?\n/);
@@ -761,46 +763,23 @@
                             ) {
                                 detectedGroup = 'hindi';
                             }
-                            else if (
-                                currentGroup.includes('bangla') || currentGroup.includes('bangladeshi') || currentGroup.includes('toffee') || 
-                                lowerTitle.includes('btv') || lowerTitle.includes('somoy') || lowerTitle.includes('jamuna') || 
-                                lowerTitle.includes('ekattor') || lowerTitle.includes('channel 24') || lowerTitle.includes('independent') || 
-                                lowerTitle.includes('dbc') || lowerTitle.includes('atn bangla') || lowerTitle.includes('rtv') || 
-                                lowerTitle.includes('ntv') || lowerTitle.includes('banglavision') || lowerTitle.includes('maasranga') || 
-                                lowerTitle.includes('nagorik') || lowerTitle.includes('gazi') || lowerTitle.includes('deepto') || 
-                                lowerTitle.includes('ekhon') || lowerTitle.includes('bijoy') || lowerTitle.includes('channel i') || 
-                                lowerTitle.includes('desh tv') || lowerTitle.includes('asian tv') || lowerTitle.includes('my tv') || 
-                                lowerTitle.includes('global tv') || lowerTitle.includes('thikana') || lowerTitle.includes('drama 24') || 
-                                lowerTitle.includes('bangla plus') || lowerTitle.includes('mohana') || lowerTitle.includes('boishakhi') || 
-                                lowerTitle.includes('channel 9') || lowerTitle.includes('sa tv')
-                            ) {
-                                detectedGroup = 'bangla';
-                            }
 
-                            let existingChannel = allChannels.find(c => c.name.toLowerCase() === currentTitle.toLowerCase());
-                            if (existingChannel) {
-                                existingChannel.url = existingChannel.url.concat(rawUrls);
-                            } else {
-                                allChannels.push({
-                                    name: currentTitle,
-                                    logo: currentLogo,
-                                    group: detectedGroup,
-                                    url: rawUrls
-                                });
-                            }
+                            allChannels.push({
+                                name: currentTitle,
+                                logo: currentLogo,
+                                url: rawUrls.length === 1 ? rawUrls[0] : rawUrls,
+                                group: currentGroup || detectedGroup
+                            });
+
+                            currentTitle = '';
                         }
                     }
                 }
                 renderChannels();
-
-                // পেজ লোড বা রিফ্রেশ হলে প্রথম চ্যানেল স্বয়ংক্রিয়ভাবে চালু করবে
-                if (allChannels.length > 0) {
-                    loadChannel(allChannels[0]);
-                }
             })
             .catch(err => {
-                console.error("Playlist load error:", err);
-                document.getElementById('channelContainer').innerHTML = '<p style="text-align: center; color: #ff4757; grid-column: span 4; padding: 20px;">প্লেলিস্ট লোড করতে সমস্যা হয়েছে!</p>';
+                console.error('Error fetching playlist:', err);
+                document.getElementById('channelContainer').innerHTML = '<p style="text-align: center; color: red; grid-column: span 4; padding: 20px;">প্লেলিস্ট লোড করতে সমস্যা হয়েছে!</p>';
             });
     </script>
 </body>
