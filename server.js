@@ -1,3 +1,6 @@
+const express = require('express');
+const app = express();
+
 // ===================================================
 // সিক্রেট আইডি (প্রয়োজনে পরিবর্তন করুন)
 // ===================================================
@@ -7,8 +10,8 @@ const EXPIRE_CODE = "48436844";
 const PLAYLIST_URL = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/refs/heads/main/playlist.m3u';
 // ===================================================
 
-export default async function handler(req, res) {
-  // CORS হেডার
+// সব রাউটের জন্য CORS হেডার যুক্ত করা
+app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
@@ -16,10 +19,19 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
+  next();
+});
 
+// হোম রুট (হেলথ চেক ও টেস্টিংয়ের জন্য)
+app.get('/', (req, res) => {
+  res.send('SHAWON TV Proxy Server is Running!');
+});
+
+// প্রক্সি প্রসেসর ফাংশন
+async function handleProxy(req, res) {
   const host = req.headers.host;
-  const protocol = req.headers['x-forwarded-proto'] || 'https';
-  const requestUrl = req.url || '';
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+  const requestUrl = req.originalUrl || req.url || '';
 
   // ---------------------------------------------------------
   // ১. M3U প্লেলিস্ট রিকোয়েস্ট (যেমন: /api/proxy/playlist-expire=48436844.m3u)
@@ -77,9 +89,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // ডায়নামিকভাবে টার্গেট ইউআরএল-এর নিজস্ব অরিজিন বের করা
     const parsedTarget = new URL(targetUrl);
-    const targetOrigin = parsedTarget.origin; // যেমন: http://198.195.239.50:8095 বা https://public.iptv-channels.workers.dev
+    const targetOrigin = parsedTarget.origin;
 
     const response = await fetch(targetUrl, {
       headers: {
@@ -97,7 +108,7 @@ export default async function handler(req, res) {
     const contentType = response.headers.get('content-type') || '';
     const finalUrl = response.url; 
 
-    // M3U8 বা সাব-플레이লিস্ট চেক
+    // M3U8 বা সাব-প্লেলিস্ট চেক
     const isPlaylist = targetUrl.includes('.m3u') || 
                        contentType.includes('mpegurl') || 
                        contentType.includes('m3u') || 
@@ -154,3 +165,12 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: error.message });
   }
 }
+
+// প্রক্সি রাউট
+app.all('/api/proxy*', handleProxy);
+
+// Render-এর জন্য নির্ধারিত পোর্ট লিসেন করা
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
