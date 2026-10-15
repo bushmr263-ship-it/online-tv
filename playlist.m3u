@@ -212,9 +212,6 @@ https://server.thelegitpro.in/rongeentv/rongeentv/tracks-v1a1/mono.m3u8
 #EXTINF:-0 tvg-logo="https://i.postimg.cc/yNvkbdL4/1000114150.png",Star maa movies 
 https://da86m1sqpm3o0.cloudfront.net/28072023/smil:maamovies.smil/chunklist_b2628000.m3u8 
 
-#EXTINF:-0 tvg-logo=""https://tinyurl.com/mr2dec8v",STAR MAA MOVIES HD
-https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starmaa1.smil/chunklist_b2628000.m3u8
-
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/6pCXvxyz/20240823_022553.png",Star Gold HD
 https://online-tv-rho.vercel.app/?url=http://198.195.239.50:8095/STAR.GOLD.HD/tracks-v1a1/mono.m3u8
 
@@ -248,8 +245,8 @@ https://d1rc86nwwc9fag.cloudfront.net/260723/smil:rishteycineplexukdev.smil/chun
 #EXTINF:-1 tvg-id="019f401f-3897-7291-8783-ed9b4301df6e" tvg-name="Pitaara TV" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-08/images_28f8e70cb65b77b00b911acfcbb43568_playmist_pitaara_tv400x400.jpg" group-title="English",Pitaara TV
 https://vg-pitaaratvlive.akamaized.net/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/vglive-sk-583798/playlist.m3u8
 
-#EXTINF:-1 tvg-logo="https://tinyurl.com/mr2dec8v",Roja Movies
-https://stream.rojatv.cloud/rojatv/rojatv/index.m3u8
+#EXTINF:-1 tvg-logo="https://tinyurl.com/mr2dec8v",STAR MAA MOVIES HD
+https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starmaa1.smil/chunklist_b2628000.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/XJ1SbVzN/20240823_022738.png",&Pictures
 https://online-tv-rho.vercel.app/?url=http://198.195.239.50:8095/ANT.PICTURS.HD/index.m3u8
