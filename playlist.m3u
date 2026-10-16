@@ -1,6 +1,6 @@
 #EXTM3U
 #EXTINF:-1 tvg-logo="https://static.wikia.nocookie.net/etv-gspn-bangla/images/6/6e/T_Sports_HD_logo_2021.png",T Sports
-https://tvsen5.aynaott.com/TnMn5kZz8aLmjklkk/index.m3u8      https://mycoffeetime.net/play/tSDRdsaoGGQ2qYgRPDEe9q-qMIzoahbJArH3W3vOiEaB97nXMpWmLb0Ts759Tjsp/m3u8
+https://tvsen5.aynaott.com/TnMn5kZz8aLmjklkk/index.m3u8      https://mycoffeetime.net/play/tSDRdsaoGGQ2qYgRPDEe9q-qMIzoahbJArH3W3vOiEaB97nXMpWmLb0Ts759Tjsp/m3u8    https://robitv.com/rn/http://45.117.61.162/01_Tsports_HD/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/W1z5BGPZ/20240823_024712.png" group-title="𝐒𝐩𝐨𝐫𝐭𝐬",A Sports HD
 https://tvsen6.aynaott.com/zv68oqPDu7MZZwmHhRxt/tracks-v1a1/mono.ts.m3u8
@@ -533,10 +533,8 @@ https://live-dangal2.akamaized.net/liveabr/playlist.m3u8
 #EXTINF:-1 group-title="Hindi" tvg-id="" tvg-name="Sony PIX HD Movies" tvg-logo="https://assets-prod.services.toffeelive.com/Ly6C-JQBv9knK3AHOjXt/posters/252e64ca-8d99-46e7-a951-e10c1703c11d.webp",Sony PIX HD Movies
 https://drk6xq0vhn.gpcdn.net/live/pix_hd_abr/live/sony_pix_hd_720/chunks.m3u8
 
-
-
-#EXTINF:-1 tvg-id="" tvg-logo="https://static.wikia.nocookie.net/logopedia/images/7/7c/HBO_Movies_2025.svg" group-title="Movies",EN | HBO Movies 2
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/7005/index.m3u8
+#EXTINF:-1 tvg-id="" tvg-logo="https://static.wikia.nocookie.net/logopedia/images/7/7c/HBO_Movies_2025.svg" group-title="Movies",EN HBO Movies 
+https://tvsen7.aynaott.com/hbo/index.m3u8
 
 #EXTINF:-1 group-title="Cartoon", Cartoon
 https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/921/index.m3u8
@@ -591,23 +589,40 @@ https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://88.212.15.19/live/spi
 
 #EXTINF:-1 tvg-id="019de785-39ff-7db1-94c6-e17acf6a6da4" tvg-name="Oman Sports TV HD" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-04-09/images_db7e2ba86e75cc789ccffacd59521127_playmist_oman_sports_tv_hd400x400.jpg" group-title="Sports",Oman Sports TV HD
 https://partneta.cdn.mgmlcdn.com/omsport/smil:omsport.stream.smil/chunklist.m3u8
+
 #EXTINF:-1 group-title="Hindi", Hindi Movie 1
 https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/912/index.m3u8
 
-#EXTINF:-1 group-title="Hindi", Hindi Movie 2
+#EXTINF:-1 group-title="Hindi",  Movie 2
 https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/912/index.m3u8
 
-#EXTINF:-1 group-title="Hindi", Hindi Movie 3
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/914/index.m3u8
+#EXTINF:-1 group-title="Hindi", Epix Movie
+https://tvsen3.aynaott.com/Ah3tLAfA/index.m3u8
 
-#EXTINF:-1 group-title="Hindi", Hindi Channel Movie
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/905/index.m3u8
+#EXTINF:-1 group-title="Lifestyle",HGTV hindi Movie
+https://tvsen3.aynaott.com/Ge23xfY5/index.m3u8
 
-#EXTINF:-1 tvg-id="" tvg-name="Star Movies" tvg-logo="" group-title="Hindi",Hindi | Star Movies
+#EXTINF:-1 tvg-id="" tvg-name="Star Movies" tvg-logo="" group-title="Hindi", Star Movies
 https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://103.185.24.134:3001/Star-Movies/tracks-v1a1/mono.m3u8
 
-#EXTINF:-1 tvg-id="" tvg-name="Star Movies HD" tvg-logo="" group-title="Hindi",Hindi | Star Movies HD
+#EXTINF:-1 tvg-id="" tvg-name="Star Movies HD" tvg-logo="" group-title="Hindi", Star Movies HD
 https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://103.185.24.134:3001/STAR-MOVIES-SEL-HD/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-id="" tvg-logo="https://static.wikia.nocookie.net/logopedia/images/7/7c/HBO_Movies_2025.svg" group-title="Hindi",Hindi | HBO Movies 2
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/7005/index.m3u8
+https://tvsen3.aynaott.com/u3NjUrny/index.m3u8
+
+#EXTINF:-1 tvg-name="SET Bangla" group-title="hindi",ster brto
+https://d1taaads3ztvmu.cloudfront.net/120723/smil:lifeokuk.smil/chunklist_b2628000.m3u8
+
+#EXTINF:-1 tvg-name="Euro Sport" group-title="Sports",Euro Sport
+https://drk6xq0vhn.gpcdn.net/live/euro_sports_hd_abr/live/euro_sports_hd/chunks.m3u8
+
+
+
+
+
+
+
+
+
+
