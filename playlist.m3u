@@ -596,7 +596,7 @@ https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/i
 #EXTINF:-1 group-title="Hindi", Epix Movie
 https://tvsen3.aynaott.com/Ah3tLAfA/index.m3u8
 
-#EXTINF:-1 group-title="Lifestyle",HGTV hindi Movie
+#EXTINF:-1 group-title="hindi",HGTV Movie
 https://tvsen3.aynaott.com/Ge23xfY5/index.m3u8
 
 #EXTINF:-1 tvg-id="" tvg-name="Star Movies" tvg-logo="" group-title="Hindi", Star Movies
