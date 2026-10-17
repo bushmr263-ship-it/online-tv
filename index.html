@@ -36,7 +36,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"></script>
     
-    <!-- HLS.js with Quality Level Control -->
+    <!-- HLS.js -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         if (typeof Hls === 'undefined') {
@@ -288,7 +288,7 @@
         
         .modes { 
             display: flex; 
-            gap: 10px; 
+            gap: 8px; 
             margin-top: 15px; 
             justify-content: center; 
             flex-wrap: wrap; 
@@ -299,10 +299,11 @@
             background: #333; 
             color: #fff; 
             border: none; 
-            padding: 10px 20px; 
+            padding: 8px 14px; 
             border-radius: 6px; 
             cursor: pointer; 
             font-weight: bold;
+            font-size: 13px;
         }
         
         .btn:hover { 
@@ -310,18 +311,36 @@
             color: #000; 
         }
 
-        .quality-select {
-            background: #21262d;
-            color: var(--accent-color);
-            border: 1px solid #30363d;
-            padding: 10px 15px;
+        .quality-buttons-wrap {
+            display: flex;
+            gap: 6px;
+            background: #0d1117;
+            padding: 4px 8px;
             border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 13px;
+            border: 1px solid #30363d;
+            flex-wrap: wrap;
         }
 
-        .quality-select:hover {
+        .q-btn {
+            background: #21262d;
+            color: #fff;
+            border: 1px solid #30363d;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .q-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .q-btn.active {
+            background: var(--accent-color);
+            color: #000;
             border-color: var(--accent-color);
         }
         
@@ -408,7 +427,6 @@
             <div class="header-wrapper">
                 <div class="logo-header">SHAWON TV</div>
                 
-                <!-- Server Switcher & Compact Notice Box on Top Right -->
                 <div id="serverSwitcherBox" class="header-server-switcher">
                     <div class="server-title-notice-row">
                         <div class="server-title" id="activeChannelName">চ্যানেল সিলেক্ট করুন</div>
@@ -432,9 +450,9 @@
             </div>
 
             <div class="video-box">
-                <video id="my-video" class="video-js vjs-big-play-centered" controls></video>
+                <video id="my-video" class="video-js vjs-big-play-centered" controls autoplay playsinline preload="auto"></video>
                 <div id="clappr-container" style="display:none;"></div>
-                <video id="html5-video" controls style="display:none;"></video>
+                <video id="html5-video" controls autoplay playsinline preload="auto" style="display:none;"></video>
                 <iframe id="custom-iframe" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen="true" style="display:none;"></iframe>
             </div>
             
@@ -443,15 +461,20 @@
                 <button class="btn" onclick="switchMode('clappr')">Clappr</button>
                 <button class="btn" onclick="switchMode('html5')">HTML5</button>
                 <button class="btn" onclick="switchMode('iframe')">Iframe</button>
-                <select id="qualitySelector" class="quality-select" onchange="changeQuality(this.value)">
-                    <option value="-1">Auto Quality</option>
-                </select>
+                
+                <div class="quality-buttons-wrap" id="qualityButtonsWrap">
+                    <button class="q-btn active" onclick="setManualQuality(-1, this)">Auto</button>
+                    <button class="q-btn" onclick="setManualQualityByHeight(1080, this)">1080p</button>
+                    <button class="q-btn" onclick="setManualQualityByHeight(720, this)">720p</button>
+                    <button class="q-btn" onclick="setManualQualityByHeight(480, this)">480p</button>
+                    <button class="q-btn" onclick="setManualQualityByHeight(360, this)">360p</button>
+                </div>
+
                 <button class="btn pip-btn" onclick="togglePIP()">PIP Mode</button>
             </div>
         </div>
 
         <div class="channel-list-container">
-            <!-- Category Filter Bar -->
             <div class="category-bar">
                 <button class="cat-btn active" onclick="filterCategory('all', this)">All</button>
                 <button class="cat-btn" onclick="filterCategory('sports', this)">Sports</button>
@@ -467,7 +490,6 @@
                 <p style="text-align: center; color: #888; grid-column: span 4;">চ্যানেল লোড হচ্ছে...</p>
             </div>
 
-            <!-- Social Links Right Below Channel List -->
             <div class="social-footer">
                 <a href="https://t.me/shawonpb" target="_blank" class="social-btn telegram-btn">📱 Telegram</a>
                 <a href="https://www.facebook.com/aribashawon6672" target="_blank" class="social-btn facebook-btn">🌐 Facebook</a>
@@ -515,7 +537,7 @@
         const iframe = document.getElementById('custom-iframe');
         const clapprEl = document.getElementById('clappr-container');
         const html5El = document.getElementById('html5-video');
-        let playerInstance = videojs('my-video');
+        let playerInstance = videojs('my-video', { autoplay: true });
         let clapprInstance;
         let hls; 
         let dashPlayer;
@@ -525,6 +547,7 @@
         let currentFilter = 'all';
         let currentChannelObj = null;
         let currentServerIndex = 0;
+        let stallCheckInterval = null;
 
         function togglePIP() {
             if (videoEl.style.display !== 'none' && document.pictureInPictureEnabled) {
@@ -587,10 +610,39 @@
             }
         }
 
-        // Manual Quality Change Function
-        function changeQuality(levelIndex) {
+        // Manual Quality Selection Logic
+        function setManualQuality(levelIndex, btnEl) {
+            document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+
             if (hls) {
-                hls.currentLevel = parseInt(levelIndex);
+                hls.currentLevel = levelIndex;
+            }
+        }
+
+        function setManualQualityByHeight(targetHeight, btnEl) {
+            document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+
+            if (hls && hls.levels && hls.levels.length > 0) {
+                let closestIndex = -1;
+                let minDiff = Infinity;
+
+                hls.levels.forEach((level, index) => {
+                    if (level.height) {
+                        let diff = Math.abs(level.height - targetHeight);
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            closestIndex = index;
+                        }
+                    }
+                });
+
+                if (closestIndex !== -1) {
+                    hls.currentLevel = closestIndex;
+                } else {
+                    hls.currentLevel = -1;
+                }
             }
         }
 
@@ -605,6 +657,7 @@
             clapprEl.style.display = 'none';
             html5El.style.display = 'none';
             
+            if (stallCheckInterval) { clearInterval(stallCheckInterval); stallCheckInterval = null; }
             if (hls) { hls.destroy(); hls = null; }
             if (dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
             if (clapprInstance) { clapprInstance.destroy(); clapprInstance = null; }
@@ -614,18 +667,25 @@
             html5El.src = "";
             iframe.src = "about:blank";
 
-            // Reset quality selector dropdown
-            const qualitySelect = document.getElementById('qualitySelector');
-            qualitySelect.innerHTML = '<option value="-1">Auto Quality</option>';
+            // Reset active quality button to Auto
+            const qBtns = document.querySelectorAll('.q-btn');
+            qBtns.forEach((b, i) => {
+                if (i === 0) b.classList.add('active');
+                else b.classList.remove('active');
+            });
 
-            const setMaxVolumeAndPlay = (mediaObj, isVjs = false) => {
+            // Instant Play BDIX-style Fast Launch Helper
+            const triggerInstantPlay = (mediaObj, isVjs = false) => {
                 if (isVjs) {
                     mediaObj.muted(false);
                     mediaObj.volume(1.0);
-                    mediaObj.play().catch(() => {
-                        mediaObj.muted(true);
-                        mediaObj.play();
-                    });
+                    let promise = mediaObj.play();
+                    if (promise !== undefined) {
+                        promise.catch(() => {
+                            mediaObj.muted(true);
+                            mediaObj.play();
+                        });
+                    }
                 } else {
                     mediaObj.muted = false;
                     mediaObj.volume = 1.0;
@@ -655,7 +715,7 @@
             } else if (mode === 'html5') {
                 html5El.style.display = 'block';
                 html5El.src = finalUrl;
-                setMaxVolumeAndPlay(html5El, false);
+                triggerInstantPlay(html5El, false);
                 html5El.onerror = () => handleFallback();
             } else {
                 videoEl.style.display = 'block';
@@ -664,45 +724,65 @@
                     if (typeof dashjs !== 'undefined') {
                         dashPlayer = dashjs.MediaPlayer().create();
                         dashPlayer.initialize(videoEl, finalUrl, true);
-                        setMaxVolumeAndPlay(playerInstance, true);
+                        triggerInstantPlay(playerInstance, true);
                     } else {
-                        playerInstance.src({ src: finalUrl });
-                        setMaxVolumeAndPlay(playerInstance, true);
+                        playerInstance.src({ src: finalUrl, type: 'application/dash+xml' });
+                        triggerInstantPlay(playerInstance, true);
                     }
                 } else if (Hls.isSupported()) {
+                    // BDIX Ultra-fast Start HLS Config
                     hls = new Hls({
                         enableWorker: true,
-                        lowLatencyMode: false,
-                        backBufferLength: 15,
-                        maxBufferLength: 30,
-                        maxMaxBufferLength: 60,
-                        maxBufferSize: 60 * 1000 * 1000,
-                        liveSyncDurationCount: 4,
-                        liveMaxLatencyDurationCount: 10,
-                        manifestLoadingTimeOut: 15000,
-                        manifestLoadingMaxRetry: 6,
-                        levelLoadingTimeOut: 15000,
-                        levelLoadingMaxRetry: 6,
-                        fragLoadingTimeOut: 20000,
-                        fragLoadingMaxRetry: 8
+                        lowLatencyMode: true,
+                        startFragPrefetch: true,
+                        maxInitialBitrate: 2000000,
+                        backBufferLength: 5,
+                        maxBufferLength: 10,
+                        maxMaxBufferLength: 20,
+                        maxBufferSize: 20 * 1000 * 1000,
+                        liveSyncDurationCount: 2,
+                        liveMaxLatencyDurationCount: 5,
+                        fragLoadingTimeOut: 10000,
+                        fragLoadingMaxRetry: 6,
+                        fragLoadingRetryDelay: 300,
+                        manifestLoadingTimeOut: 10000,
+                        manifestLoadingMaxRetry: 4
                     });
 
                     hls.loadSource(finalUrl);
                     hls.attachMedia(videoEl);
 
-                    // Populate Quality Levels dynamically when manifest is parsed
+                    hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+                        triggerInstantPlay(playerInstance, true);
+                    });
+
                     hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
-                        setMaxVolumeAndPlay(playerInstance, true);
-                        
-                        if (hls.levels && hls.levels.length > 1) {
-                            qualitySelect.innerHTML = '<option value="-1">Auto Quality</option>';
-                            hls.levels.forEach((level, index) => {
-                                let height = level.height ? level.height + 'p' : `Level ${index + 1}`;
-                                let opt = document.createElement('option');
-                                opt.value = index;
-                                opt.innerText = height;
-                                qualitySelect.appendChild(opt);
-                            });
+                        triggerInstantPlay(playerInstance, true);
+                    });
+
+                    // Autonomous Fast-Recovery Watchdog
+                    let lastTime = 0;
+                    let stallCount = 0;
+                    stallCheckInterval = setInterval(() => {
+                        if (!videoEl.paused && videoEl.readyState > 2) {
+                            if (videoEl.currentTime === lastTime) {
+                                stallCount++;
+                                if (stallCount >= 2 && hls) {
+                                    console.warn("Buffer stalling detected. Auto-healing playback...");
+                                    hls.startLoad();
+                                    hls.recoverMediaError();
+                                    stallCount = 0;
+                                }
+                            } else {
+                                stallCount = 0;
+                            }
+                            lastTime = videoEl.currentTime;
+                        }
+                    }, 1000);
+
+                    hls.on(Hls.Events.FRAG_BUFFERED, function () {
+                        if (videoEl.paused && !document.hidden && videoEl.readyState >= 2) {
+                            videoEl.play().catch(() => {});
                         }
                     });
 
@@ -710,23 +790,23 @@
                         if (data.fatal) {
                             switch (data.type) {
                                 case Hls.ErrorTypes.NETWORK_ERROR:
+                                    console.warn("Network error encountered, trying to recover load...");
                                     hls.startLoad();
-                                    setTimeout(() => {
-                                        if (videoEl.paused) handleFallback();
-                                    }, 4000);
                                     break;
                                 case Hls.ErrorTypes.MEDIA_ERROR:
+                                    console.warn("Media error or buffer stalled, recovering media...");
                                     hls.recoverMediaError();
                                     break;
                                 default:
+                                    console.warn("Fatal error encountered, switching fallback server...");
                                     handleFallback();
                                     break;
                             }
                         }
                     });
                 } else {
-                    playerInstance.src({ src: finalUrl });
-                    setMaxVolumeAndPlay(playerInstance, true);
+                    playerInstance.src({ src: finalUrl, type: 'application/x-mpegURL' });
+                    triggerInstantPlay(playerInstance, true);
                 }
             }
         }
@@ -769,7 +849,6 @@
                     container.appendChild(btn);
                 });
 
-                // Auto-play the first channel upon entering the website
                 if (allChannels.length > 0 && !currentUrl) {
                     loadChannel(allChannels[0]);
                 }
@@ -785,7 +864,6 @@
             renderChannels();
         }
 
-        // Categorization Engine & Multi-Server Parser with Cache Bypass
         const playlistUrl = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/main/playlist.m3u?t=' + new Date().getTime();
 
         fetch(playlistUrl, { cache: 'no-store' })
