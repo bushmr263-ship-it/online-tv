@@ -33,12 +33,19 @@
     <link rel="icon" type="image/png" href="https://i.ibb.co.com/PvnVqbdS/cpt-1469868507562.jpg">
 
     <!-- Video.js -->
-    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-    <!-- HLS.js -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"></script>
+    
+    <!-- HLS.js with Quality Level Control -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        if (typeof Hls === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"><\/script>');
+        }
+    </script>
+
     <!-- DASH.js -->
-    <script src="https://cdn.jsdelivr.net/npm/dashjs@latest/dist/dash.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/4.7.2/dash.all.min.js"></script>
     <!-- Clappr -->
     <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
     
@@ -285,6 +292,7 @@
             margin-top: 15px; 
             justify-content: center; 
             flex-wrap: wrap; 
+            align-items: center;
         }
         
         .btn { 
@@ -294,15 +302,32 @@
             padding: 10px 20px; 
             border-radius: 6px; 
             cursor: pointer; 
+            font-weight: bold;
         }
         
         .btn:hover { 
             background: var(--accent-color); 
             color: #000; 
         }
+
+        .quality-select {
+            background: #21262d;
+            color: var(--accent-color);
+            border: 1px solid #30363d;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .quality-select:hover {
+            border-color: var(--accent-color);
+        }
         
         .pip-btn { 
             background: #ff4757 !important; 
+            color: #fff !important;
         }
         
         .ch-btn { 
@@ -418,6 +443,9 @@
                 <button class="btn" onclick="switchMode('clappr')">Clappr</button>
                 <button class="btn" onclick="switchMode('html5')">HTML5</button>
                 <button class="btn" onclick="switchMode('iframe')">Iframe</button>
+                <select id="qualitySelector" class="quality-select" onchange="changeQuality(this.value)">
+                    <option value="-1">Auto Quality</option>
+                </select>
                 <button class="btn pip-btn" onclick="togglePIP()">PIP Mode</button>
             </div>
         </div>
@@ -495,6 +523,8 @@
         let currentUrl = '';
         let allChannels = [];
         let currentFilter = 'all';
+        let currentChannelObj = null;
+        let currentServerIndex = 0;
 
         function togglePIP() {
             if (videoEl.style.display !== 'none' && document.pictureInPictureEnabled) {
@@ -507,6 +537,8 @@
         }
 
         function loadChannel(ch) {
+            currentChannelObj = ch;
+            currentServerIndex = 0;
             const buttonsContainer = document.getElementById('serverButtonsContainer');
             const channelNameEl = document.getElementById('activeChannelName');
 
@@ -522,6 +554,7 @@
                 if (index === 0) sBtn.classList.add('active');
 
                 sBtn.onclick = () => {
+                    currentServerIndex = index;
                     document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
                     sBtn.classList.add('active');
                     loadChannelUrl(link, currentMode);
@@ -530,6 +563,35 @@
             });
 
             loadChannelUrl(urls[0], currentMode);
+        }
+
+        // Automatic Server Fallback Logic
+        function handleFallback() {
+            if (!currentChannelObj) return;
+            let urls = Array.isArray(currentChannelObj.url) ? currentChannelObj.url : [currentChannelObj.url];
+            
+            if (currentServerIndex < urls.length - 1) {
+                currentServerIndex++;
+                console.warn(`Server ${currentServerIndex} failed. Switching to Server ${currentServerIndex + 1} automatically...`);
+                
+                const serverBtns = document.querySelectorAll('.server-btn');
+                serverBtns.forEach((b, idx) => {
+                    if (idx === currentServerIndex) {
+                        b.classList.add('active');
+                    } else {
+                        b.classList.remove('active');
+                    }
+                });
+
+                loadChannelUrl(urls[currentServerIndex], currentMode);
+            }
+        }
+
+        // Manual Quality Change Function
+        function changeQuality(levelIndex) {
+            if (hls) {
+                hls.currentLevel = parseInt(levelIndex);
+            }
         }
 
         function loadChannelUrl(url, mode) {
@@ -551,6 +613,10 @@
             html5El.pause();
             html5El.src = "";
             iframe.src = "about:blank";
+
+            // Reset quality selector dropdown
+            const qualitySelect = document.getElementById('qualitySelector');
+            qualitySelect.innerHTML = '<option value="-1">Auto Quality</option>';
 
             const setMaxVolumeAndPlay = (mediaObj, isVjs = false) => {
                 if (isVjs) {
@@ -590,6 +656,7 @@
                 html5El.style.display = 'block';
                 html5El.src = finalUrl;
                 setMaxVolumeAndPlay(html5El, false);
+                html5El.onerror = () => handleFallback();
             } else {
                 videoEl.style.display = 'block';
                 
@@ -605,41 +672,57 @@
                 } else if (Hls.isSupported()) {
                     hls = new Hls({
                         enableWorker: true,
-                        lowLatencyMode: true,
-                        backBufferLength: 30,
-                        liveSyncDurationCount: 3,
-                        liveMaxLatencyDurationCount: 6,
-                        maxBufferLength: 8,
-                        maxMaxBufferLength: 15,
-                        manifestLoadingTimeOut: 10000,
-                        manifestLoadingMaxRetry: 4,
-                        levelLoadingTimeOut: 10000,
-                        levelLoadingMaxRetry: 4,
-                        fragLoadingTimeOut: 15000,
-                        fragLoadingMaxRetry: 6
+                        lowLatencyMode: false,
+                        backBufferLength: 15,
+                        maxBufferLength: 30,
+                        maxMaxBufferLength: 60,
+                        maxBufferSize: 60 * 1000 * 1000,
+                        liveSyncDurationCount: 4,
+                        liveMaxLatencyDurationCount: 10,
+                        manifestLoadingTimeOut: 15000,
+                        manifestLoadingMaxRetry: 6,
+                        levelLoadingTimeOut: 15000,
+                        levelLoadingMaxRetry: 6,
+                        fragLoadingTimeOut: 20000,
+                        fragLoadingMaxRetry: 8
                     });
 
                     hls.loadSource(finalUrl);
                     hls.attachMedia(videoEl);
+
+                    // Populate Quality Levels dynamically when manifest is parsed
+                    hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+                        setMaxVolumeAndPlay(playerInstance, true);
+                        
+                        if (hls.levels && hls.levels.length > 1) {
+                            qualitySelect.innerHTML = '<option value="-1">Auto Quality</option>';
+                            hls.levels.forEach((level, index) => {
+                                let height = level.height ? level.height + 'p' : `Level ${index + 1}`;
+                                let opt = document.createElement('option');
+                                opt.value = index;
+                                opt.innerText = height;
+                                qualitySelect.appendChild(opt);
+                            });
+                        }
+                    });
 
                     hls.on(Hls.Events.ERROR, function (event, data) {
                         if (data.fatal) {
                             switch (data.type) {
                                 case Hls.ErrorTypes.NETWORK_ERROR:
                                     hls.startLoad();
+                                    setTimeout(() => {
+                                        if (videoEl.paused) handleFallback();
+                                    }, 4000);
                                     break;
                                 case Hls.ErrorTypes.MEDIA_ERROR:
                                     hls.recoverMediaError();
                                     break;
                                 default:
-                                    hls.destroy();
+                                    handleFallback();
                                     break;
                             }
                         }
-                    });
-
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                        setMaxVolumeAndPlay(playerInstance, true);
                     });
                 } else {
                     playerInstance.src({ src: finalUrl });
@@ -653,6 +736,7 @@
             if(url) {
                 document.getElementById('serverButtonsContainer').innerHTML = "";
                 document.getElementById('activeChannelName').innerText = "Custom URL - সার্ভার পরিবর্তন করুন";
+                currentChannelObj = null;
                 loadChannelUrl(url, currentMode);
             }
         }
@@ -667,7 +751,7 @@
             });
 
             if (filteredChannels.length > 0) {
-                filteredChannels.forEach(ch => {
+                filteredChannels.forEach((ch, idx) => {
                     const btn = document.createElement('div');
                     btn.className = 'ch-btn';
                     
@@ -684,6 +768,11 @@
                     btn.onclick = () => loadChannel(ch);
                     container.appendChild(btn);
                 });
+
+                // Auto-play the first channel upon entering the website
+                if (allChannels.length > 0 && !currentUrl) {
+                    loadChannel(allChannels[0]);
+                }
             } else {
                 container.innerHTML = '<p style="text-align: center; color: #888; grid-column: span 4; padding: 20px;">এই ক্যাটাগরিতে কোনো চ্যানেল পাওয়া যায়নি।</p>';
             }
@@ -779,7 +868,7 @@
                                 detectedGroup = 'indian_bangla';
                             }
                             else if (
-                                currentGroup.includes('hindi') || currentGroup.includes('movies') || currentGroup.includes('movie club') || 
+                                currentGroup.includes('hindi') || lowerTitle.includes('movies') || lowerTitle.includes('movie club') || 
                                 lowerTitle.includes('star gold') || lowerTitle.includes('sony max') || lowerTitle.includes('zee tv') || 
                                 lowerTitle.includes('zee cinema') || lowerTitle.includes('bollywood') || lowerTitle.includes('goldmines') || 
                                 lowerTitle.includes('gold mines') || lowerTitle.includes('pictures') || lowerTitle.includes('&pictures') || 
