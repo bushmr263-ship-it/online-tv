@@ -462,8 +462,9 @@
                 <button class="btn" onclick="switchMode('html5')">HTML5</button>
                 <button class="btn" onclick="switchMode('iframe')">Iframe</button>
                 
+                <!-- Manual Quality Buttons -->
                 <div class="quality-buttons-wrap" id="qualityButtonsWrap">
-                    <button class="q-btn active" onclick="setManualQuality(-1, this)">Auto</button>
+                    <button class="q-btn active" onclick="setManualQualityByHeight(-1, this)">Auto</button>
                     <button class="q-btn" onclick="setManualQualityByHeight(1080, this)">1080p</button>
                     <button class="q-btn" onclick="setManualQualityByHeight(720, this)">720p</button>
                     <button class="q-btn" onclick="setManualQualityByHeight(480, this)">480p</button>
@@ -610,38 +611,48 @@
             }
         }
 
-        // Manual Quality Selection Logic
-        function setManualQuality(levelIndex, btnEl) {
-            document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active'));
-            if (btnEl) btnEl.classList.add('active');
-
-            if (hls) {
-                hls.currentLevel = levelIndex;
-            }
-        }
-
+        // Manual Resolution Selection Logic (Adaptive + Bitrate Fallback Capping)
         function setManualQualityByHeight(targetHeight, btnEl) {
             document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active'));
             if (btnEl) btnEl.classList.add('active');
 
-            if (hls && hls.levels && hls.levels.length > 0) {
-                let closestIndex = -1;
-                let minDiff = Infinity;
-
-                hls.levels.forEach((level, index) => {
-                    if (level.height) {
-                        let diff = Math.abs(level.height - targetHeight);
-                        if (diff < minDiff) {
-                            minDiff = diff;
-                            closestIndex = index;
-                        }
-                    }
-                });
-
-                if (closestIndex !== -1) {
-                    hls.currentLevel = closestIndex;
-                } else {
+            if (hls) {
+                if (targetHeight === -1) {
                     hls.currentLevel = -1;
+                    hls.autoLevelCapping = -1;
+                    hls.config.maxBufferSize = 30 * 1024 * 1024;
+                    return;
+                }
+
+                if (hls.levels && hls.levels.length > 1) {
+                    let closestIndex = -1;
+                    let minDiff = Infinity;
+
+                    hls.levels.forEach((level, index) => {
+                        if (level.height) {
+                            let diff = Math.abs(level.height - targetHeight);
+                            if (diff < minDiff) {
+                                minDiff = diff;
+                                closestIndex = index;
+                            }
+                        }
+                    });
+
+                    if (closestIndex !== -1) {
+                        hls.currentLevel = closestIndex;
+                    }
+                } else {
+                    // Fallback Bitrate Capping for Single-Bitrate streams
+                    if (targetHeight === 360) {
+                        hls.config.maxBufferSize = 2 * 1024 * 1024;
+                        hls.config.maxBufferLength = 4;
+                    } else if (targetHeight === 480) {
+                        hls.config.maxBufferSize = 5 * 1024 * 1024;
+                        hls.config.maxBufferLength = 8;
+                    } else {
+                        hls.config.maxBufferSize = 30 * 1024 * 1024;
+                        hls.config.maxBufferLength = 12;
+                    }
                 }
             }
         }
@@ -674,7 +685,7 @@
                 else b.classList.remove('active');
             });
 
-            // Instant Play BDIX-style Fast Launch Helper
+            // Instant Play Helper
             const triggerInstantPlay = (mediaObj, isVjs = false) => {
                 if (isVjs) {
                     mediaObj.muted(false);
@@ -730,20 +741,18 @@
                         triggerInstantPlay(playerInstance, true);
                     }
                 } else if (Hls.isSupported()) {
-                    // BDIX Ultra-fast Start HLS Config
+                    // Balanced Ultra-Low Latency & Fast Buffer Config
                     hls = new Hls({
                         enableWorker: true,
                         lowLatencyMode: true,
                         startFragPrefetch: true,
-                        maxInitialBitrate: 2000000,
-                        backBufferLength: 5,
-                        maxBufferLength: 10,
-                        maxMaxBufferLength: 20,
-                        maxBufferSize: 20 * 1000 * 1000,
-                        liveSyncDurationCount: 2,
-                        liveMaxLatencyDurationCount: 5,
-                        fragLoadingTimeOut: 10000,
-                        fragLoadingMaxRetry: 6,
+                        liveSyncDurationCount: 3,
+                        liveMaxLatencyDurationCount: 6,
+                        maxBufferLength: 12,
+                        maxMaxBufferLength: 25,
+                        maxBufferSize: 30 * 1000 * 1000,
+                        fragLoadingTimeOut: 12000,
+                        fragLoadingMaxRetry: 5,
                         fragLoadingRetryDelay: 300,
                         manifestLoadingTimeOut: 10000,
                         manifestLoadingMaxRetry: 4
