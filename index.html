@@ -35,12 +35,8 @@
     <!-- Video.js -->
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-
-    <!-- CDN High Speed & P2P Engine CDN Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/p2p-media-loader-core@latest/build/p2p-media-loader-core.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/p2p-media-loader-hlsjs@latest/build/p2p-media-loader-hlsjs.min.js"></script>
-
+    <!-- HLS.js -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <!-- DASH.js -->
     <script src="https://cdn.jsdelivr.net/npm/dashjs@latest/dist/dash.all.min.js"></script>
     <!-- Clappr -->
@@ -607,38 +603,13 @@
                         playerInstance.src({ src: finalUrl });
                         setMaxVolumeAndPlay(playerInstance, true);
                     }
-                } else if (Hls.isSupported() && typeof p2pml !== 'undefined' && p2pml.hlsjs.Engine.isSupported()) {
-                    // CDN Edge + P2P Multi Loader Engine Optimization
-                    var engine = new p2pml.hlsjs.Engine({
-                        loader: {
-                            cachedSegmentExpiration: 300000,
-                            cachedSegmentsCount: 50,
-                            requiredSegmentsPriority: 5,
-                            simultaneousP2PDownloads: 6
-                        }
-                    });
-
-                    hls = new Hls({
-                        enableWorker: true,
-                        lowLatencyMode: true,
-                        liveSyncDurationCount: 3,
-                        maxBufferLength: 10,
-                        loader: engine.createLoaderClass()
-                    });
-
-                    p2pml.hlsjs.initHlsJs(hls);
-
-                    hls.loadSource(finalUrl);
-                    hls.attachMedia(videoEl);
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                        setMaxVolumeAndPlay(playerInstance, true);
-                    });
                 } else if (Hls.isSupported()) {
                     hls = new Hls({
                         enableWorker: true,
                         lowLatencyMode: true,
                         liveSyncDurationCount: 3,
-                        maxBufferLength: 10
+                        maxBufferLength: 8,
+                        maxMaxBufferLength: 15
                     });
                     hls.loadSource(finalUrl);
                     hls.attachMedia(videoEl);
