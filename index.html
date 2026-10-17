@@ -32,13 +32,13 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://i.ibb.co.com/PvnVqbdS/cpt-1469868507562.jpg">
 
-    <!-- Video.js (Cloudflare CDN - Reliable & Fast) -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"></script>
-    <!-- HLS.js (Ultra Fast High-Load CDN Engine) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
+    <!-- Video.js -->
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <!-- HLS.js -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <!-- DASH.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/4.7.2/dash.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dashjs@latest/dist/dash.all.min.js"></script>
     <!-- Clappr -->
     <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
     
@@ -487,7 +487,7 @@
         const iframe = document.getElementById('custom-iframe');
         const clapprEl = document.getElementById('clappr-container');
         const html5El = document.getElementById('html5-video');
-        let playerInstance = videojs('my-video'); // Video.js instance
+        let playerInstance = videojs('my-video');
         let clapprInstance;
         let hls; 
         let dashPlayer;
@@ -552,18 +552,17 @@
             html5El.src = "";
             iframe.src = "about:blank";
 
-            // ফুল ভলিউম এবং সাউন্ড নিশ্চিত করার ফাংশন
             const setMaxVolumeAndPlay = (mediaObj, isVjs = false) => {
                 if (isVjs) {
                     mediaObj.muted(false);
-                    mediaObj.volume(1.0); // 100% Volume
+                    mediaObj.volume(1.0);
                     mediaObj.play().catch(() => {
-                        mediaObj.muted(true); // ব্রাউজার ব্লক করলে মিউট করে প্লে করবে
+                        mediaObj.muted(true);
                         mediaObj.play();
                     });
                 } else {
                     mediaObj.muted = false;
-                    mediaObj.volume = 1.0; // 100% Volume
+                    mediaObj.volume = 1.0;
                     let playPromise = mediaObj.play();
                     if (playPromise !== undefined) {
                         playPromise.catch(() => {
@@ -604,7 +603,6 @@
                         setMaxVolumeAndPlay(playerInstance, true);
                     }
                 } else if (Hls.isSupported()) {
-                    // High-Load Optimized Low-Latency Engine Configuration
                     hls = new Hls({
                         enableWorker: true,
                         lowLatencyMode: true,
@@ -624,7 +622,6 @@
                     hls.loadSource(finalUrl);
                     hls.attachMedia(videoEl);
 
-                    // Auto Network Failover Recovery
                     hls.on(Hls.Events.ERROR, function (event, data) {
                         if (data.fatal) {
                             switch (data.type) {
@@ -782,7 +779,7 @@
                                 detectedGroup = 'indian_bangla';
                             }
                             else if (
-                                currentGroup.includes('hindi') || lowerTitle.includes('movies') || lowerTitle.includes('movie club') || 
+                                currentGroup.includes('hindi') || currentGroup.includes('movies') || currentGroup.includes('movie club') || 
                                 lowerTitle.includes('star gold') || lowerTitle.includes('sony max') || lowerTitle.includes('zee tv') || 
                                 lowerTitle.includes('zee cinema') || lowerTitle.includes('bollywood') || lowerTitle.includes('goldmines') || 
                                 lowerTitle.includes('gold mines') || lowerTitle.includes('pictures') || lowerTitle.includes('&pictures') || 
@@ -804,20 +801,20 @@
                             allChannels.push({
                                 name: currentTitle,
                                 logo: currentLogo,
-                                group: detectedGroup,
-                                url: rawUrls
+                                url: rawUrls.length === 1 ? rawUrls[0] : rawUrls,
+                                group: currentGroup || detectedGroup
                             });
+
+                            currentTitle = '';
                         }
                     }
-                    currentTitle = '';
                 }
-            }
-            renderChannels();
-        })
-        .catch(error => {
-            console.error('Error fetching playlist:', error);
-            document.getElementById('channelContainer').innerHTML = '<p style="text-align: center; color: red; grid-column: span 4; padding: 20px;">চ্যানেল লোড করতে সমস্যা হয়েছে।</p>';
-        });
+                renderChannels();
+            })
+            .catch(err => {
+                console.error('Error fetching playlist:', err);
+                document.getElementById('channelContainer').innerHTML = '<p style="text-align: center; color: red; grid-column: span 4; padding: 20px;">প্লেলিস্ট লোড করতে সমস্যা হয়েছে!</p>';
+            });
     </script>
 </body>
 </html>
