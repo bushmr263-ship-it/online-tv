@@ -7,7 +7,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Primary SEO Meta Tags -->
     <title>SHAWON TV - Live TV Streaming, Sports, News & Bangla Channels</title>
     <meta name="title" content="SHAWON TV - Live TV Streaming, Sports, News & Bangla Channels">
     <meta name="description" content="Watch live TV streaming, sports channels like T Sports, A Sports, Star Sports, and Bangladeshi, Indian news & entertainment channels for free on SHAWON TV.">
@@ -611,7 +610,7 @@
             }
         }
 
-        // Manual Resolution Selection Logic (Adaptive + Bitrate Fallback Capping)
+        // Manual Resolution Selection Logic (Safe Adaptive Switching)
         function setManualQualityByHeight(targetHeight, btnEl) {
             document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active'));
             if (btnEl) btnEl.classList.add('active');
@@ -619,8 +618,6 @@
             if (hls) {
                 if (targetHeight === -1) {
                     hls.currentLevel = -1;
-                    hls.autoLevelCapping = -1;
-                    hls.config.maxBufferSize = 30 * 1024 * 1024;
                     return;
                 }
 
@@ -640,18 +637,6 @@
 
                     if (closestIndex !== -1) {
                         hls.currentLevel = closestIndex;
-                    }
-                } else {
-                    // Fallback Bitrate Capping for Single-Bitrate streams
-                    if (targetHeight === 360) {
-                        hls.config.maxBufferSize = 2 * 1024 * 1024;
-                        hls.config.maxBufferLength = 4;
-                    } else if (targetHeight === 480) {
-                        hls.config.maxBufferSize = 5 * 1024 * 1024;
-                        hls.config.maxBufferLength = 8;
-                    } else {
-                        hls.config.maxBufferSize = 30 * 1024 * 1024;
-                        hls.config.maxBufferLength = 12;
                     }
                 }
             }
@@ -741,21 +726,18 @@
                         triggerInstantPlay(playerInstance, true);
                     }
                 } else if (Hls.isSupported()) {
-                    // Balanced Ultra-Low Latency & Fast Buffer Config
+                    // Safe Buffer & Stall Jump Config
                     hls = new Hls({
                         enableWorker: true,
-                        lowLatencyMode: true,
-                        startFragPrefetch: true,
-                        liveSyncDurationCount: 3,
-                        liveMaxLatencyDurationCount: 6,
-                        maxBufferLength: 12,
-                        maxMaxBufferLength: 25,
-                        maxBufferSize: 30 * 1000 * 1000,
-                        fragLoadingTimeOut: 12000,
-                        fragLoadingMaxRetry: 5,
-                        fragLoadingRetryDelay: 300,
-                        manifestLoadingTimeOut: 10000,
-                        manifestLoadingMaxRetry: 4
+                        lowLatencyMode: false,
+                        liveSyncDurationCount: 4,
+                        liveMaxLatencyDurationCount: 8,
+                        maxBufferLength: 15,
+                        maxMaxBufferLength: 30,
+                        maxBufferSize: 40 * 1024 * 1024,
+                        fragLoadingTimeOut: 15000,
+                        fragLoadingMaxRetry: 6,
+                        fragLoadingRetryDelay: 500
                     });
 
                     hls.loadSource(finalUrl);
@@ -769,7 +751,7 @@
                         triggerInstantPlay(playerInstance, true);
                     });
 
-                    // Autonomous Fast-Recovery Watchdog
+                    // Anti-Stall Auto Jump Watchdog
                     let lastTime = 0;
                     let stallCount = 0;
                     stallCheckInterval = setInterval(() => {
@@ -777,9 +759,13 @@
                             if (videoEl.currentTime === lastTime) {
                                 stallCount++;
                                 if (stallCount >= 2 && hls) {
-                                    console.warn("Buffer stalling detected. Auto-healing playback...");
+                                    console.warn("Buffer stall detected. Jump-healing video...");
                                     hls.startLoad();
                                     hls.recoverMediaError();
+                                    // জাম্প দিয়ে সাথে সাথে প্লে করানো
+                                    if (videoEl.duration && videoEl.currentTime < videoEl.duration - 1) {
+                                        videoEl.currentTime += 0.5;
+                                    }
                                     stallCount = 0;
                                 }
                             } else {
