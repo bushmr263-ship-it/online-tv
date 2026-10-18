@@ -617,6 +617,14 @@ https://d1taaads3ztvmu.cloudfront.net/120723/smil:lifeokuk.smil/chunklist_b26280
 #EXTINF:-1 tvg-name="Euro Sport" group-title="Sports",Euro Sport
 https://drk6xq0vhn.gpcdn.net/live/euro_sports_hd_abr/live/euro_sports_hd/chunks.m3u8
 
+#EXTINF:-1 tvg-name="SET hindi" group-title="hindi",Sony one movies
+https://5098a8b860504a3690fd2e7c0a18d68f.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-817-FR-SONYONEHITSACTION-LG_FR/playlist.m3u8 
+
+#EXTINF:-1 tvg-logo="" group-title="Hindi",SONY ONEHITS ACTION
+https://5098a8b860504a3690fd2e7c0a18d68f.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-817-FR-SONYONEHITSACTION-LG_FR/playlist.m3u8 
+
+
+
 
 
 
