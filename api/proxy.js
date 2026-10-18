@@ -1,33 +1,83 @@
-export default async function handler(req, res) {
-  // Cloudflare Pages থেকে আসা রিকোয়েস্টের জন্য CORS হেডার
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', '*');
+avascript
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(req) {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, HEAD, POST, OPTIONS',
+    'Access-Control-Allow-Headers': '*',
+  };
 
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return new Response(null, { headers: corsHeaders });
   }
 
-  const targetUrl = req.query.url;
+  const reqUrl = new URL(req.url);
+  const targetUrl = reqUrl.searchParams.get('url');
 
   if (!targetUrl) {
-    return res.status(400).send('URL query parameter strictly required.');
+    return new Response('Missing "url" parameter', { 
+      status: 400, 
+      headers: corsHeaders 
+    });
   }
 
   try {
     const response = await fetch(targetUrl, {
+      method: req.method,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      }
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+      },
+      redirect: 'follow',
     });
 
-    const contentType = response.headers.get('content-type') || 'application/x-mpegURL';
-    const data = await response.text();
+    const contentType = response.headers.get('content-type') || '';
+    const finalUrl = response.url;
 
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    return res.status(200).send(data);
+    if (contentType.includes('mpegurl') || contentType.includes('m3u8') || targetUrl.includes('.m3u8')) {
+      let text = await response.text();
+      const baseUrl = finalUrl.substring(0, finalUrl.lastIndexOf('/') + 1);
+      const proxyPrefix = `${reqUrl.origin}${reqUrl.pathname}?url=`;
+
+      const rewrittenText = text.split('\n').map(line => {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#')) {
+          if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+            return `${proxyPrefix}${encodeURIComponent(trimmed)}`;
+          } else {
+            return `${proxyPrefix}${encodeURIComponent(baseUrl + trimmed)}`;
+          }
+        }
+        return line;
+      }).join('\n');
+
+      const responseHeaders = new Headers(corsHeaders);
+      responseHeaders.set('Content-Type', 'application/vnd.apple.mpegurl');
+
+      return new Response(rewrittenText, {
+        status: 200,
+        headers: responseHeaders,
+      });
+    }
+
+    const responseHeaders = new Headers(response.headers);
+    Object.keys(corsHeaders).forEach((key) => {
+      responseHeaders.set(key, corsHeaders[key]);
+    });
+
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: responseHeaders,
+    });
+
   } catch (err) {
-    return res.status(500).json({ error: 'Failed to fetch stream data', details: err.message });
+    return new Response('Proxy Error: ' + err.message, { 
+      status: 500, 
+      headers: corsHeaders 
+    });
   }
 }
