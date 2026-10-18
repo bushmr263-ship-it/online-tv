@@ -504,7 +504,7 @@ https://a-cdn.klowdtv.com/live1/smc_720p/chunks.m3u8
 https://tvsen7.aynaott.com/disney/index.m3u8
 
 #EXTINF:-1 tvg-id="" tvg-name="Star Movies HD" tvg-logo="" group-title="Movies",Star Movies HD
-https://robitv.com/rn/http://103.185.24.134:3001/STAR-MOVIES-SEL-HD/tracks-v1a1/mono.m3u8
+https://robitv.com/rn/http://103.185.24.134:3001/STAR-MOVIES-SEL-HD/tracks-v1a1/mono.m3u8      https://da.gd/k6bOE  
 
 #EXTINF:-1 tvg-id="019de785-3bac-72a7-b7ff-9d20d69bb27d" tvg-name="Nat Geo TV" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_25b786047244481532eb505dfba85580_playmist_nat_geo_tv_400x400.jpg" group-title="English",Nat Geo bangla
 https://103.185.24.134:3001/NATGEO-HD/tracks-v1a1/mono.m3u8
