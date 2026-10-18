@@ -600,10 +600,13 @@ https://tvsen3.aynaott.com/Ah3tLAfA/index.m3u8
 https://tvsen3.aynaott.com/Ge23xfY5/index.m3u8
 
 #EXTINF:-1 tvg-id="" tvg-name="Star Movies" tvg-logo="" group-title="Hindi", Star Movies
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://103.185.24.134:3001/Star-Movies/tracks-v1a1/mono.m3u8
+https://online-tv-rho.vercel.app/api/proxy?url=https://da.gd/k6bOE
 
 #EXTINF:-1 tvg-id="" tvg-name="Star Movies HD" tvg-logo="" group-title="Hindi", Star Movies HD
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://103.185.24.134:3001/STAR-MOVIES-SEL-HD/tracks-v1a1/mono.m3u8
+https://online-tv-rho.vercel.app/api/proxy?url=https://da.gd/yIqto 
+
+#EXTINF:-1 tvg-logo="" group-title="Hindi",MOVIES NOW
+https://da.gd/VzDkED    
 
 #EXTINF:-1 tvg-id="" tvg-logo="https://static.wikia.nocookie.net/logopedia/images/7/7c/HBO_Movies_2025.svg" group-title="Hindi", HBO Movies
 https://tvsen7.aynaott.com/hbo/index.m3u8
@@ -611,17 +614,18 @@ https://tvsen7.aynaott.com/hbo/index.m3u8
 #EXTINF:-1 tvg-id="" tvg-logo="https://static.wikia.nocookie.net/logopedia/images/7/7c/HBO_Movies_2025.svg" group-title="Hindi", HBO Movies 2
 https://tvsen3.aynaott.com/u3NjUrny/index.m3u8
 
+#EXTINF:-1 tvg-name="SET hindi" group-title="hindi",SONY ACTIONMOVIES
+https://5098a8b860504a3690fd2e7c0a18d68f.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-817-FR-SONYONEHITSACTION-LG_FR/playlist.m3u8 
+
 #EXTINF:-1 tvg-name="SET Bangla" group-title="hindi",ster brto
 https://d1taaads3ztvmu.cloudfront.net/120723/smil:lifeokuk.smil/chunklist_b2628000.m3u8
 
 #EXTINF:-1 tvg-name="Euro Sport" group-title="Sports",Euro Sport
 https://drk6xq0vhn.gpcdn.net/live/euro_sports_hd_abr/live/euro_sports_hd/chunks.m3u8
 
-#EXTINF:-1 tvg-name="SET hindi" group-title="hindi",SONY ACTION mMOVIES
-https://5098a8b860504a3690fd2e7c0a18d68f.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-817-FR-SONYONEHITSACTION-LG_FR/playlist.m3u8 
 
-#EXTINF:-1 tvg-logo="" group-title="Hindi", ONEHITS ACTION
-https://online-tv-rho.vercel.app/api/proxy?url=https://da.gd/k6bOE
+
+
 
 
 
