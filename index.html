@@ -547,7 +547,7 @@
         let currentFilter = 'all';
         let currentChannelObj = null;
         let currentServerIndex = 0;
-        let stallCheckInterval = null;
+        let instantStallDetector = null;
 
         function togglePIP() {
             if (videoEl.style.display !== 'none' && document.pictureInPictureEnabled) {
@@ -588,14 +588,14 @@
             loadChannelUrl(urls[0], currentMode);
         }
 
-        // Automatic Server Fallback Logic
+        // Fast Automatic Server Fallback Logic
         function handleFallback() {
             if (!currentChannelObj) return;
             let urls = Array.isArray(currentChannelObj.url) ? currentChannelObj.url : [currentChannelObj.url];
             
             if (currentServerIndex < urls.length - 1) {
                 currentServerIndex++;
-                console.warn(`Server ${currentServerIndex} failed. Switching to Server ${currentServerIndex + 1} automatically...`);
+                console.warn(`Server ${currentServerIndex} failed. Switching to Server ${currentServerIndex + 1} instantly...`);
                 
                 const serverBtns = document.querySelectorAll('.server-btn');
                 serverBtns.forEach((b, idx) => {
@@ -653,7 +653,7 @@
             clapprEl.style.display = 'none';
             html5El.style.display = 'none';
             
-            if (stallCheckInterval) clearInterval(stallCheckInterval);
+            if (instantStallDetector) clearInterval(instantStallDetector);
             if (hls) { hls.destroy(); hls = null; }
             if (dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
             if (clapprInstance) { clapprInstance.destroy(); clapprInstance = null; }
@@ -663,12 +663,14 @@
             html5El.src = "";
             iframe.src = "about:blank";
 
+            // Reset active quality button to Auto
             const qBtns = document.querySelectorAll('.q-btn');
             qBtns.forEach((b, i) => {
                 if (i === 0) b.classList.add('active');
                 else b.classList.remove('active');
             });
 
+            // Instant Play Helper
             const triggerInstantPlay = (mediaObj, isVjs = false) => {
                 if (isVjs) {
                     mediaObj.muted(false);
@@ -724,44 +726,53 @@
                         triggerInstantPlay(playerInstance, true);
                     }
                 } else if (Hls.isSupported()) {
-                    // VLC-Style Preemptive & Smart Recovery Config
+                    // Ultra-Responsive Auto-Recovery HLS Engine
                     hls = new Hls({
                         enableWorker: true,
                         lowLatencyMode: false,
                         
-                        // VLC-style Buffer Memory (5 Minutes Buffer)
-                        maxBufferLength: 300,
-                        maxMaxBufferLength: 600,
-                        maxBufferSize: 250 * 1024 * 1024, // 250 MB Cache
+                        // Ultra Buffering Memory & Low Stalling Threshold
+                        maxBufferLength: 240,
+                        maxMaxBufferLength: 480,
+                        maxBufferSize: 150 * 1024 * 1024,
                         backBufferLength: 60,
                         
-                        // Live Sync & Pad
-                        liveSyncDurationCount: 7,
-                        liveMaxLatencyDurationCount: 20,
+                        // Live Edge Auto Jump Parameters
+                        liveSyncDurationCount: 5,
+                        liveMaxLatencyDurationCount: 12,
                         
-                        // Quick Network Retry Settings
-                        fragLoadingTimeOut: 20000,
-                        fragLoadingMaxRetry: 30,
-                        fragLoadingRetryDelay: 500,
-                        manifestLoadingMaxRetry: 20,
-                        levelLoadingMaxRetry: 20
+                        // Rapid Re-fetch & Immediate Recovery Settings
+                        fragLoadingTimeOut: 15000,
+                        fragLoadingMaxRetry: 15,
+                        fragLoadingRetryDelay: 300,
+                        manifestLoadingMaxRetry: 10,
+                        levelLoadingMaxRetry: 10
                     });
 
                     hls.loadSource(finalUrl);
                     hls.attachMedia(videoEl);
 
-                    // Preemptive Health Checker (আটকে যাওয়ার আগেই অটো রিকভারি)
-                    let lastPlayTime = 0;
-
-                    stallCheckInterval = setInterval(() => {
+                    // Instant Freeze & Stall Recovery Check (1 Second Interval)
+                    let lastTimePos = 0;
+                    let stuckCount = 0;
+                    instantStallDetector = setInterval(() => {
                         if (videoEl && !videoEl.paused && !videoEl.ended) {
-                            if (videoEl.currentTime === lastPlayTime && videoEl.readyState < 3) {
-                                console.warn("Preemptive Alert: Stream stuck detected before buffer fail! Auto-reconnecting...");
-                                if (hls) hls.startLoad();
+                            if (videoEl.currentTime === lastTimePos && videoEl.readyState < 3) {
+                                stuckCount++;
+                                if (stuckCount >= 1) { // Immediate Auto-Recovery Trigger
+                                    console.warn("Instant Recovery: Video stuck detected! Force reloading stream segment...");
+                                    if (hls) {
+                                        hls.recoverMediaError();
+                                        hls.startLoad();
+                                    }
+                                    stuckCount = 0;
+                                }
+                            } else {
+                                stuckCount = 0;
                             }
-                            lastPlayTime = videoEl.currentTime;
+                            lastTimePos = videoEl.currentTime;
                         }
-                    }, 1500);
+                    }, 1000);
 
                     hls.on(Hls.Events.MEDIA_ATTACHED, () => {
                         triggerInstantPlay(playerInstance, true);
@@ -771,16 +782,15 @@
                         triggerInstantPlay(playerInstance, true);
                     });
 
-                    // Advanced Error Handling & Forced Recovery
                     hls.on(Hls.Events.ERROR, function (event, data) {
                         if (data.fatal) {
                             switch (data.type) {
                                 case Hls.ErrorTypes.NETWORK_ERROR:
-                                    console.warn("Network Error: Forcing background reload...");
+                                    console.warn("Network drop! Instant auto-recovery loading...");
                                     hls.startLoad();
                                     break;
                                 case Hls.ErrorTypes.MEDIA_ERROR:
-                                    console.warn("Media Error: Recovering media buffer...");
+                                    console.warn("Media decoding glitch! Instant auto-recovering...");
                                     hls.recoverMediaError();
                                     break;
                                 default:
@@ -788,7 +798,7 @@
                                     break;
                             }
                         } else if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
-                            console.warn("Buffer Stalled: Jumping to live head...");
+                            console.warn("Buffer Stall! Auto-advancing to live buffer head...");
                             hls.startLoad();
                         }
                     });
@@ -872,33 +882,103 @@
                         currentLogo = logoMatch ? logoMatch[1] : 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
                         
                         let groupMatch = line.match(/group-title="([^"]+)"/);
-                        currentGroup = groupMatch ? groupMatch[1].trim() : '';
-
-                        let nameSplit = line.split(',');
-                        currentTitle = nameSplit.length > 1 ? nameSplit[nameSplit.length - 1].trim() : 'Live Channel';
-                    } else if (line && !line.startsWith('#')) {
-                        let existingChannel = allChannels.find(ch => ch.name === currentTitle);
-                        if (existingChannel) {
-                            if (Array.isArray(existingChannel.url)) {
-                                existingChannel.url.push(line);
+                        currentGroup = groupMatch ? groupMatch[1].trim().toLowerCase() : '';
+                        
+                        let nameParts = line.split(',');
+                        currentTitle = nameParts[nameParts.length - 1].trim();
+                    } 
+                    else if (line && !line.startsWith('#')) {
+                        if (currentTitle) {
+                            let rawUrls = [];
+                            let matches = line.match(/(https?:\/\/[^\s]+)/g);
+                            if (matches) {
+                                rawUrls = matches.map(u => u.trim());
                             } else {
-                                existingChannel.url = [existingChannel.url, line];
+                                rawUrls = [line];
                             }
-                        } else {
+
+                            let lowerTitle = currentTitle.toLowerCase();
+                            let detectedGroup = 'other';
+
+                            if (
+                                currentGroup.includes('sport') || lowerTitle.includes('sport') || lowerTitle.includes('cricket') || 
+                                lowerTitle.includes('football') || lowerTitle.includes('willow') || lowerTitle.includes('ten') || 
+                                lowerTitle.includes('bein') || lowerTitle.includes('ptv') || lowerTitle.includes('dazan') || 
+                                lowerTitle.includes('spiler') || lowerTitle.includes('prajm') || lowerTitle.includes('goal tv') || 
+                                lowerTitle.includes('tsn') || lowerTitle.includes('tnt sport') || lowerTitle.includes('fifa') || 
+                                lowerTitle.includes('fb tv') || lowerTitle.includes('setanta') || lowerTitle.includes('unite 8') || 
+                                lowerTitle.includes('go 3') || lowerTitle.includes('fox')
+                            ) {
+                                detectedGroup = 'sports';
+                            } 
+                            else if (
+                                currentGroup.includes('docu') || lowerTitle.includes('documentary') || lowerTitle.includes('discovery') || 
+                                lowerTitle.includes('nat geo') || lowerTitle.includes('national geo') || lowerTitle.includes('animal planet') || 
+                                lowerTitle.includes('history') || lowerTitle.includes('science') || lowerTitle.includes('earth') || 
+                                lowerTitle.includes('wild') || lowerTitle.includes('investigation') || lowerTitle.includes('crime') || 
+                                lowerTitle.includes('turbo') || lowerTitle.includes('travel') || lowerTitle.includes('weather') || lowerTitle.includes('pikstan')
+                            ) {
+                                detectedGroup = 'documentary';
+                            }
+                            else if (
+                                currentGroup.includes('cartoon') || currentGroup.includes('kids') || lowerTitle.includes('cartoon') || 
+                                lowerTitle.includes('duronto') || lowerTitle.includes('nick') || lowerTitle.includes('pogo') || 
+                                lowerTitle.includes('hungama') || lowerTitle.includes('disney') || lowerTitle.includes('motu patlu') || 
+                                lowerTitle.includes('tom & jerry') || lowerTitle.includes('doraemon') || lowerTitle.includes('mr bean') || 
+                                lowerTitle.includes('sony yay') || lowerTitle.includes('rongeen')
+                            ) {
+                                detectedGroup = 'cartoon';
+                            }
+                            else if (
+                                currentGroup.includes('music') || lowerTitle.includes('music') || lowerTitle.includes('9xm') || 
+                                lowerTitle.includes('9x') || lowerTitle.includes('m tv') || lowerTitle.includes('zing') || 
+                                lowerTitle.includes('mastiii') || lowerTitle.includes('sangeet')
+                            ) {
+                                detectedGroup = 'music';
+                            }
+                            else if (
+                                currentGroup.includes('indian_bangla') || currentGroup.includes('indian') || lowerTitle.includes('jalsha') || 
+                                lowerTitle.includes('zee bangla') || lowerTitle.includes('colors bangla') || lowerTitle.includes('sun bangla') || 
+                                lowerTitle.includes('sananda') || lowerTitle.includes('zb cinema')
+                            ) {
+                                detectedGroup = 'indian_bangla';
+                            }
+                            else if (
+                                currentGroup.includes('hindi') || lowerTitle.includes('movies') || lowerTitle.includes('movie club') || 
+                                lowerTitle.includes('star gold') || lowerTitle.includes('sony max') || lowerTitle.includes('zee tv') || 
+                                lowerTitle.includes('zee cinema') || lowerTitle.includes('bollywood') || lowerTitle.includes('goldmines') || 
+                                lowerTitle.includes('pictures') || lowerTitle.includes('&pictures') || lowerTitle.includes('shemaroo') || 
+                                lowerTitle.includes('action hollywood') || lowerTitle.includes('b4u') || lowerTitle.includes('star maa') || 
+                                lowerTitle.includes('roja') || lowerTitle.includes('south indian') || lowerTitle.includes('hbo') || 
+                                lowerTitle.includes('cineplex') || lowerTitle.includes('cinema') || lowerTitle.includes('rishtey') || 
+                                lowerTitle.includes('colors hindi') || lowerTitle.includes('dhinchaak') || lowerTitle.includes('enterr10') || 
+                                lowerTitle.includes('manoranjan') || lowerTitle.includes('classic 24') || lowerTitle.includes('sony sab') || 
+                                lowerTitle.includes('sony pal') || lowerTitle.includes('star plus') || lowerTitle.includes('star bharat') || 
+                                lowerTitle.includes('utv') || lowerTitle.includes('bhojpuri') || lowerTitle.includes('pitaara') || 
+                                lowerTitle.includes('english movie') || lowerTitle.includes('sony movies')
+                            ) {
+                                detectedGroup = 'hindi';
+                            }
+                            else {
+                                detectedGroup = 'bangla';
+                            }
+
                             allChannels.push({
                                 name: currentTitle,
                                 logo: currentLogo,
-                                group: currentGroup,
-                                url: line
+                                url: rawUrls.length === 1 ? rawUrls[0] : rawUrls,
+                                group: currentGroup || detectedGroup
                             });
+
+                            currentTitle = '';
                         }
                     }
                 }
                 renderChannels();
             })
             .catch(err => {
-                console.error("Failed to load playlist:", err);
-                document.getElementById('channelContainer').innerHTML = '<p style="text-align: center; color: red; grid-column: span 4; padding: 20px;">প্লেলিস্ট লোড করতে ব্যর্থ হয়েছে!</p>';
+                console.error('Error fetching playlist:', err);
+                document.getElementById('channelContainer').innerHTML = '<p style="text-align: center; color: red; grid-column: span 4; padding: 20px;">প্লেলিস্ট লোড করতে সমস্যা হয়েছে!</p>';
             });
     </script>
 </body>
