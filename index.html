@@ -547,7 +547,7 @@
         let currentFilter = 'all';
         let currentChannelObj = null;
         let currentServerIndex = 0;
-        let instantStallDetector = null;
+        let stallCheckInterval = null;
 
         function togglePIP() {
             if (videoEl.style.display !== 'none' && document.pictureInPictureEnabled) {
@@ -588,14 +588,14 @@
             loadChannelUrl(urls[0], currentMode);
         }
 
-        // Fast Automatic Server Fallback Logic
+        // Automatic Server Fallback Logic
         function handleFallback() {
             if (!currentChannelObj) return;
             let urls = Array.isArray(currentChannelObj.url) ? currentChannelObj.url : [currentChannelObj.url];
             
             if (currentServerIndex < urls.length - 1) {
                 currentServerIndex++;
-                console.warn(`Server ${currentServerIndex} failed. Switching to Server ${currentServerIndex + 1} instantly...`);
+                console.warn(`Server ${currentServerIndex} failed. Switching to Server ${currentServerIndex + 1} automatically...`);
                 
                 const serverBtns = document.querySelectorAll('.server-btn');
                 serverBtns.forEach((b, idx) => {
@@ -610,7 +610,6 @@
             }
         }
 
-        // Standard Adaptive Quality Selection Logic
         function setManualQualityByHeight(targetHeight, btnEl) {
             document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active'));
             if (btnEl) btnEl.classList.add('active');
@@ -653,7 +652,7 @@
             clapprEl.style.display = 'none';
             html5El.style.display = 'none';
             
-            if (instantStallDetector) clearInterval(instantStallDetector);
+            if (stallCheckInterval) clearInterval(stallCheckInterval);
             if (hls) { hls.destroy(); hls = null; }
             if (dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
             if (clapprInstance) { clapprInstance.destroy(); clapprInstance = null; }
@@ -663,14 +662,12 @@
             html5El.src = "";
             iframe.src = "about:blank";
 
-            // Reset active quality button to Auto
             const qBtns = document.querySelectorAll('.q-btn');
             qBtns.forEach((b, i) => {
                 if (i === 0) b.classList.add('active');
                 else b.classList.remove('active');
             });
 
-            // Instant Play Helper
             const triggerInstantPlay = (mediaObj, isVjs = false) => {
                 if (isVjs) {
                     mediaObj.muted(false);
@@ -726,52 +723,25 @@
                         triggerInstantPlay(playerInstance, true);
                     }
                 } else if (Hls.isSupported()) {
-                    // Fast-Boot & Low-Latency HLS Config
+                    // Smart HLS Config with Native Fallback Support
                     hls = new Hls({
                         enableWorker: true,
-                        lowLatencyMode: true,
-                        
-                        // Fast initial play limits
+                        lowLatencyMode: false,
                         maxBufferLength: 30,
                         maxMaxBufferLength: 60,
                         maxBufferSize: 30 * 1024 * 1024,
                         backBufferLength: 15,
-                        
                         liveSyncDurationCount: 3,
                         liveMaxLatencyDurationCount: 8,
-                        
-                        // Fast Timeout (Re-fetch in 3s)
-                        fragLoadingTimeOut: 4000,
-                        fragLoadingMaxRetry: 6,
-                        fragLoadingRetryDelay: 300,
-                        manifestLoadingMaxRetry: 5,
-                        levelLoadingMaxRetry: 5
+                        fragLoadingTimeOut: 15000,
+                        fragLoadingMaxRetry: 8,
+                        fragLoadingRetryDelay: 500,
+                        manifestLoadingMaxRetry: 8,
+                        levelLoadingMaxRetry: 8
                     });
 
                     hls.loadSource(finalUrl);
                     hls.attachMedia(videoEl);
-
-                    // Instant Freeze Detector
-                    let lastTimePos = 0;
-                    let stuckCount = 0;
-                    instantStallDetector = setInterval(() => {
-                        if (videoEl && !videoEl.paused && !videoEl.ended) {
-                            if (videoEl.currentTime === lastTimePos && videoEl.readyState < 3) {
-                                stuckCount++;
-                                if (stuckCount >= 1) {
-                                    console.warn("Fast Recovery: Video stuck, reloading segment...");
-                                    if (hls) {
-                                        hls.recoverMediaError();
-                                        hls.startLoad();
-                                    }
-                                    stuckCount = 0;
-                                }
-                            } else {
-                                stuckCount = 0;
-                            }
-                            lastTimePos = videoEl.currentTime;
-                        }
-                    }, 1000);
 
                     hls.on(Hls.Events.MEDIA_ATTACHED, () => {
                         triggerInstantPlay(playerInstance, true);
@@ -791,13 +761,23 @@
                                     hls.recoverMediaError();
                                     break;
                                 default:
-                                    handleFallback();
+                                    // If HLS.js fails, fallback to video native HLS playback
+                                    if (videoEl.canPlayType('application/vnd.apple.mpegurl') || finalUrl.includes('.m3u8')) {
+                                        console.warn("HLS.js failed, switching to Native HLS...");
+                                        hls.destroy();
+                                        hls = null;
+                                        videoEl.src = finalUrl;
+                                        triggerInstantPlay(playerInstance, true);
+                                    } else {
+                                        handleFallback();
+                                    }
                                     break;
                             }
-                        } else if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
-                            hls.startLoad();
                         }
                     });
+                } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+                    videoEl.src = finalUrl;
+                    triggerInstantPlay(playerInstance, true);
                 } else {
                     playerInstance.src({ src: finalUrl, type: 'application/x-mpegURL' });
                     triggerInstantPlay(playerInstance, true);
@@ -947,7 +927,7 @@
                                 lowerTitle.includes('action hollywood') || lowerTitle.includes('b4u') || lowerTitle.includes('star maa') || 
                                 lowerTitle.includes('roja') || lowerTitle.includes('south indian') || lowerTitle.includes('hbo') || 
                                 lowerTitle.includes('cineplex') || lowerTitle.includes('cinema') || lowerTitle.includes('rishtey') || 
-                                lowerTitle.includes('colors hindi') || lowerTitle.includes('dhinchaak') || lowerTitle.includes('enterr10') || 
+                                lowerTitle.includes('colors_hindi') || lowerTitle.includes('dhinchaak') || lowerTitle.includes('enterr10') || 
                                 lowerTitle.includes('manoranjan') || lowerTitle.includes('classic 24') || lowerTitle.includes('sony sab') || 
                                 lowerTitle.includes('sony pal') || lowerTitle.includes('star plus') || lowerTitle.includes('star bharat') || 
                                 lowerTitle.includes('utv') || lowerTitle.includes('bhojpuri') || lowerTitle.includes('pitaara') || 
