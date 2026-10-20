@@ -15,7 +15,10 @@ https://tvsen5.aynaott.com/willowhd/tracks-v1a1/mono.ts.m3u8
 https://drk6xq0vhn.gpcdn.net/live/ten_cricket_hd_abr/live/ten_cricket_hd_720/chunks.m3u8
 
 #EXTINF:-1 tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/9-by-xfireflix.png",Sky sports Cricket
-https://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/9258/index.m3u8
+https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/9258/index.m3u8
+
+#EXTINF:-1 tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/9-by-xfireflix.png",Sky sports Football
+https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/9289/index.m3u8 
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/DzDHjCJm/20240823_024249.png",Star Sports 1 HD
 https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://dsmqbfez.pardns.com/live/6CTB9BKG/4Q7Y9DFW/778413.m3u8
@@ -24,16 +27,13 @@ https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://dsmqbfez.pardns.com/l
 https://tvsen7.aynaott.com/ssport2hd/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/20-by-xfireflix.png",PTV Sports
-https://tvsen7.aynascope.net/zY3hJ7pQ2vM5gD8s/index.m3u8
+https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://103.135.253.32:8080/PTV-SPORTS/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg", TYC Sports
 https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/ts-us-e2-n2/playlist/amg26268-sportsstudio-tycsports-freelivesportsemea/cb573d1e786c64869bd43863cef04482847b3dcb0e6c886470af4a9765d97800dbe8ae84ae5b910c4c9e1fc061017d360439cd1dd56c49c1da63b820743c4b21fdcde00080dd0d0cb1df11292ca36265299a7369cc350f7bd2ec5a2f803ebe764c53cb017c593f88f258a8724cc59e0a957f39e8fc8b307b24455a9c5a43e6a64cb7a9b55f448c6fa4e4011ac37b14fa83439fd501b2d5825a83458422f717949af1dd861287e4ab599975824e6912422ff9bab4f2a3529bd5806035907067135005a6eba4f740388950501cd6cb8bee35b14395c912886e61ef5bd857d264c32b8b19b7ed4b97a8b9f44b5576f1970c2f74f6a5e8a1d3011e912abbaee0d6763cbef3177348802dfb2a39379df88445d1975bc6f873cbe4292e39c6905792d2e7d0b8fede1cee50a0adc391334641741742d70dd0fd43ef698c28e69e6962362b63a29552c883a32e136a5d898d5b945e5b8ed28587d0192888073f5ffb6bcd541566ae623f9c84e050728a0ac80f20faa282a906f709fb36f0b06270/63/1920x1080_8796395/index.m3u8
 
 #EXTINF:-1 tvg-name="Laliga HD" tvg-logo="https://i.postimg.cc/v8JPQjFK/laliga.png" group-title="Sports",Laliga HD
 https://rmtv.akamaized.net/hls/live/2043154/rmtv-en-web/bitrate_3.m3u8
-
-#EXTINF:-1 group-title="Sports" tvg-logo="https://raw.githubusercontent.com/personaliptv/paid-link-1/main/482243292_642826978446244_6712273032991625548_n.jpg" group-title="ALL SPORTS",Okko Football
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://stream.mcquack.net/491/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://tstatic.akash-go.com/cms-ui/images/custom-content/1778082545894.png" group-title="Bangla",BTV National
 https://robiproxi.bushmr263.workers.dev/?url=https://gov.iptv-network.workers.dev/live/national.m3u8   https://robiproxi.bushmr263.workers.dev/?url=https://btv.hridoytv-channel.workers.dev/btv.m3u8
@@ -551,8 +551,8 @@ https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/i
 #EXTINF:-1 tvg-id="01a11291-2c1a-72fb-bf2d-bf03de6e974d" tvg-name="Sportv" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-10-06/images_6b43965cf8ff9e05973fde793d1ba4d2_playmist_sportv_logo_png_seeklogo_424355.png" group-title="Sports",xoilacz.io footbll
 https://tv.kbhub.online/Live-Event-Sports/xxxInter-Miami-vs-Atalanta.m3u8
 
-#EXTINF:-1 tvg-id="01a11291-2c1a-72fb-bf2d-bf03de6e974d" tvg-name="Sportv" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-10-06/images_6b43965cf8ff9e05973fde793d1ba4d2_playmist_sportv_logo_png_seeklogo_424355.png" group-title="Sports",Sportv.2
-https://tv.kbhub.online/Live-Event-Sports/x1.m3u8
+#EXTINF:-1 tvg-id="01a11291-2c1a-72fb-bf2d-bf03de6e974d" tvg-name="Sportv" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-10-06/images_6b43965cf8ff9e05973fde793d1ba4d2_playmist_sportv_logo_png_seeklogo_424355.png" group-title="Sports",GE SPORTS
+https://playztv-apps.pages.dev/ptv-sports/index.m3u8 
 
 #EXTINF:-1 group-title="Sports", Sport tv 3
 https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/6530/index.m3u8
