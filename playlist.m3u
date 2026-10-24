@@ -1,6 +1,6 @@
 #EXTM3U
 #EXTINF:-1 tvg-logo="https://static.wikia.nocookie.net/etv-gspn-bangla/images/6/6e/T_Sports_HD_logo_2021.png",T Sports
-https://robitv.com/rn/http://45.117.61.162/01_Tsports_HD/tracks-v1a1/mono.m3u8      https://mycoffeetime.net/play/tSDRdsaoGGQ2qYgRPDEe9q-qMIzoahbJArH3W3vOiEaB97nXMpWmLb0Ts759Tjsp/m3u8    https://tvsen5.aynaott.com/TnMn5kZz8aLmjklkk/index.m3u8
+https://livetv.shamon-cable.net:8443/T-Sports-FHD/tracks-v1a1/mono.m3u8     https://mycoffeetime.net/play/tSDRdsaoGGQ2qYgRPDEe9q-qMIzoahbJArH3W3vOiEaB97nXMpWmLb0Ts759Tjsp/m3u8    https://tvsen5.aynaott.com/TnMn5kZz8aLmjklkk/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/W1z5BGPZ/20240823_024712.png" group-title="𝐒𝐩𝐨𝐫𝐭𝐬",A Sports HD
 https://tvsen6.aynaott.com/zv68oqPDu7MZZwmHhRxt/tracks-v1a1/mono.ts.m3u8
@@ -21,13 +21,13 @@ https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/i
 https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/9289/index.m3u8 
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/DzDHjCJm/20240823_024249.png",Star Sports 1 HD
-https://app.uckingcrazy1.workers.dev/api/play/Star%20Sports%201.m3u8
+https://livetv.shamon-cable.net:8443/Star-sports-1/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/zBgM9nK7/20240823_024306.png",Star Sports HD2
 https://tvsen7.aynaott.com/ssport2hd/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/20-by-xfireflix.png",PTV Sports
-https://app.uckingcrazy1.workers.dev/api/play/PTV%20Sports.m3u8
+https://livetv.shamon-cable.net:8443/PTV/tracks-v1a1/mono.m3u8         https://app.uckingcrazy1.workers.dev/api/play/PTV%20Sports.m3u8
 
 #EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg", TYC Sports
 https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/ts-us-e2-n2/playlist/amg26268-sportsstudio-tycsports-freelivesportsemea/cb573d1e786c64869bd43863cef04482847b3dcb0e6c886470af4a9765d97800dbe8ae84ae5b910c4c9e1fc061017d360439cd1dd56c49c1da63b820743c4b21fdcde00080dd0d0cb1df11292ca36265299a7369cc350f7bd2ec5a2f803ebe764c53cb017c593f88f258a8724cc59e0a957f39e8fc8b307b24455a9c5a43e6a64cb7a9b55f448c6fa4e4011ac37b14fa83439fd501b2d5825a83458422f717949af1dd861287e4ab599975824e6912422ff9bab4f2a3529bd5806035907067135005a6eba4f740388950501cd6cb8bee35b14395c912886e61ef5bd857d264c32b8b19b7ed4b97a8b9f44b5576f1970c2f74f6a5e8a1d3011e912abbaee0d6763cbef3177348802dfb2a39379df88445d1975bc6f873cbe4292e39c6905792d2e7d0b8fede1cee50a0adc391334641741742d70dd0fd43ef698c28e69e6962362b63a29552c883a32e136a5d898d5b945e5b8ed28587d0192888073f5ffb6bcd541566ae623f9c84e050728a0ac80f20faa282a906f709fb36f0b06270/63/1920x1080_8796395/index.m3u8
@@ -185,6 +185,9 @@ https://d1rc86nwwc9fag.cloudfront.net/260723/smil:zeebangla.smil/chunklist_b8960
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/3w6F5VZ5/20240822-231514.png",Colors Bangla HD
 https://app.uckingcrazy1.workers.dev/api/play/COLORS%20BANGLA.m3u8
 
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/3w6F5VZ5/20240822-231514.png",Colors Bangla Cinema
+https://livetv.shamon-cable.net:8443/Colors-bangla/tracks-v1a1/mono.m3u8
+
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/dtBRtL99/20240822_231732.png",Zee Bangla cinema
 https://drk6xq0vhn.gpcdn.net/live/zee_bangla_cinema_abr/index.m3u8
 
@@ -222,7 +225,10 @@ https://vods2.aynaott.com/gseriesDrama/tracks-v1a1/mono.ts.m3u8
 https://server.thelegitpro.in/rongeentv/rongeentv/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/6pCXvxyz/20240823_022553.png" group-title="Hindi",Star Gold HD
-https://s3.itcnbd.live/channel/f5dd87a5c3b03131.m3u8                                            
+https://livetv.shamon-cable.net:8443/StarGold/tracks-v1a1/mono.m3u8      https://s3.itcnbd.live/channel/f5dd87a5c3b03131.m3u8  
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/6pCXvxyz/20240823_022553.png" group-title="Hindi",Star Gold select
+https://livetv.shamon-cable.net:8443/StarGoldSelect/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Ay52-JQBv9knK3AHFDWt/posters/00afb30b-3c19-4c4c-abd8-891db94e4767.webp" group-title="Hindi",Sony Max
 https://drk6xq0vhn.gpcdn.net/live/max_hd_abr/live/max_hd_720/chunks.m3u8
@@ -432,7 +438,7 @@ https://app.uckingcrazy1.workers.dev/api/play/Bein%20Sports%201.m3u8
 https://app.uckingcrazy1.workers.dev/api/play/Bein%20Sports%202.m3u8
 
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/B6TPgPPT/20250120_193903.png",Bein Sports 3
-https://app.uckingcrazy1.workers.dev/api/play/Bein%20Sports%203.m3u8
+https://livetv.shamon-cable.net:8443/beINSports3/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/B6TPgPPT/20250120_193903.png",Bein Sports 4
 https://tvsen6.aynaott.com/beinsports/index.m3u8
@@ -446,17 +452,20 @@ https://stream.ottplus.live/live/ten_1_hd_abr/live/ten_1_hd_720/index.m3u8
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/wjqC7RYx/20240823_024150.png" group-title="𝐒𝐩𝐨𝐫𝐭𝐬",Sony Ten 2
 https://stream.ottplus.live/live/ten_2_hd_abr/live/ten_2_hd_720/index.m3u8
 
+#EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/wjqC7RYx/20240823_024150.png" group-title="𝐒𝐩𝐨𝐫𝐭𝐬",Sony Ten 3
+https://livetv.shamon-cable.net:8443/Sony-sports-3/tracks-v1a1/mono.m3u8
+
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/wjqC7RYx/20240823_024150.png" group-title="𝐒𝐩𝐨𝐫𝐭𝐬",Sony Ten 4
-https://my-website-69ndd02fb-bushmr263-ship-it.vercel.app/?url=http://198.195.239.50:8095/SONY.SPORTS.4/index.m3u8
+https://livetv.shamon-cable.net:8443/Sony-sports-4/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/W4tx7R4Q/20240823_024232.png" group-title="𝐒𝐩𝐨𝐫𝐭𝐬",Sony Ten 5
 https://stream.ottplus.live/live/ten_5_hd_abr/live/ten_5_hd_720/index.m3u8
 
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/ZnzgZCLS/20240823_024321.png" group-title="𝐒𝐩𝐨𝐫𝐭𝐬",Star Sports SL 1
-https://app.uckingcrazy1.workers.dev/api/play/Star%20Sports%20SL%201.m3u8
+https://livetv.shamon-cable.net:8443/Star-select-1/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/rmczbb8g/20240825_060019.png" group-title="𝐒𝐩𝐨𝐫𝐭𝐬",Star Sports SL 2
-https://app.uckingcrazy1.workers.dev/api/play/Star%20Sports%20SL%202.m3u8
+https://livetv.shamon-cable.net:8443/Star-select-2/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/10-by-xfireflix.png",TEN SPORTS
 https://robitv.com/lps/https://ml-pull-dvc-myco.io:2096/TENSPORTS_HD/mono.m3u8
@@ -570,7 +579,7 @@ https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://23.237.104.106:8080/U
 https://robiproxi.bushmr263.workers.dev/?url=http://stream.mcquack.net/416/index.m3u8
 
 #EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg", Unite 8 Sports 1 HD
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://103.114.11.37:8081/Unite8-sports-1/index.m3u8
+https://livetv.shamon-cable.net:8443/Unite8-sports-1/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-url="https://raw.githubusercontent.com/personaliptv/paid-link-1/main/482243292_642826978446244_6712273032991625548_n.jpg" group-title="Sports",Okko Prajm Sport
 https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://stream.mcquack.net/493/index.m3u8
@@ -581,8 +590,8 @@ https://robiproxi.bushmr263.workers.dev/?url=http://stream.mcquack.net/234/index
 #EXTINF:-1 group-title="Sports", Setanta Sports 2 Eurasia
 https://robiproxi.bushmr263.workers.dev/?url=http://stream.mcquack.net/235/index.m3u8
 
-#EXTINF:-1 group-title="Sports", Spiler 2
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://88.212.15.19/live/spiler2/index.m3u8
+#EXTINF:-1 group-title="Sports", USA
+https://tvsen6.aynaott.com/usa/tracks-v1a1/mono.ts.m3u8
 
 #EXTINF:-1 tvg-id="019de785-39ff-7db1-94c6-e17acf6a6da4" tvg-name="Oman Sports TV HD" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-04-09/images_db7e2ba86e75cc789ccffacd59521127_playmist_oman_sports_tv_hd400x400.jpg" group-title="Sports",Oman Sports TV HD
 https://partneta.cdn.mgmlcdn.com/omsport/smil:omsport.stream.smil/chunklist.m3u8
@@ -594,10 +603,10 @@ https://tvsen3.aynaott.com/Ah3tLAfA/index.m3u8
 https://tvsen3.aynaott.com/Ge23xfY5/index.m3u8
 
 #EXTINF:-1 tvg-id="" tvg-name="Star Movies" tvg-logo="https://i.postimg.cc/yNvkbdL4/1000114150.png" group-title="Hindi", Star Movies HD
-https://app.uckingcrazy1.workers.dev/api/play/Star%20Movies.m3u8
+https://livetv.shamon-cable.net:8443/Star-Movies/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-id="" tvg-name="Star Movies HD" tvg-logo="https://i.postimg.cc/yNvkbdL4/1000114150.png" group-title="Hindi", Star Movies Select 
-https://robitv.com/rn/http://103.185.24.134:3001/STAR-MOVIES-SEL-HD/tracks-v1a1/mono.m3u8
+https://livetv.shamon-cable.net:8443/Star-movies-select/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="" group-title="Hindi",AXN MOVIES 
 https://robiproxi.bushmr263.workers.dev/?url=https://ipbase-proxy.torongoplus.workers.dev/proxy/direct?url=https://xtream.iptv-channels.workers.dev/iptv/XHP4F64V8MXFXTKTQ5VSM88K/7007/index.m3u8   
@@ -616,8 +625,6 @@ https://d1taaads3ztvmu.cloudfront.net/120723/smil:lifeokuk.smil/chunklist_b26280
 
 #EXTINF:-1 tvg-name="Euro Sport" group-title="Sports",Euro Sport
 https://drk6xq0vhn.gpcdn.net/live/euro_sports_hd_abr/live/euro_sports_hd/chunks.m3u8
-
-
 
 
 
