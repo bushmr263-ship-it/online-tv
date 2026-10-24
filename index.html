@@ -530,7 +530,7 @@
                 window.location.href = "about:blank";
             }
         }
-        setInterval(checkDevTools, 300);
+        setInterval(checkDevTools, 1000);
 
         // Player & Category Filter Logic
         const videoEl = document.getElementById('my-video');
@@ -723,21 +723,21 @@
                         triggerInstantPlay(playerInstance, true);
                     }
                 } else if (Hls.isSupported()) {
-                    // Smart HLS Config with Native Fallback Support
+                    // Optimized High-Performance Buffer Configuration
                     hls = new Hls({
                         enableWorker: true,
                         lowLatencyMode: false,
-                        maxBufferLength: 30,
-                        maxMaxBufferLength: 60,
-                        maxBufferSize: 30 * 1024 * 1024,
-                        backBufferLength: 15,
-                        liveSyncDurationCount: 3,
-                        liveMaxLatencyDurationCount: 8,
-                        fragLoadingTimeOut: 15000,
-                        fragLoadingMaxRetry: 8,
-                        fragLoadingRetryDelay: 500,
-                        manifestLoadingMaxRetry: 8,
-                        levelLoadingMaxRetry: 8
+                        maxBufferLength: 60,
+                        maxMaxBufferLength: 120,
+                        maxBufferSize: 60 * 1024 * 1024,
+                        backBufferLength: 30,
+                        liveSyncDurationCount: 6,
+                        liveMaxLatencyDurationCount: 15,
+                        fragLoadingTimeOut: 20000,
+                        fragLoadingMaxRetry: 4,
+                        fragLoadingRetryDelay: 1000,
+                        manifestLoadingMaxRetry: 4,
+                        levelLoadingMaxRetry: 4
                     });
 
                     hls.loadSource(finalUrl);
@@ -751,6 +751,25 @@
                         triggerInstantPlay(playerInstance, true);
                     });
 
+                    // Anti-Stall Auto Recovery System
+                    let lastTime = 0;
+                    let stallCount = 0;
+                    stallCheckInterval = setInterval(() => {
+                        if (videoEl && !videoEl.paused) {
+                            if (videoEl.currentTime === lastTime) {
+                                stallCount++;
+                                if (stallCount >= 3) {
+                                    console.warn("Buffer stall detected. Recovering stream...");
+                                    if (hls) hls.startLoad();
+                                    stallCount = 0;
+                                }
+                            } else {
+                                stallCount = 0;
+                                lastTime = videoEl.currentTime;
+                            }
+                        }
+                    }, 2000);
+
                     hls.on(Hls.Events.ERROR, function (event, data) {
                         if (data.fatal) {
                             switch (data.type) {
@@ -761,7 +780,6 @@
                                     hls.recoverMediaError();
                                     break;
                                 default:
-                                    // If HLS.js fails, fallback to video native HLS playback
                                     if (videoEl.canPlayType('application/vnd.apple.mpegurl') || finalUrl.includes('.m3u8')) {
                                         console.warn("HLS.js failed, switching to Native HLS...");
                                         hls.destroy();
