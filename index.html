@@ -703,11 +703,29 @@
                     width: '100%', 
                     height: '100%', 
                     autoPlay: true,
-                    mute: false
+                    preload: 'auto',
+                    mute: false,
+                    hlsjsConfig: {
+                        enableWorker: true,
+                        lowLatencyMode: true,
+                        liveSyncDurationCount: 2,
+                        maxBufferLength: 15,
+                        manifestLoadingTimeOut: 3500,
+                        fragLoadingTimeOut: 4000
+                    },
+                    events: {
+                        onReady: function() {
+                            var plugin = this.getPlugin('click_to_pause');
+                            if (plugin) plugin.disable();
+                            this.play();
+                        }
+                    }
                 });
             } else if (mode === 'html5') {
                 html5El.style.display = 'block';
+                html5El.preload = "auto";
                 html5El.src = finalUrl;
+                html5El.load();
                 triggerInstantPlay(html5El, false);
                 html5El.onerror = () => handleFallback();
             } else {
@@ -723,21 +741,27 @@
                         triggerInstantPlay(playerInstance, true);
                     }
                 } else if (Hls.isSupported()) {
-                    // Optimized High-Performance Buffer Configuration
+                    // Fast-Loading & Anti-Stall HLS Configuration
                     hls = new Hls({
                         enableWorker: true,
-                        lowLatencyMode: false,
-                        maxBufferLength: 60,
-                        maxMaxBufferLength: 120,
-                        maxBufferSize: 60 * 1024 * 1024,
-                        backBufferLength: 30,
-                        liveSyncDurationCount: 6,
-                        liveMaxLatencyDurationCount: 15,
-                        fragLoadingTimeOut: 20000,
-                        fragLoadingMaxRetry: 4,
-                        fragLoadingRetryDelay: 1000,
-                        manifestLoadingMaxRetry: 4,
-                        levelLoadingMaxRetry: 4
+                        lowLatencyMode: true,
+                        capLevelToPlayerSize: true,
+                        startLevel: -1,
+                        
+                        manifestLoadingTimeOut: 3500,
+                        levelLoadingTimeOut: 3500,
+                        fragLoadingTimeOut: 4000,
+                        
+                        manifestLoadingMaxRetry: 2,
+                        levelLoadingMaxRetry: 2,
+                        fragLoadingMaxRetry: 2,
+                        fragLoadingRetryDelay: 300,
+                        
+                        maxBufferLength: 20,
+                        maxMaxBufferLength: 40,
+                        liveSyncDurationCount: 3,
+                        liveMaxLatencyDurationCount: 7,
+                        testBandwidth: false
                     });
 
                     hls.loadSource(finalUrl);
@@ -748,27 +772,40 @@
                     });
 
                     hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+                        if (data.levels && data.levels.length > 1) {
+                            let defaultLevel = data.levels.findIndex(l => l.height && l.height <= 720);
+                            if (defaultLevel !== -1) {
+                                hls.firstLevel = defaultLevel;
+                            }
+                        }
                         triggerInstantPlay(playerInstance, true);
                     });
 
-                    // Anti-Stall Auto Recovery System
+                    // Anti-Stall & Expired Connection Auto-Recovery (1-min freeze protection)
                     let lastTime = 0;
-                    let stallCount = 0;
+                    let stallCheckCounter = 0;
                     stallCheckInterval = setInterval(() => {
                         if (videoEl && !videoEl.paused) {
                             if (videoEl.currentTime === lastTime) {
-                                stallCount++;
-                                if (stallCount >= 3) {
-                                    console.warn("Buffer stall detected. Recovering stream...");
-                                    if (hls) hls.startLoad();
-                                    stallCount = 0;
+                                stallCheckCounter++;
+                                if (stallCheckCounter >= 2) {
+                                    console.warn("Stream frozen/expired. Auto reconnecting...");
+                                    if (hls) {
+                                        hls.stopLoad();
+                                        hls.startLoad();
+                                        videoEl.play().catch(() => {});
+                                    } else {
+                                        videoEl.src = finalUrl;
+                                        videoEl.play().catch(() => {});
+                                    }
+                                    stallCheckCounter = 0;
                                 }
                             } else {
-                                stallCount = 0;
+                                stallCheckCounter = 0;
                                 lastTime = videoEl.currentTime;
                             }
                         }
-                    }, 2000);
+                    }, 1200);
 
                     hls.on(Hls.Events.ERROR, function (event, data) {
                         if (data.fatal) {
@@ -802,6 +839,17 @@
                 }
             }
         }
+
+        // Auto restart stream on error or end
+        videoEl.onerror = () => {
+            console.warn("Video error detected. Replay...");
+            setTimeout(() => { loadChannelUrl(currentUrl, currentMode); }, 500);
+        };
+
+        videoEl.onended = () => {
+            console.warn("Stream ended unexpectedly. Restarting...");
+            setTimeout(() => { loadChannelUrl(currentUrl, currentMode); }, 500);
+        };
 
         function playCustom() {
             const url = document.getElementById('customUrlInput').value;
