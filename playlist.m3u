@@ -117,7 +117,7 @@ https://tvsen6.aynaott.com/39ee93nUbCCmm5LsyD4t/tracks-v1a1/mono.ts.m3u8
 https://byphdgllyk.gpcdn.net/hls/deeptotv/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/0QRKCsfQ/20240823_020937.png" group-title="Bangla",Duronto TV
-https://box.bbaria.net/DurontoTV/tracks-v1a1/mono.ts.m3u8
+https://livetv.shamon-cable.net:8443/Duronto/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="https://asset.bioscopelive.com/uploads/images/2025/08/11/thumbnails_58ebcef1efcc65837557de15952d2643_goplay_srk_tv_landscape.jpg" group-title="Bangla",SRK TV
 https://srktv.net/srktvhls/cdnlive_srktv.m3u8
@@ -195,7 +195,7 @@ https://drk6xq0vhn.gpcdn.net/live/zee_bangla_cinema_abr/index.m3u8
 https://app.uckingcrazy1.workers.dev/api/play/Sun%20Bangla.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/rFcCkS5m/20240822_231714.png",Jalsha Movies
-https://robitv.com/rn/http://livetv.akr4m.com:8080/bdtv/restrem/27.m3u8
+https://livetv.shamon-cable.net:8443/Jalsha-Movies/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/rFcCkS5m/20240822_231714.png",Jalsha Movies 2
 https://iptvlive-beta.vercel.app/jalsha-movies/index.m3u8
