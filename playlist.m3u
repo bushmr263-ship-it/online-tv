@@ -183,10 +183,10 @@ https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starjalsha.smil/chunklist_b19
 https://d1rc86nwwc9fag.cloudfront.net/260723/smil:zeebangla.smil/chunklist_b896000.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/3w6F5VZ5/20240822-231514.png",Colors Bangla HD
-https://app.uckingcrazy1.workers.dev/api/play/COLORS%20BANGLA.m3u8
+https://livetv.shamon-cable.net:8443/Colors-bangla/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/DfJPtVHT/Color-Bangla-Cinema.jpg",Colors Bangla Cinema
-https://livetv.shamon-cable.net:8443/Colors-bangla/tracks-v1a1/mono.m3u8
+https://servermairebap.cloudbd.one/COLORS-BANGLA-CINEMA/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/dtBRtL99/20240822_231732.png",Zee Bangla cinema
 https://drk6xq0vhn.gpcdn.net/live/zee_bangla_cinema_abr/index.m3u8
@@ -267,7 +267,7 @@ https://vg-pitaaratvlive.akamaized.net/v1/master/611d79b11b77e2f571934fd80ca1413
 https://stream.rojatv.cloud/rojatv/rojatv/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/XJ1SbVzN/20240823_022738.png" group-title="Hindi",&Pictures
-http://198.195.239.50:8095/ANT.PICTURS.HD/index.m3u8
+https://alixbd.com/playlistconfig/channel/78.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/7ZNqRywh/20240823_023440.png" group-title="Hindi",Gold Mines
 https://streams.tangotv.in/GOLDMINES/ORIGIN/tracks-v1a1/mono.m3u8
@@ -289,9 +289,6 @@ https://cdn-uw2-prod.tsv2.amagi.tv/linear/amg00864-shemarooenterta-shemabollywoo
 
 #EXTINF:-1 tvg-logo="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSw1zW8RLLNCQm6UHcIIJZlscOB5vhs7BF2I7SfTthYGv3LtHeRSut2-Ag&s=10" group-title="Hindi",Action Hollywood
 https://cdn-apse1-prod.tsv2.amagi.tv/linear/amg01076-lightningintern-actionhollywood-samsungnz/playlist.m3u8
-
-#EXTINF:-1 tvg-logo="https://i.postimg.cc/XJ1SbVzN/20240823_022738.png" group-title="Hindi",&Pictures (Alt)
-https://stream.ottplus.bd/live/and_picture_hd_abr/live/and_picture_hd_720/chunks.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/Z5dRqZnV/20240825_055816.png" group-title="Hindi",Bhojpuri Cinema
 https://tv.chitrabani24.com/proxy.php?url=https%3A%2F%2Flive-bhojpuri.akamaized.net%2Fliveabr%2Fpub-iobhojpuqbu6yj%2Flive_720p%2Fchunks.m3u8
@@ -494,8 +491,8 @@ https://tvsen7.aynascope.net/tsn3/index.m3u8
 #EXTINF:-1 tvg-id="019de785-3a0f-7a8d-aa40-1bc1d60c9817" tvg-name="TNT Sport 1" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-09/images_4af9a282522f487a6ed41692f99baad6_playmist_tnt_sports_1400x400.jpg" group-title="Sports",TNT Sport 1
 https://tvsen6.aynaott.com/TntSports1HD/index.m3u8
 
-#EXTINF:-1,Dazan 2
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://23.237.104.106:8080/DAZN_2/index.m3u8#skym3u.dev
+#EXTINF:-1,Dazan 
+https://zibo1.tvhunter.top/DAZN_TEST/index.m3u8
 
 #EXTINF:-1,Dazan 4
 https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://23.237.104.106:8080/DAZN_4/index.m3u8#skym3u.dev
