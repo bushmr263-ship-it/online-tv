@@ -225,7 +225,7 @@ https://vods2.aynaott.com/gseriesDrama/tracks-v1a1/mono.ts.m3u8
 https://server.thelegitpro.in/rongeentv/rongeentv/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/6pCXvxyz/20240823_022553.png" group-title="Hindi",Star Gold HD
-https://livetv.shamon-cable.net:8443/StarGold/tracks-v1a1/mono.m3u8      https://s3.itcnbd.live/channel/f5dd87a5c3b03131.m3u8  
+https://livetv.shamon-cable.net:8443/SkySportsF1/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/6pCXvxyz/20240823_022553.png" group-title="Hindi",Star Gold select
 https://livetv.shamon-cable.net:8443/StarGoldSelect/tracks-v1a1/mono.m3u8
