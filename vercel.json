@@ -1,3 +1,22 @@
 {
-  "rewrites": []
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "query",
+          "key": "url"
+        }
+      ],
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/(.*\\.m3u.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
 }
