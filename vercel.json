@@ -1,21 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/",
-      "has": [
-        {
-          "type": "query",
-          "key": "url"
-        }
-      ],
+      "source": "/api/proxy",
       "destination": "/api/index.js"
     },
     {
-      "source": "/(.*\\.m3u.*)",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/((?!api/).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
