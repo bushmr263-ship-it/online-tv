@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="bn">
 <head>
     <!-- Google Search Console Verification Tag -->
@@ -7,24 +6,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>SHAWON TV - Live TV Streaming, Sports, News & Bangla Channels</title>
-    <meta name="title" content="SHAWON TV - Live TV Streaming, Sports, News & Bangla Channels">
-    <meta name="description" content="Watch live TV streaming, sports channels like T Sports, A Sports, Star Sports, and Bangladeshi, Indian news & entertainment channels for free on SHAWON TV.">
-    <meta name="keywords" content="SHAWON TV, Live TV, T Sports live, A Sports HD, Bangladeshi TV channels online, Watch live sports, Free streaming website">
-    <meta name="author" content="SHAWON TV">
+    <title>SHAWON TV PALASHBARI - Live TV Streaming, Sports, News & Bangla Channels</title>
+    <meta name="title" content="SHAWON TV PALASHBARI - Live TV Streaming, Sports, News & Bangla Channels">
+    <meta name="description" content="Watch live TV streaming, sports channels like T Sports, A Sports, Star Sports, and Bangladeshi, Indian news & entertainment channels for free on SHAWON TV PALASHBARI.">
+    <meta name="keywords" content="SHAWON TV PALASHBARI, Live TV, T Sports live, A Sports HD, Bangladeshi TV channels online, Watch live sports, Free streaming website">
+    <meta name="author" content="SHAWON TV PALASHBARI">
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph / Facebook Meta Tags -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://yourwebsite.com/">
-    <meta property="og:title" content="SHAWON TV - Live TV Streaming & Sports">
+    <meta property="og:url" content="https://palashbari-ples.pages.dev/">
+    <meta property="og:title" content="SHAWON TV PALASHBARI - Live TV Streaming & Sports">
     <meta property="og:description" content="Watch live TV streaming, sports channels like T Sports, A Sports, Star Sports, and local news channels for free.">
     <meta property="og:image" content="https://i.postimg.cc/W1z5BGPZ/20240823_024712.png">
 
     <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://yourwebsite.com/">
-    <meta name="twitter:title" content="SHAWON TV - Live TV Streaming & Sports">
+    <meta name="twitter:url" content="https://palashbari-ples.pages.dev/">
+    <meta name="twitter:title" content="SHAWON TV PALASHBARI - Live TV Streaming & Sports">
     <meta name="twitter:description" content="Watch live TV streaming, sports channels like T Sports, A Sports, Star Sports, and local news channels for free.">
     <meta name="twitter:image" content="https://i.postimg.cc/W1z5BGPZ/20240823_024712.png">
 
@@ -416,6 +415,44 @@
 
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+
+        /* ==========================================================
+           মোবাইল স্ক্রিনের জন্য ভিডিও প্লেয়ার ওপরে ফিক্সড (Sticky) রাখার CSS
+           ========================================================== */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .main-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            /* ভিডিও প্লেয়ার সেকশন একদম ওপরের স্ক্রিনে ফিক্সড বা স্টিকি থাকবে */
+            .player-section {
+                position: sticky !important;
+                top: 0;
+                left: 0;
+                width: 100%;
+                z-index: 9999;
+                box-sizing: border-box;
+                padding: 10px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+            }
+
+            /* চ্যানেল লিস্ট সেকশন প্লেয়ারের নিচে থাকবে এবং শুধু এটিই স্ক্রোল হবে */
+            .channel-list-container {
+                width: 100%;
+                margin-top: 5px;
+            }
+
+            /* মোবাইলে চ্যানেল লিস্টের গ্রিড ৩ কলামে দেখানোর জন্য */
+            .channel-list {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                height: 55vh;
+            }
+        }
     </style>
 </head>
 <body>
@@ -424,7 +461,7 @@
         <div class="player-section">
             
             <div class="header-wrapper">
-                <div class="logo-header">SHAWON TV</div>
+                <div class="logo-header">SHAWON TV PALASHBARI</div>
                 
                 <div id="serverSwitcherBox" class="header-server-switcher">
                     <div class="server-title-notice-row">
@@ -498,6 +535,7 @@
         </div>
     </div>
 
+    <!-- Custom URL Input Section -->
     <div class="input-box">
         <input type="text" id="customUrlInput" placeholder="লিঙ্ক এখানে দিন (M3U8, MPD বা URL)...">
         <button class="play-btn" onclick="playCustom()">প্লে করুন</button>
@@ -723,7 +761,6 @@
                         triggerInstantPlay(playerInstance, true);
                     }
                 } else if (Hls.isSupported()) {
-                    // Optimized High-Performance Buffer Configuration
                     hls = new Hls({
                         enableWorker: true,
                         lowLatencyMode: false,
@@ -751,7 +788,6 @@
                         triggerInstantPlay(playerInstance, true);
                     });
 
-                    // Anti-Stall Auto Recovery System
                     let lastTime = 0;
                     let stallCount = 0;
                     stallCheckInterval = setInterval(() => {
