@@ -43,26 +43,30 @@
     </div>
 
     <script>
-        const API_URL = "YOUR_WORKER_URL_HERE"; // আপনার Cloudflare Worker URL বসাবেন
+        const API_URL = "https://admin.bushmr263.workers.dev"; // আপনার লাইভ Cloudflare Worker URL
 
         async function loadUsers() {
-            const res = await fetch(`${API_URL}/get-users`);
-            const users = await res.json();
-            const tbody = document.getElementById('userTable');
-            tbody.innerHTML = '';
-            
-            Object.keys(users).forEach(user => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${user}</td>
-                        <td><span style="color:${users[user].active ? 'green':'red'}">${users[user].active ? 'Active':'Blocked'}</span></td>
-                        <td>
-                            <button onclick="toggleUser('${user}', ${!users[user].active})">${users[user].active ? 'Block':'Unblock'}</button>
-                            <button onclick="deleteUser('${user}')" style="background:red; color:#fff;">Delete</button>
-                        </td>
-                    </tr>
-                `;
-            });
+            try {
+                const res = await fetch(`${API_URL}/get-users`);
+                const users = await res.json();
+                const tbody = document.getElementById('userTable');
+                tbody.innerHTML = '';
+                
+                Object.keys(users).forEach(user => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${user}</td>
+                            <td><span style="color:${users[user].active ? 'green':'red'}">${users[user].active ? 'Active':'Blocked'}</span></td>
+                            <td>
+                                <button onclick="toggleUser('${user}', ${!users[user].active})">${users[user].active ? 'Block':'Unblock'}</button>
+                                <button onclick="deleteUser('${user}')" style="background:red; color:#fff;">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error("Error loading users:", err);
+            }
         }
 
         async function addUser() {
@@ -74,7 +78,9 @@
                 method: 'POST',
                 body: JSON.stringify({ username: u, password: p })
             });
-            alert("নতুন ইউজার যোগ হয়েছে!");
+            alert("নতুন ইউজার যোগ হয়েছে!");
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
             loadUsers();
         }
 
