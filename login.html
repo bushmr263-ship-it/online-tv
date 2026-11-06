@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PB TV - Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            width: 300px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #00ffcc;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #444;
+            background-color: #2a2a2a;
+            color: #fff;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #00ffcc;
+            border: none;
+            color: #121212;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #00b38f;
+        }
+        #error-msg {
+            color: #ff4d4d;
+            text-align: center;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <h2>PB TV Login</h2>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="username">ইউজারনেম</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="input-group">
+                <label for="password">পাসওয়ার্ড</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">লগইন করুন</button>
+            <div id="error-msg"></div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            const usernameInput = document.getElementById("username").value.trim();
+            const passwordInput = document.getElementById("password").value.trim();
+            const errorMsg = document.getElementById("error-msg");
+            
+            errorMsg.textContent = "লগইন হচ্ছে, অপেক্ষা করুন...";
+
+            // ডিভাইস আইডি তৈরি বা চেক করা
+            let deviceId = localStorage.getItem("pb_device_id");
+            if (!deviceId) {
+                deviceId = "Device-" + Math.random().toString(36).substring(2, 9);
+                localStorage.setItem("pb_device_id", deviceId);
+            }
+
+            try {
+                // ক্লাউডফ্লেয়ার ওয়ার্কারে রিকোয়েস্ট পাঠানো
+                const response = await fetch("https://admin.bushmr263.workers.dev/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        username: usernameInput,
+                        password: passwordInput,
+                        deviceId: deviceId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem("pb_logged_username", usernameInput);
+                    window.location.href = "index.html"; // সফল হলে মূল পেজে চলে যাবে
+                } else {
+                    errorMsg.textContent = data.message;
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                errorMsg.textContent = "সার্ভারে সংযোগ করতে সমস্যা হয়েছে!";
+            }
+        });
+    </script>
+
+</body>
+</html>
