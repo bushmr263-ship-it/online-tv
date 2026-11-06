@@ -61,10 +61,10 @@
 
         <div class="card" style="text-align: center;">
             <h3><i class="fa-solid fa-headset"></i> সহায়তা ও যোগাযোগ</h3>
-            <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">সরাসরি যোগাযোগ করুন কোনো প্রয়োজনে:</p>
+            <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">সরাসরি যোগাযোগ করুন কোনো প্রয়োজনে:</p>
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <a href="https://wa.me/8801812895985" target="_blank" style="background:#16a34a; color:#fff; text-decoration:none; padding:10px; border-radius:6px; font-weight:bold; font-size:13px;"><i class="fa-brands fa-whatsapp"></i> WhatsApp (01812895985)</a>
-                <a href="https://t.me/+8801812895985" target="_blank" style="background:#0284c7; color:#fff; text-decoration:none; padding:10px; border-radius:6px; font-weight:bold; font-size:13px;"><i class="fa-paper-plane"></i> টেলিগ্রাম চ্যানেল</a>
+                <a href="https://t.me/your_telegram_channel" target="_blank" style="background:#0284c7; color:#fff; text-decoration:none; padding:10px; border-radius:6px; font-weight:bold; font-size:13px;"><i class="fa-paper-plane"></i> টেলিগ্রাম চ্যানেল</a>
                 <a href="tel:+8801812895985" style="background:#f59e0b; color:#0f172a; text-decoration:none; padding:10px; border-radius:6px; font-weight:bold; font-size:13px;"><i class="fa-solid fa-phone"></i> সরাসরি কল করুন</a>
             </div>
         </div>
@@ -160,7 +160,7 @@
         }
 
         async function toggleUser(u, status) {
-            await fetch(`${API_URL}/update-status`, {
+            await fetch(`${API_URL}/toggle-user`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ username: u, active: status })
