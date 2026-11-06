@@ -12,6 +12,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #333; padding: 10px; text-align: left; }
         th { background: #252525; color: #ffaa00; }
+        .contact-btn { padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin: 5px; color: white; }
     </style>
 </head>
 <body>
@@ -42,8 +43,29 @@
         </table>
     </div>
 
+    <!-- Contact Section -->
+    <div class="card" style="text-align: center;">
+        <h3 style="color: #ffaa00; margin-bottom: 10px;">যোগাযোগ করুন</h3>
+        <p style="color: #ccc; margin-bottom: 15px; font-size: 14px;">সহায়তার জন্য সরাসরি যোগাযোগ করুন:</p>
+        
+        <!-- WhatsApp Button -->
+        <a href="https://wa.me/8801812895985?text=Assalamu%20Alaikum,%20amar%20PB%20TV%20niye%20shohayota%20proyojon." target="_blank" class="contact-btn" style="background: #25D366;">
+            💬 WhatsApp (01812895985)
+        </a>
+        
+        <!-- Telegram Button -->
+        <a href="https://t.me/+8801812895985" target="_blank" class="contact-btn" style="background: #0088cc;">
+            ✈️ Telegram
+        </a>
+        
+        <!-- Direct Call Button -->
+        <a href="tel:+8801812895985" class="contact-btn" style="background: #ffaa00; color: #121212;">
+            📞 কল করুন
+        </a>
+    </div>
+
     <script>
-        const API_URL = "https://admin.bushmr263.workers.dev"; // আপনার লাইভ Cloudflare Worker URL
+        const API_URL = "https://admin.bushmr263.workers.dev"; // আপনার লাইভ Cloudflare Worker URL[cite: 8]
 
         async function loadUsers() {
             try {
