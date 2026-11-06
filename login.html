@@ -3,17 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PB TV - Login</title>
+    <title>পিবি টিভি - লগইন</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #121212;
+            background-color: #0b1329; /* অ্যাডমিন প্যানেলের সাথে মিল রেখে ব্যাকগ্রাউন্ড কালার */
             color: #ffffff;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
             margin: 0;
+        }
+        /* হেডার স্টাইল */
+        .header-title {
+            text-align: center;
+            color: #f59e0b;
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 30px;
         }
         .container {
             display: flex;
@@ -21,23 +30,30 @@
             gap: 20px;
             justify-content: center;
             align-items: flex-start;
+            max-width: 900px;
+            width: 100%;
+            padding: 10px;
         }
+        /* বক্সগুলোর স্টাইল */
         .login-box, .support-box {
-            background-color: #1e1e1e;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            width: 320px;
+            background-color: #111a3a; /* অ্যাডমিন কার্ডের ব্যাকগ্রাউন্ড কালার */
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            width: 380px;
             box-sizing: border-box;
         }
-        h2, h3 {
-            text-align: center;
+        h3 {
+            margin-top: 0;
             margin-bottom: 20px;
-            color: #00ffcc;
+            color: #f59e0b;
+            font-size: 18px;
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 10px;
         }
         .support-box h3 {
             color: #60a5fa;
-            font-size: 18px;
         }
         .input-group {
             margin-bottom: 15px;
@@ -46,19 +62,25 @@
             display: block;
             margin-bottom: 5px;
             font-size: 14px;
+            color: #cbd5e1;
         }
         input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #444;
-            background-color: #2a2a2a;
+            padding: 12px;
+            border: 1px solid #334155;
+            background-color: #0b1329;
             color: #fff;
             border-radius: 5px;
             box-sizing: border-box;
+            outline: none;
         }
+        input:focus {
+            border-color: #f59e0b;
+        }
+        /* বাটন স্টাইল */
         button, .contact-btn {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: none;
             font-weight: bold;
             border-radius: 5px;
@@ -68,13 +90,14 @@
             text-decoration: none;
             display: block;
             box-sizing: border-box;
+            font-size: 15px;
         }
         button {
-            background-color: #00ffcc;
-            color: #121212;
+            background-color: #f59e0b; /* অ্যাডমিনের হলুদ/কমলা বাটন কালার */
+            color: #0b1329;
         }
         button:hover {
-            background-color: #00b38f;
+            background-color: #d97706;
         }
         .whatsapp-btn {
             background-color: #22c55e;
@@ -86,10 +109,10 @@
         }
         .call-btn {
             background-color: #f59e0b;
-            color: #121212;
+            color: #0b1329;
         }
         #error-msg {
-            color: #ff4d4d;
+            color: #ef4444;
             text-align: center;
             font-size: 14px;
             margin-top: 10px;
@@ -97,25 +120,30 @@
         .support-text {
             text-align: center;
             font-size: 13px;
-            color: #cbd5e1;
+            color: #94a3b8;
             margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
 
+    <!-- হেডার টাইটেল -->
+    <div class="header-title">
+        📺 পিবি টিভি লগইন প্যানেল
+    </div>
+
     <div class="container">
         <!-- Login Form Box -->
         <div class="login-box">
-            <h2>PB TV Login</h2>
+            <h3>👤 ইউজার লগইন করুন</h3>
             <form id="loginForm">
                 <div class="input-group">
-                    <label for="username">ইউজারনেম</label>
-                    <input type="text" id="username" required>
+                    <label for="username">ইউজারনেম দিন</label>
+                    <input type="text" id="username" placeholder="ইউজারনেম দিন" required>
                 </div>
                 <div class="input-group">
-                    <label for="password">পাসওয়ার্ড</label>
-                    <input type="password" id="password" required>
+                    <label for="password">পাসওয়ার্ড দিন</label>
+                    <input type="password" id="password" placeholder="পাসওয়ার্ড দিন" required>
                 </div>
                 <button type="submit">লগইন করুন</button>
                 <div id="error-msg"></div>
@@ -124,19 +152,19 @@
 
         <!-- Support & Contact Box -->
         <div class="support-box">
-            <h3>সহায়তা ও যোগাযোগ</h3>
+            <h3>🎧 সহায়তা ও যোগাযোগ</h3>
             <p class="support-text">সরাসরি যোগাযোগ করুন কোনো প্রয়োজনে:</p>
             
             <a href="https://wa.me/8801812895985" target="_blank" class="contact-btn whatsapp-btn">
-                WhatsApp (01812895985)
+                💬 WhatsApp (01812895985)
             </a>
             
             <a href="https://t.me/your_telegram_channel" target="_blank" class="contact-btn telegram-btn">
-                টেলিগ্রাম চ্যানেল
+                📢 টেলিগ্রাম চ্যানেল
             </a>
             
             <a href="tel:01812895985" class="contact-btn call-btn">
-                সরাসরি কল করুন
+                📞 সরাসরি কল করুন
             </a>
         </div>
     </div>
