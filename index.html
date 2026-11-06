@@ -1,5 +1,25 @@
 <html lang="bn">
 <head>
+    <!-- ডোমেইন চেক এবং লগইন প্রোটেকশন স্ক্রিপ্ট -->
+    <script>
+        const currentDomain = window.location.hostname;
+
+        // যদি online-tv-5je.pages.dev ডোমেইন হয়, তবে ইউজার লগইন করা আছে কিনা চেক করবে
+        if (currentDomain.includes("online-tv-5je.pages.dev")) {
+            const user = localStorage.getItem("pb_logged_username");
+            const device = localStorage.getItem("pb_device_id");
+            
+            // যদি লগইন করা না থাকে, তবে সরাসরি লগইন পেজে পাঠিয়ে দেবে
+            if (!user || !device) {
+                window.location.href = "login.html"; // আপনার লগইন ফাইলের নাম এখানে দিতে পারেন
+            }
+        } 
+        // যদি palashbari-plex.pages.dev হয়, তবে কোনো লগইন বা আইডি চেক করবে না (ফ্রি চলবে)
+        else if (currentDomain.includes("palashbari-plex.pages.dev")) {
+            // Free access - কোনো বাধা নেই
+        }
+    </script>
+
     <!-- Google Search Console Verification Tag -->
     <meta name="google-site-verification" content="4Wrkrkzr9ugDKvZi_NlCh9fztvhJWFl_4s5BlLBHyhM" />
 
@@ -15,14 +35,14 @@
 
     <!-- Open Graph / Facebook Meta Tags -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://palashbari-ples.pages.dev/">
+    <meta property="og:url" content="https://palashbari-plex.pages.dev/">
     <meta property="og:title" content="PB TV - Live TV Streaming & Sports">
     <meta property="og:description" content="Watch live TV streaming, sports channels like T Sports, A Sports, Star Sports, and local news channels for free.">
     <meta property="og:image" content="https://i.postimg.cc/W1z5BGPZ/20240823_024712.png">
 
     <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://palashbari-ples.pages.dev/">
+    <meta name="twitter:url" content="https://palashbari-plex.pages.dev/">
     <meta name="twitter:title" content="PB TV - Live TV Streaming & Sports">
     <meta name="twitter:description" content="Watch live TV streaming, sports channels like T Sports, A Sports, Star Sports, and local news channels for free.">
     <meta name="twitter:image" content="https://i.postimg.cc/W1z5BGPZ/20240823_024712.png">
