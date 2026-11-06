@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>PB TV - Admin Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 20px; }
+        .card { background: #1e1e1e; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; }
+        input, button { padding: 10px; margin: 5px 0; border-radius: 4px; border: none; }
+        input { background: #2a2a2a; color: #fff; width: 90%; }
+        button { background: #ffaa00; font-weight: bold; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #333; padding: 10px; text-align: left; }
+        th { background: #252525; color: #ffaa00; }
+    </style>
+</head>
+<body>
+    <h2>PB TV Admin Panel</h2>
+
+    <!-- Add New User -->
+    <div class="card">
+        <h3>Create New User</h3>
+        <input type="text" id="newUsername" placeholder="Username">
+        <input type="password" id="newPassword" placeholder="Password">
+        <button onclick="addUser()">Add User</button>
+    </div>
+
+    <!-- User List -->
+    <div class="card">
+        <h3>All Users List</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="userTable">
+                <!-- ইউজার লিষ্ট এখানে লোড হবে -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_URL = "YOUR_WORKER_URL_HERE"; // আপনার Cloudflare Worker URL বসাবেন
+
+        async function loadUsers() {
+            const res = await fetch(`${API_URL}/get-users`);
+            const users = await res.json();
+            const tbody = document.getElementById('userTable');
+            tbody.innerHTML = '';
+            
+            Object.keys(users).forEach(user => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${user}</td>
+                        <td><span style="color:${users[user].active ? 'green':'red'}">${users[user].active ? 'Active':'Blocked'}</span></td>
+                        <td>
+                            <button onclick="toggleUser('${user}', ${!users[user].active})">${users[user].active ? 'Block':'Unblock'}</button>
+                            <button onclick="deleteUser('${user}')" style="background:red; color:#fff;">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function addUser() {
+            const u = document.getElementById('newUsername').value;
+            const p = document.getElementById('newPassword').value;
+            if(!u || !p) return alert("সব ঘর পূরণ করুন");
+
+            await fetch(`${API_URL}/add-user`, {
+                method: 'POST',
+                body: JSON.stringify({ username: u, password: p })
+            });
+            alert("নতুন ইউজার যোগ হয়েছে!");
+            loadUsers();
+        }
+
+        async function toggleUser(username, status) {
+            await fetch(`${API_URL}/toggle-user`, {
+                method: 'POST',
+                body: JSON.stringify({ username, active: status })
+            });
+            loadUsers();
+        }
+
+        async function deleteUser(username) {
+            if(confirm('ইউজারটি ডিলেট করতে চান?')) {
+                await fetch(`${API_URL}/delete-user`, {
+                    method: 'POST',
+                    body: JSON.stringify({ username })
+                });
+                loadUsers();
+            }
+        }
+
+        loadUsers();
+    </script>
+</body>
+</html>
