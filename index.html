@@ -23,7 +23,7 @@
     <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://palashbari-ples.pages.dev/">
-    <meta name="twitter:title" content="SHAWON TV PALASHBARI - Live TV Streaming & Sports">
+    <meta name="twitter:title" content="PB TV - Live TV Streaming & Sports">
     <meta name="twitter:description" content="Watch live TV streaming, sports channels like T Sports, A Sports, Star Sports, and local news channels for free.">
     <meta name="twitter:image" content="https://i.postimg.cc/W1z5BGPZ/20240823_024712.png">
 
@@ -416,9 +416,6 @@
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
 
-        /* ==========================================================
-           মোবাইল স্ক্রিনের জন্য ভিডিও প্লেয়ার ওপরে ফিক্সড (Sticky) রাখার CSS
-           ========================================================== */
         @media screen and (max-width: 768px) {
             body {
                 padding: 10px;
@@ -429,7 +426,6 @@
                 gap: 10px;
             }
 
-            /* ভিডিও প্লেয়ার সেকশন একদম ওপরের স্ক্রিনে ফিক্সড বা স্টিকি থাকবে */
             .player-section {
                 position: sticky !important;
                 top: 0;
@@ -441,13 +437,11 @@
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
             }
 
-            /* চ্যানেল লিস্ট সেকশন প্লেয়ারের নিচে থাকবে এবং শুধু এটিই স্ক্রোল হবে */
             .channel-list-container {
                 width: 100%;
                 margin-top: 5px;
             }
 
-            /* মোবাইলে চ্যানেল লিস্টের গ্রিড ৩ কলামে দেখানোর জন্য */
             .channel-list {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
                 height: 55vh;
@@ -461,7 +455,7 @@
         <div class="player-section">
             
             <div class="header-wrapper">
-                <div class="logo-header">SHAWON TV PALASHBARI</div>
+                <div class="logo-header">PB TV</div>
                 
                 <div id="serverSwitcherBox" class="header-server-switcher">
                     <div class="server-title-notice-row">
