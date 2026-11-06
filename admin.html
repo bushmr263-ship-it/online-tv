@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PB TV - Smart Admin Dashboard</title>
+    <title>PB TV - এডমিন ড্যাশবোর্ড</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -54,36 +54,36 @@
 <body>
 
     <div class="header">
-        <h2><i class="fa-solid fa-tv"></i> PB TV Admin Dashboard</h2>
+        <h2><i class="fa-solid fa-tv"></i> পিবি টিভি এডমিন ড্যাশবোর্ড</h2>
     </div>
 
     <!-- Top Section: Modern Two Columns -->
     <div class="top-grid">
         <!-- Left: Create User -->
         <div class="card">
-            <h3><i class="fa-solid fa-user-plus"></i> Create New User</h3>
+            <h3><i class="fa-solid fa-user-plus"></i> নতুন ইউজার তৈরি করুন</h3>
             <div class="input-group">
-                <input type="text" id="newUsername" placeholder="Enter Username">
+                <input type="text" id="newUsername" placeholder="ইউজারনেম দিন">
             </div>
             <div class="input-group">
-                <input type="password" id="newPassword" placeholder="Enter Password">
+                <input type="password" id="newPassword" placeholder="পাসওয়ার্ড দিন">
             </div>
-            <button class="btn-add" onclick="addUser()"><i class="fa-solid fa-plus"></i> Add User</button>
+            <button class="btn-add" onclick="addUser()"><i class="fa-solid fa-plus"></i> ইউজার যোগ করুন</button>
         </div>
 
         <!-- Right: Contact & Support -->
         <div class="card" style="text-align: center;">
-            <h3><i class="fa-solid fa-headset"></i> Support & Contact</h3>
-            <p style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">Sorasori jogajog korun kono proyojone:</p>
+            <h3><i class="fa-solid fa-headset"></i> সহায়তা ও যোগাযোগ</h3>
+            <p style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">সরাসরি যোগাযোগ করুন কোনো প্রয়োজনে:</p>
             <div class="contact-links">
                 <a href="https://wa.me/8801812895985?text=Assalamu%20Alaikum,%20amar%20PB%20TV%20niye%20shohayota%20proyojon." target="_blank" class="contact-btn btn-wa">
                     <i class="fa-brands fa-whatsapp"></i> WhatsApp (01812895985)
                 </a>
                 <a href="https://t.me/+8801812895985" target="_blank" class="contact-btn btn-tg">
-                    <i class="fa-paper-plane"></i> Telegram Channel
+                    <i class="fa-paper-plane"></i> টেলিগ্রাম চ্যানেল
                 </a>
                 <a href="tel:+8801812895985" class="contact-btn btn-call">
-                    <i class="fa-solid fa-phone"></i> Call Direct
+                    <i class="fa-solid fa-phone"></i> সরাসরি কল করুন
                 </a>
             </div>
         </div>
@@ -91,19 +91,19 @@
 
     <!-- User List Section -->
     <div class="card">
-        <h3><i class="fa-solid fa-users"></i> Registered Users</h3>
+        <h3><i class="fa-solid fa-users"></i> নিবন্ধিত ইউজার তালিকা</h3>
         
         <div class="stats-bar">
             <div class="stat-box">
-                <span>Total Users</span>
+                <span>মোট ইউজার</span>
                 <h4 id="totalCount">0</h4>
             </div>
             <div class="stat-box">
-                <span>Active</span>
+                <span>সক্রিয় (Active)</span>
                 <h4 id="activeCount" style="color: #4ade80;">0</h4>
             </div>
             <div class="stat-box">
-                <span>Blocked</span>
+                <span>ব্লকড (Blocked)</span>
                 <h4 id="blockedCount" style="color: #f87171;">0</h4>
             </div>
         </div>
@@ -112,9 +112,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Username</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>ইউজারনেম</th>
+                        <th>স্ট্যাটাস</th>
+                        <th>অ্যাকশন</th>
                     </tr>
                 </thead>
                 <tbody id="userTable">
@@ -147,14 +147,14 @@
                             <td style="font-weight: 600;">${user}</td>
                             <td>
                                 <span class="badge ${isActive ? 'badge-active' : 'badge-blocked'}">
-                                    ${isActive ? 'Active' : 'Blocked'}
+                                    ${isActive ? 'সক্রিয়' : 'ব্লকড'}
                                 </span>
                             </td>
                             <td>
                                 <button class="action-btn ${isActive ? 'btn-toggle-block' : 'btn-toggle-active'}" onclick="toggleUser('${user}', ${!isActive})">
-                                    ${isActive ? 'Block' : 'Unblock'}
+                                    ${isActive ? 'ব্লক করুন' : 'আনব্লক করুন'}
                                 </button>
-                                <button class="action-btn btn-delete" onclick="deleteUser('${user}')">Delete</button>
+                                <button class="action-btn btn-delete" onclick="deleteUser('${user}')">ডিলিট</button>
                             </td>
                         </tr>
                     `;
@@ -172,13 +172,13 @@
         async function addUser() {
             const u = document.getElementById('newUsername').value.trim();
             const p = document.getElementById('newPassword').value.trim();
-            if(!u || !p) return alert("Shob ghor puron korun!");
+            if(!u || !p) return alert("সব ঘর পূরণ করুন!");
 
             await fetch(`${API_URL}/add-user`, {
                 method: 'POST',
                 body: JSON.stringify({ username: u, password: p })
             });
-            alert("Notun user jog hoyese!");
+            alert("নতুন ইউজার সফলভাবে যোগ করা হয়েছে!");
             document.getElementById('newUsername').value = '';
             document.getElementById('newPassword').value = '';
             loadUsers();
@@ -193,7 +193,7 @@
         }
 
         async function deleteUser(username) {
-            if(confirm('User-ti delete korte chan?')) {
+            if(confirm('ইউজারটি ডিলিট করতে চান?')) {
                 await fetch(`${API_URL}/delete-user`, {
                     method: 'POST',
                     body: JSON.stringify({ username })
