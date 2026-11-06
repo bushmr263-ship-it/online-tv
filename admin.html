@@ -2,70 +2,130 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>PB TV - Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PB TV - Smart Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 20px; }
-        .card { background: #1e1e1e; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; }
-        input, button { padding: 10px; margin: 5px 0; border-radius: 4px; border: none; }
-        input { background: #2a2a2a; color: #fff; width: 90%; }
-        button { background: #ffaa00; font-weight: bold; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #333; padding: 10px; text-align: left; }
-        th { background: #252525; color: #ffaa00; }
-        .contact-btn { padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin: 5px; color: white; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; padding: 25px; }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h2 { color: #f59e0b; font-size: 28px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        .top-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .card { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); }
+        .card h3 { color: #38bdf8; font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        
+        .input-group { margin-bottom: 12px; }
+        .input-group input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 14px; outline: none; transition: 0.3s; }
+        .input-group input:focus { border-color: #f59e0b; }
+        
+        .btn-add { width: 100%; padding: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .btn-add:hover { opacity: 0.9; transform: translateY(-1px); }
+        
+        .contact-links { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .contact-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: 600; color: #fff; font-size: 14px; transition: 0.2s; }
+        .btn-wa { background: #16a34a; }
+        .btn-tg { background: #0284c7; }
+        .btn-call { background: #f59e0b; color: #0f172a; }
+        .contact-btn:hover { opacity: 0.9; }
+        
+        .stats-bar { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-box { background: #1e293b; padding: 12px 20px; border-radius: 8px; border: 1px solid #334155; flex: 1; text-align: center; }
+        .stat-box span { font-size: 12px; color: #94a3b8; }
+        .stat-box h4 { font-size: 20px; color: #f59e0b; margin-top: 2px; }
+        
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155; }
+        th, td { padding: 14px 16px; text-align: left; }
+        th { background: #0f172a; color: #94a3b8; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        tr { border-bottom: 1px solid #334155; }
+        tr:last-child { border-bottom: none; }
+        
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-active { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .badge-blocked { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        
+        .action-btn { padding: 6px 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; margin-right: 5px; }
+        .btn-toggle-block { background: #3b82f6; color: #fff; }
+        .btn-toggle-active { background: #16a34a; color: #fff; }
+        .btn-delete { background: #dc2626; color: #fff; }
     </style>
 </head>
 <body>
-    <h2>PB TV Admin Panel</h2>
 
-    <!-- Add New User -->
-    <div class="card">
-        <h3>Create New User</h3>
-        <input type="text" id="newUsername" placeholder="Username">
-        <input type="password" id="newPassword" placeholder="Password">
-        <button onclick="addUser()">Add User</button>
+    <div class="header">
+        <h2><i class="fa-solid fa-tv"></i> PB TV Admin Dashboard</h2>
     </div>
 
-    <!-- User List -->
-    <div class="card">
-        <h3>All Users List</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="userTable">
-                <!-- ইউজার লিষ্ট এখানে লোড হবে -->
-            </tbody>
-        </table>
+    <!-- Top Section: Modern Two Columns -->
+    <div class="top-grid">
+        <!-- Left: Create User -->
+        <div class="card">
+            <h3><i class="fa-solid fa-user-plus"></i> Create New User</h3>
+            <div class="input-group">
+                <input type="text" id="newUsername" placeholder="Enter Username">
+            </div>
+            <div class="input-group">
+                <input type="password" id="newPassword" placeholder="Enter Password">
+            </div>
+            <button class="btn-add" onclick="addUser()"><i class="fa-solid fa-plus"></i> Add User</button>
+        </div>
+
+        <!-- Right: Contact & Support -->
+        <div class="card" style="text-align: center;">
+            <h3><i class="fa-solid fa-headset"></i> Support & Contact</h3>
+            <p style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">Sorasori jogajog korun kono proyojone:</p>
+            <div class="contact-links">
+                <a href="https://wa.me/8801812895985?text=Assalamu%20Alaikum,%20amar%20PB%20TV%20niye%20shohayota%20proyojon." target="_blank" class="contact-btn btn-wa">
+                    <i class="fa-brands fa-whatsapp"></i> WhatsApp (01812895985)
+                </a>
+                <a href="https://t.me/+8801812895985" target="_blank" class="contact-btn btn-tg">
+                    <i class="fa-paper-plane"></i> Telegram Channel
+                </a>
+                <a href="tel:+8801812895985" class="contact-btn btn-call">
+                    <i class="fa-solid fa-phone"></i> Call Direct
+                </a>
+            </div>
+        </div>
     </div>
 
-    <!-- Contact Section -->
-    <div class="card" style="text-align: center;">
-        <h3 style="color: #ffaa00; margin-bottom: 10px;">যোগাযোগ করুন</h3>
-        <p style="color: #ccc; margin-bottom: 15px; font-size: 14px;">সহায়তার জন্য সরাসরি যোগাযোগ করুন:</p>
+    <!-- User List Section -->
+    <div class="card">
+        <h3><i class="fa-solid fa-users"></i> Registered Users</h3>
         
-        <!-- WhatsApp Button -->
-        <a href="https://wa.me/8801812895985?text=Assalamu%20Alaikum,%20amar%20PB%20TV%20niye%20shohayota%20proyojon." target="_blank" class="contact-btn" style="background: #25D366;">
-            💬 WhatsApp (01812895985)
-        </a>
-        
-        <!-- Telegram Button -->
-        <a href="https://t.me/+8801812895985" target="_blank" class="contact-btn" style="background: #0088cc;">
-            ✈️ Telegram
-        </a>
-        
-        <!-- Direct Call Button -->
-        <a href="tel:+8801812895985" class="contact-btn" style="background: #ffaa00; color: #121212;">
-            📞 কল করুন
-        </a>
+        <div class="stats-bar">
+            <div class="stat-box">
+                <span>Total Users</span>
+                <h4 id="totalCount">0</h4>
+            </div>
+            <div class="stat-box">
+                <span>Active</span>
+                <h4 id="activeCount" style="color: #4ade80;">0</h4>
+            </div>
+            <div class="stat-box">
+                <span>Blocked</span>
+                <h4 id="blockedCount" style="color: #f87171;">0</h4>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="userTable">
+                    <!-- User items will dynamic render here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        const API_URL = "https://admin.bushmr263.workers.dev"; // আপনার লাইভ Cloudflare Worker URL[cite: 8]
+        const API_URL = "https://admin.bushmr263.workers.dev";
 
         async function loadUsers() {
             try {
@@ -74,33 +134,51 @@
                 const tbody = document.getElementById('userTable');
                 tbody.innerHTML = '';
                 
-                Object.keys(users).forEach(user => {
+                const userKeys = Object.keys(users);
+                let activeCnt = 0;
+                let blockedCnt = 0;
+
+                userKeys.forEach(user => {
+                    const isActive = users[user].active;
+                    if(isActive) activeCnt++; else blockedCnt++;
+
                     tbody.innerHTML += `
                         <tr>
-                            <td>${user}</td>
-                            <td><span style="color:${users[user].active ? 'green':'red'}">${users[user].active ? 'Active':'Blocked'}</span></td>
+                            <td style="font-weight: 600;">${user}</td>
                             <td>
-                                <button onclick="toggleUser('${user}', ${!users[user].active})">${users[user].active ? 'Block':'Unblock'}</button>
-                                <button onclick="deleteUser('${user}')" style="background:red; color:#fff;">Delete</button>
+                                <span class="badge ${isActive ? 'badge-active' : 'badge-blocked'}">
+                                    ${isActive ? 'Active' : 'Blocked'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="action-btn ${isActive ? 'btn-toggle-block' : 'btn-toggle-active'}" onclick="toggleUser('${user}', ${!isActive})">
+                                    ${isActive ? 'Block' : 'Unblock'}
+                                </button>
+                                <button class="action-btn btn-delete" onclick="deleteUser('${user}')">Delete</button>
                             </td>
                         </tr>
                     `;
                 });
+
+                document.getElementById('totalCount').innerText = userKeys.length;
+                document.getElementById('activeCount').innerText = activeCnt;
+                document.getElementById('blockedCount').innerText = blockedCnt;
+
             } catch (err) {
                 console.error("Error loading users:", err);
             }
         }
 
         async function addUser() {
-            const u = document.getElementById('newUsername').value;
-            const p = document.getElementById('newPassword').value;
-            if(!u || !p) return alert("সব ঘর পূরণ করুন");
+            const u = document.getElementById('newUsername').value.trim();
+            const p = document.getElementById('newPassword').value.trim();
+            if(!u || !p) return alert("Shob ghor puron korun!");
 
             await fetch(`${API_URL}/add-user`, {
                 method: 'POST',
                 body: JSON.stringify({ username: u, password: p })
             });
-            alert("নতুন ইউজার যোগ হয়েছে!");
+            alert("Notun user jog hoyese!");
             document.getElementById('newUsername').value = '';
             document.getElementById('newPassword').value = '';
             loadUsers();
@@ -115,7 +193,7 @@
         }
 
         async function deleteUser(username) {
-            if(confirm('ইউজারটি ডিলেট করতে চান?')) {
+            if(confirm('User-ti delete korte chan?')) {
                 await fetch(`${API_URL}/delete-user`, {
                     method: 'POST',
                     body: JSON.stringify({ username })
