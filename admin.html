@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PB TV - অ্যাডমিন ড্যাশবোর্ড</title>
+    <title>PB TV - Admin Panel</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -39,24 +39,168 @@
         .btn-toggle { background: #2563eb; color: #fff; }
         .btn-delete { background: #dc2626; color: #fff; }
         .device-code { font-family: monospace; color: #38bdf8; background: #0f172a; padding: 3px 6px; border-radius: 4px; font-size: 12px; }
+        
+        /* কাস্টমারদের ব্লক করার ভিউ */
+        .blocked-screen { text-align: center; margin-top: 15vh; }
+        .blocked-screen h1 { color: #ef4444; font-size: 32px; margin-bottom: 10px; }
+        .blocked-screen p { color: #94a3b8; font-size: 16px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h2><i class="fa-solid fa-tv"></i> পিবি টিভি অ্যাডমিন ড্যাশবোর্ড</h2>
+    <!-- ১. কাস্টমার ব্লকড ভিউ (যদি /admin কেটে দেয়) -->
+    <div id="blocked-screen" class="blocked-screen" style="display: none;">
+        <h1>Access Denied</h1>
+        <p>সরাসরি কোনো সার্ভিস উপলব্ধ নেই।</p>
     </div>
 
-    <div class="grid">
-        <div class="card">
-            <h3><i class="fa-solid fa-user-plus"></i> নতুন ইউজার তৈরি করুন</h3>
-            <div class="input-group">
-                <input type="text" id="newUsername" placeholder="ইউজারনেম দিন">
-            </div>
-            <div class="input-group">
-                <input type="password" id="newPassword" placeholder="পাসওয়ার্ড দিন">
-            </div>
-            <button class="btn-add" onclick="addUser()"><i class="fa-solid fa-plus"></i> ইউজার যোগ করুন</button>
+    <!-- ২. পিবি টিভি অ্যাডমিন প্যানেল -->
+    <div id="admin-content">
+        <div class="header">
+            <h2><i class="fa-solid fa-tv"></i> পিবি টিভি অ্যাডমিন ড্যাশবোর্ড</h2>
         </div>
 
-        <div class="card" style="text-align: center;">
+        <div class="grid">
+            <div class="card">
+                <h3><i class="fa-solid fa-user-plus"></i> নতুন ইউজার তৈরি করুন</h3>
+                <div class="input-group">
+                    <input type="text" id="newUsername" placeholder="ইউজারনেম দিন">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="newPassword" placeholder="পাসওয়ার্ড দিন">
+                </div>
+                <button class="btn-add" onclick="addUser()"><i class="fa-solid fa-plus"></i> ইউজার যোগ করুন</button>
+            </div>
+
+            <div class="card" style="text-align: center;">
+                <h3><i class="fa-solid fa-headset"></i> সহায়তা ও যোগাযোগ</h3>
+                <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">সরাসরি যোগাযোগ করুন কোনো প্রয়োজনে:</p>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <a href="https://wa.me/8801812895985" target="_blank" style="background:#16a34a; color:#fff; text-decoration:none; padding:10px; border-radius:6px; font-weight:bold; font-size:13px;"><i class="fa-brands fa-whatsapp"></i> WhatsApp (01812895985)</a>
+                    <a href="https://t.me/+VqDOF_-beaQyMWY1" target="_blank" style="background:#0284c7; color:#fff; text-decoration:none; padding:10px; border-radius:6px; font-weight:bold; font-size:13px;"><i class="fa-solid fa-paper-plane"></i> টেলিগ্রাম চ্যানেল</a>
+                    <a href="tel:+8801812895985" style="background:#f59e0b; color:#0f172a; text-decoration:none; padding:10px; border-radius:6px; font-weight:bold; font-size:13px;"><i class="fa-solid fa-phone"></i> সরাসরি কল করুন</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="max-width: 1100px; margin: 0 auto;">
+            <h3><i class="fa-solid fa-users"></i> নিবন্ধিত ইউজার তালিকা</h3>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h4>মোট ইউজার</h4>
+                    <p id="totalUsers" style="color: #f59e0b;">0</p>
+                </div>
+                <div class="stat-box">
+                    <h4>সক্রিয় (Active)</h4>
+                    <p id="activeUsers" style="color: #4ade80;">0</p>
+                </div>
+                <div class="stat-box">
+                    <h4>ব্লকড (Blocked)</h4>
+                    <p id="blockedUsers" style="color: #f87171;">0</p>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ইউজারনেম</th>
+                        <th>ডিভাইস আইডি / MAC</th>
+                        <th>স্ট্যাটাস</th>
+                        <th>অ্যাকশন</th>
+                    </tr>
+                </thead>
+                <tbody id="userTable">
+                    <!-- Data will load here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://admin.bushmr263.workers.dev";
+
+        // URL চেক: /admin কেটে দিলে কাস্টমার এক্সেস ব্লক করে দেওয়া
+        const path = window.location.pathname.toLowerCase();
+        if (path !== '/admin' && path !== '/admin/') {
+            document.getElementById('admin-content').style.display = 'none';
+            document.getElementById('blocked-screen').style.display = 'block';
+            document.title = "Access Denied";
+        }
+
+        async function loadUsers() {
+            try {
+                const res = await fetch(`${API_URL}/get-users`);
+                const users = await res.json();
+                
+                const table = document.getElementById('userTable');
+                table.innerHTML = '';
+                
+                let total = 0, active = 0, blocked = 0;
+
+                for (let u in users) {
+                    total++;
+                    if(users[u].active) active++; else blocked++;
+
+                    const devId = users[u].deviceId ? `<span class="device-code">${users[u].deviceId}</span>` : `<span style="color:#64748b; font-size:12px;">লগইন করেনি</span>`;
+
+                    table.innerHTML += `
+                        <tr>
+                            <td><strong>${u}</strong></td>
+                            <td>${devId}</td>
+                            <td><span class="badge ${users[u].active ? 'badge-active' : 'badge-blocked'}">${users[u].active ? 'সক্রিয়' : 'ব্লকড'}</span></td>
+                            <td>
+                                <button class="btn-action btn-toggle" onclick="toggleUser('${u}', ${!users[u].active})">${users[u].active ? 'ব্লক করুন' : 'আনব্লক'}</button>
+                                <button class="btn-action btn-delete" onclick="deleteUser('${u}')">ডিলিট</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                document.getElementById('totalUsers').innerText = total;
+                document.getElementById('activeUsers').innerText = active;
+                document.getElementById('blockedUsers').innerText = blocked;
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function addUser() {
+            const u = document.getElementById('newUsername').value.trim();
+            const p = document.getElementById('newPassword').value.trim();
+            if(!u || !p) return alert("সব তথ্য দিন");
+
+            await fetch(`${API_URL}/add-user`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username: u, password: p })
+            });
+
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            loadUsers();
+        }
+
+        async function toggleUser(u, status) {
+            await fetch(`${API_URL}/toggle-user`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username: u, active: status })
+            });
+            loadUsers();
+        }
+
+        async function deleteUser(u) {
+            if(!confirm("নিশ্চিত ডিলিট করবেন?")) return;
+            await fetch(`${API_URL}/delete-user`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username: u })
+            });
+            loadUsers();
+        }
+
+        loadUsers();
+    </script>
+</body>
+</html>
