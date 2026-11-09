@@ -60,7 +60,8 @@
         }
     </script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/4.7.2/dash.all.min.js"></script>
+    <!-- DASH.js CDN (Updated for reliable MPD playback) -->
+    <script src="https://cdn.dashjs.org/v4.7.4/dash.all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
     
     <style>
@@ -795,15 +796,15 @@
             } else {
                 videoEl.style.display = 'block';
                 
+                // Fixed MPD / DASH Playback Logic
                 if (finalUrl.includes('.mpd') || finalUrl.includes('dash')) {
                     if (typeof dashjs !== 'undefined') {
                         dashPlayer = dashjs.MediaPlayer().create();
                         dashPlayer.initialize(videoEl, finalUrl, true);
-                        triggerInstantPlay(playerInstance, true);
                     } else {
                         playerInstance.src({ src: finalUrl, type: 'application/dash+xml' });
-                        triggerInstantPlay(playerInstance, true);
                     }
+                    triggerInstantPlay(playerInstance, true);
                 } else if (Hls.isSupported()) {
                     hls = new Hls({
                         enableWorker: true,
@@ -1013,7 +1014,7 @@
                                 lowerTitle.includes('zee bangla') || lowerTitle.includes('colors bangla') || lowerTitle.includes('sun bangla') || 
                                 lowerTitle.includes('sananda') || lowerTitle.includes('zb cinema')
                             ) {
-                                detectedGroup = 'indian_bangla';
+                                detectedGroup.detectedGroup = 'indian_bangla';
                             }
                             else if (
                                 currentGroup.includes('hindi') || lowerTitle.includes('movies') || lowerTitle.includes('movie club') || 
@@ -1038,7 +1039,7 @@
                             allChannels.push({
                                 name: currentTitle,
                                 logo: currentLogo,
-                                url: rawUrls.length === 1 ? rawUrls[0] : rawUrls,
+                                url: rawUrls.length === 1 ? rawUrls.0 : rawUrls,
                                 group: currentGroup || detectedGroup
                             });
 
