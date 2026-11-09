@@ -621,13 +621,48 @@ https://tvsen3.aynaott.com/u3NjUrny/index.m3u8
 #EXTINF:-1 tvg-name="SET hindi" group-title="hindi",SONY ACTION MOVIES
 https://5098a8b860504a3690fd2e7c0a18d68f.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-817-FR-SONYONEHITSACTION-LG_FR/playlist.m3u8 
 
-#EXTINF:-1 tvg-id="" tvg-logo="https://i.postimg.cc/6pCXvxyz/20240823_022553.png" group-title="Hindi", Star Barot
+#EXTINF:-1 tvg-id="" tvg-logo=""https://go4.pw/India/_STAR BHARAT.png" group-title="Hindi", STAR BHARAT HD
 https://d1taaads3ztvmu.cloudfront.net/120723/smil:lifeokuk.smil/chunklist_b2628000.m3u8
 
 #EXTINF:-1 tvg-name="Euro Sport" group-title="Sports",Euro Sport
 https://drk6xq0vhn.gpcdn.net/live/euro_sports_hd_abr/live/euro_sports_hd/chunks.m3u8
 
 
+#EXTINF:-1 group-title="🎵 Music",Rana Cable Music
+https://ranacable.duckdns.org/RanaCableMusic/tracks-v1a1/mono.m3u8
+
+#EXTINF:-1 group-title="🧸 Kids & Cartoons",Jungle Book
+https://cc-4bhi5osabejc9.akamaized.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-4bhi5osabejc9/c437e5d9-4027-4850-9d79-17b235719743/0.m3u8
+
+#EXTINF:-1 group-title="🧸 Kids & Cartoons",Tiny Pop Cartoon
+https://amg01753-narrativeuk-amg01753c1-rakuten-uk-2339.playouts.now.amagi.tv/480p/index.m3u8
+
+#EXTINF:-1 group-title="🎬 Entertainment",House of Scream
+https://cc-y2z89muounal4.akamaized.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-y2z89muounal4/b8b76fc9-0a70-4025-a234-9e29a150048f/0.m3u8
+
+#EXTINF:-1 group-title="🎬 Entertainment",Ex TV
+https://tvsen3.aynaott.com/P2fJzfsg/tracks-v1a1/mono.ts.m3u8
+
+#EXTINF:-1 group-title="🍿 Movies",Movie Sphere UK
+https://moviesphereuk-samsunguk.amagi.tv/480p-vtt/index.m3u8
+
+#EXTINF:-1 group-title="🍿 Movies",Rakuten TV
+https://0145451975a64b35866170fd2e8fa486.mediatailor.eu-west-1.amazonaws.com/v1/manifest/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-5987/44d78841-7948-4515-8e83-6ee86d0512d2/1.m3u8
+
+#EXTINF:-1 group-title="🍿 Movies",Rush by AMC (English Movie)
+https://436f59579436473e8168284cac5d725f.mediatailor.us-east-1.amazonaws.com/v1/master/44f73ba4d03e9607dcd9bebdcb8494d86964f1d8/Plex_RushByAMC/playlist.m3u8
+
+#EXTINF:-1 group-title="🍿 Movies",C Malayalam Movie
+https://2-fss-2.streamhoster.com/pl_120/206508-3261972-1/playlist.m3u8
+
+#EXTINF:-1 group-title="🇮🇳 Hindi & Regional",Bollyflix Hindi
+https://cc-r5hupcym5oehh.akamaized.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-r5hupcym5oehh/ece6e311-8eb0-4fdf-8378-d337cba07ec2/0.m3u8
+
+#EXTINF:-1 group-title="🇮🇳 Hindi & Regional" tvg-logo="https://go4.pw/ASIA/INDIA/MH_ONE_HD.png",HINDI - MH ONE HD
+https://streams.tangotv.in/MHONE/ORIGIN/index.m3u8
+
+#EXTINF:-1 group-title="🇮🇳 Hindi & Regional" tvg-logo="https://go4.pw/India/EPIC.png",HINDI - EPIC HD
+https://cc-wsuyg2uxeak04.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-wsuyg2uxeak04/master.m3u8
 
 
 
