@@ -442,15 +442,15 @@
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
 
-        /* মোবাইলের জন্য সুন্দর অপ্টিমাইজড ভিউ (পিসির ফরম্যাট ও ডিজাইন ১০০% ঠিক রেখে) */
+        /* মোবাইল স্ক্রিনের জন্য বিশেষ ক্লিনার ও প্রিমিয়াম স্টাইলিং */
         @media screen and (max-width: 768px) {
             body {
-                padding: 8px;
+                padding: 6px;
             }
 
             .main-container {
                 flex-direction: column;
-                gap: 12px;
+                gap: 10px;
             }
 
             .player-section {
@@ -460,57 +460,110 @@
                 width: 100%;
                 z-index: 999;
                 box-sizing: border-box;
-                padding: 12px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+                padding: 10px;
+                border-radius: 10px;
+                box-shadow: 0 4px 18px rgba(0, 0, 0, 0.85);
+            }
+
+            .header-wrapper {
+                margin-bottom: 10px;
+                gap: 8px;
+            }
+
+            .logo-header {
+                font-size: 22px;
+            }
+
+            .header-server-switcher {
+                padding: 6px;
+                gap: 4px;
+            }
+
+            .server-title {
+                font-size: 13px;
             }
 
             .channel-list-container {
                 width: 100%;
-                margin-top: 0;
             }
 
-            /* মোবাইলে চ্যানেল লিস্ট দেখতে আরও সুন্দর ও গাণিতিকভাবে পারফেক্ট করার জন্য ৩ কলাম */
+            /* চ্যানেল কার্ড ৩ কলামে নিখুঁত অ্যাপের লুক দেওয়া হয়েছে */
             .channel-list {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
-                height: 52vh;
-                padding: 10px;
+                height: 56vh;
+                padding: 8px;
                 gap: 8px;
+                border-radius: 10px 10px 0 0;
             }
 
             .ch-btn {
-                height: 90px;
-                padding: 6px;
-                gap: 5px;
+                height: 82px;
+                padding: 6px 4px;
+                gap: 4px;
+                border-radius: 8px;
+                background: #1c2128;
             }
 
             .ch-btn img {
-                width: 40px;
-                height: 40px;
+                width: 38px;
+                height: 38px;
             }
 
             .ch-btn strong {
-                font-size: 11.5px;
+                font-size: 11px;
+            }
+
+            .category-bar {
+                margin-bottom: 8px;
+                gap: 6px;
+            }
+
+            .cat-btn {
+                padding: 6px 12px;
+                font-size: 11px;
             }
 
             .modes {
-                gap: 6px;
+                gap: 5px;
                 margin-top: 10px;
             }
 
             .btn, .q-btn {
+                padding: 6px 9px;
+                font-size: 11px;
+                border-radius: 5px;
+            }
+
+            .quality-buttons-wrap {
+                padding: 2px 4px;
+                gap: 4px;
+            }
+
+            .social-footer {
+                padding: 8px 10px;
+                gap: 6px;
+            }
+
+            .social-btn {
                 padding: 6px 10px;
                 font-size: 11.5px;
             }
 
             .input-box {
-                flex-direction: column;
+                flex-direction: row;
                 margin: 10px auto;
-                gap: 8px;
+                gap: 6px;
+            }
+
+            #customUrlInput {
+                padding: 10px;
+                font-size: 12px;
             }
 
             .play-btn {
-                width: 100%;
-                padding: 12px;
+                padding: 10px 16px;
+                font-size: 12px;
+                white-space: nowrap;
             }
         }
     </style>
