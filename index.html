@@ -1,35 +1,33 @@
-<script>
-    const currentDomain = window.location.hostname;
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <script>
+        const currentDomain = window.location.hostname;
 
-    // শুধুমাত্র কাস্টমার ডোমেইনে ঢুকলেই লগইন ও ব্লকড স্ট্যাটাস চেক করবে
-    if (currentDomain.includes("online-tv-5je.pages.dev")) {
-        const user = localStorage.getItem("pb_logged_username");
-        const device = localStorage.getItem("pb_device_id");
-        
-        // লগইন না করা থাকলে লগইন পেজে পাঠাবে
-        if (!user || !device) {
-            window.location.href = "login.html";
-        } else {
-            // রিয়েল-টাইমে চেক করবে ইউজার ব্লক কিনা
-            fetch("https://admin.bushmr263.workers.dev/get-users")
-                .then(res => res.json())
-                .then(users => {
-                    if (!users[user] || !users[user].active) {
-                        alert("আপনার অ্যাকাউন্টটি ব্লক বা বাতিল করা হয়েছে!");
-                        localStorage.removeItem("pb_logged_username");
-                        window.location.href = "login.html";
-                    }
-                })
-                .catch(err => console.error("Status check failed:", err));
+        if (currentDomain.includes("online-tv-5je.pages.dev")) {
+            const user = localStorage.getItem("pb_logged_username");
+            const device = localStorage.getItem("pb_device_id");
+            
+            if (!user || !device) {
+                window.location.href = "login.html";
+            } else {
+                fetch("https://admin.bushmr263.workers.dev/get-users")
+                    .then(res => res.json())
+                    .then(users => {
+                        if (!users[user] || !users[user].active) {
+                            alert("আপনার অ্যাকাউন্টটি ব্লক বা বাতিল করা হয়েছে!");
+                            localStorage.removeItem("pb_logged_username");
+                            window.location.href = "login.html";
+                        }
+                    })
+                    .catch(err => console.error("Status check failed:", err));
+            }
         }
-    }
-</script>
+    </script>
 
-    <!-- Google Search Console Verification Tag -->
     <meta name="google-site-verification" content="4Wrkrkzr9ugDKvZi_NlCh9fztvhJWFl_4s5BlLBHyhM" />
-
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <title>PB TV - Live TV Streaming, Sports, News & Bangla Channels</title>
     <meta name="title" content="PB TV - Live TV Streaming, Sports, News & Bangla Channels">
@@ -38,28 +36,23 @@
     <meta name="author" content="PB TV">
     <meta name="robots" content="index, follow">
 
-    <!-- Open Graph / Facebook Meta Tags -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://palashbari-plex.pages.dev/">
     <meta property="og:title" content="PB TV - Live TV Streaming & Sports">
     <meta property="og:description" content="Watch live TV streaming, sports channels like T Sports, A Sports, Star Sports, and local news channels for free.">
     <meta property="og:image" content="https://i.postimg.cc/W1z5BGPZ/20240823_024712.png">
 
-    <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://palashbari-plex.pages.dev/">
     <meta name="twitter:title" content="PB TV - Live TV Streaming & Sports">
     <meta name="twitter:description" content="Watch live TV streaming, sports channels like T Sports, A Sports, Star Sports, and local news channels for free.">
     <meta name="twitter:image" content="https://i.postimg.cc/W1z5BGPZ/20240823_024712.png">
 
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://i.ibb.co.com/PvnVqbdS/cpt-1469868507562.jpg">
 
-    <!-- Video.js -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"></script>
     
-    <!-- HLS.js -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         if (typeof Hls === 'undefined') {
@@ -67,9 +60,7 @@
         }
     </script>
 
-    <!-- DASH.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/4.7.2/dash.all.min.js"></script>
-    <!-- Clappr -->
     <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
     
     <style>
@@ -83,16 +74,21 @@
             color: #fff; 
             font-family: 'Segoe UI', sans-serif; 
             margin: 0; 
-            padding: 20px; 
+            padding: 15px; 
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            box-sizing: border-box;
+        }
+
+        *, *:before, *:after {
+            box-sizing: border-box;
         }
 
         .main-container { 
             display: flex; 
-            gap: 20px; 
+            gap: 15px; 
             max-width: 1800px; 
             margin: auto; 
             flex-wrap: wrap; 
@@ -101,9 +97,9 @@
 
         .player-section { 
             flex: 3.7; 
-            min-width: 320px; 
+            min-width: 280px; 
             background: var(--bg-color); 
-            padding: 20px; 
+            padding: 15px; 
             border-radius: 12px; 
         } 
         
@@ -111,13 +107,13 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 10px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
         }
 
         .logo-header { 
-            font-size: 26px; 
+            font-size: 22px; 
             font-weight: 800; 
             color: var(--accent-color); 
             letter-spacing: 2px; 
@@ -129,9 +125,9 @@
 
         .header-server-switcher {
             flex-grow: 1;
-            min-width: 250px;
+            min-width: 220px;
             background: #0d1117;
-            padding: 8px 12px;
+            padding: 8px 10px;
             border-radius: 8px;
             border: 1px solid #30363d;
             text-align: center;
@@ -148,12 +144,15 @@
         }
 
         .server-title {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--accent-color);
             font-weight: bold;
             text-align: center;
             width: 100%;
             margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .server-inline-notice {
@@ -175,7 +174,7 @@
 
         .server-buttons-wrap {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             justify-content: center;
             flex-wrap: wrap;
         }
@@ -184,10 +183,10 @@
             background: #21262d;
             color: #fff;
             border: 1px solid #30363d;
-            padding: 4px 14px;
+            padding: 4px 10px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             transition: 0.2s;
         }
@@ -206,28 +205,29 @@
             flex: 2.1;
             display: flex;
             flex-direction: column;
-            min-width: 300px;
+            min-width: 280px;
         }
 
         .category-bar {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             width: 100%;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             overflow-x: auto;
             padding-bottom: 5px;
             justify-content: flex-start;
             flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
         }
 
         .cat-btn {
             background: #21262d;
             color: #fff;
             border: 1px solid #30363d;
-            padding: 8px 14px;
+            padding: 6px 12px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             transition: 0.2s;
             white-space: nowrap;
@@ -247,21 +247,21 @@
         .channel-list { 
             display: grid; 
             grid-template-columns: repeat(4, minmax(0, 1fr)); 
-            gap: 10px; 
-            height: 72vh; 
+            gap: 8px; 
+            height: 65vh; 
             overflow-y: auto;
             background: var(--bg-color); 
-            padding: 15px; 
-            padding-right: 10px;
+            padding: 12px; 
             border-radius: 12px 12px 0 0; 
             align-content: start; 
+            -webkit-overflow-scrolling: touch;
         }
 
         .social-footer {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             background: var(--bg-color);
-            padding: 12px 15px;
+            padding: 10px 12px;
             border-radius: 0 0 12px 12px;
             border-top: 1px solid #30363d;
             justify-content: center;
@@ -271,12 +271,12 @@
         .social-btn {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
+            gap: 6px;
+            padding: 6px 12px;
             border-radius: 6px;
             text-decoration: none;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
             color: #fff;
             transition: 0.3s;
             border: 1px solid #30363d;
@@ -311,8 +311,8 @@
         
         .modes { 
             display: flex; 
-            gap: 8px; 
-            margin-top: 15px; 
+            gap: 6px; 
+            margin-top: 12px; 
             justify-content: center; 
             flex-wrap: wrap; 
             align-items: center;
@@ -322,11 +322,11 @@
             background: #333; 
             color: #fff; 
             border: none; 
-            padding: 8px 14px; 
+            padding: 6px 10px; 
             border-radius: 6px; 
             cursor: pointer; 
             font-weight: bold;
-            font-size: 13px;
+            font-size: 11px;
         }
         
         .btn:hover { 
@@ -336,9 +336,9 @@
 
         .quality-buttons-wrap {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             background: #0d1117;
-            padding: 4px 8px;
+            padding: 3px 6px;
             border-radius: 6px;
             border: 1px solid #30363d;
             flex-wrap: wrap;
@@ -348,10 +348,10 @@
             background: #21262d;
             color: #fff;
             border: 1px solid #30363d;
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             transition: 0.2s;
         }
@@ -374,7 +374,7 @@
         
         .ch-btn { 
             background: #21262d; 
-            padding: 10px; 
+            padding: 8px; 
             border-radius: 8px; 
             cursor: pointer; 
             text-align: center; 
@@ -384,9 +384,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             width: 100%;
-            height: 95px;
+            height: 85px;
             box-sizing: border-box;
         }
         
@@ -396,14 +396,14 @@
         }
         
         .ch-btn img { 
-            width: 50px; 
-            height: 50px; 
+            width: 38px; 
+            height: 38px; 
             object-fit: contain; 
             pointer-events: none;
         }
         
         .ch-btn strong { 
-            font-size: 13.2px; 
+            font-size: 11.5px; 
             font-weight: bold; 
             color: var(--accent-color);
             white-space: nowrap;
@@ -414,41 +414,43 @@
         
         .input-box { 
             display: flex; 
-            gap: 10px; 
+            gap: 8px; 
             max-width: 1800px; 
-            margin: 20px auto 10px auto; 
+            margin: 15px auto 5px auto; 
         }
         
         #customUrlInput { 
             flex: 1; 
-            padding: 15px; 
+            padding: 10px 12px; 
             background: var(--bg-color); 
             border: 1px solid #30363d; 
             color: white; 
-            border-radius: 6px; 
+            border-radius: 6px;
+            font-size: 13px;
         }
         
         .play-btn { 
             background: var(--accent-color); 
             border: none; 
-            padding: 15px 30px; 
+            padding: 10px 20px; 
             border-radius: 6px; 
             cursor: pointer; 
             font-weight: bold; 
-            color: #000; 
+            color: #000;
+            font-size: 12px;
         }
 
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
 
         @media screen and (max-width: 768px) {
             body {
-                padding: 10px;
+                padding: 6px;
             }
 
             .main-container {
                 flex-direction: column;
-                gap: 10px;
+                gap: 8px;
             }
 
             .player-section {
@@ -460,16 +462,45 @@
                 box-sizing: border-box;
                 padding: 10px;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+                border-radius: 0 0 10px 10px;
             }
 
             .channel-list-container {
                 width: 100%;
-                margin-top: 5px;
+                margin-top: 2px;
             }
 
             .channel-list {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
-                height: 55vh;
+                height: 52vh;
+                padding: 8px;
+                gap: 6px;
+            }
+
+            .ch-btn {
+                height: 80px;
+                padding: 6px;
+            }
+
+            .ch-btn img {
+                width: 32px;
+                height: 32px;
+            }
+
+            .ch-btn strong {
+                font-size: 11px;
+            }
+
+            .input-box {
+                margin: 10px auto 5px auto;
+            }
+            
+            #customUrlInput {
+                padding: 8px 10px;
+            }
+
+            .play-btn {
+                padding: 8px 15px;
             }
         }
     </style>
@@ -510,14 +541,13 @@
                 <video id="html5-video" controls autoplay playsinline preload="auto" style="display:none;"></video>
                 <iframe id="custom-iframe" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen="true" style="display:none;"></iframe>
             </div>
-            
+
             <div class="modes">
-                <button class="btn" onclick="switchMode('videojs')">Main (Video.js)</button>
+                <button class="btn" onclick="switchMode('videojs')">Main</button>
                 <button class="btn" onclick="switchMode('clappr')">Clappr</button>
                 <button class="btn" onclick="switchMode('html5')">HTML5</button>
                 <button class="btn" onclick="switchMode('iframe')">Iframe</button>
                 
-                <!-- Manual Quality Buttons -->
                 <div class="quality-buttons-wrap" id="qualityButtonsWrap">
                     <button class="q-btn active" onclick="setManualQualityByHeight(-1, this)">Auto</button>
                     <button class="q-btn" onclick="setManualQualityByHeight(1080, this)">1080p</button>
@@ -526,7 +556,7 @@
                     <button class="q-btn" onclick="setManualQualityByHeight(360, this)">360p</button>
                 </div>
 
-                <button class="btn pip-btn" onclick="togglePIP()">PIP Mode</button>
+                <button class="btn pip-btn" onclick="togglePIP()">PIP</button>
             </div>
         </div>
 
@@ -554,14 +584,12 @@
         </div>
     </div>
 
-    <!-- Custom URL Input Section -->
     <div class="input-box">
         <input type="text" id="customUrlInput" placeholder="লিঙ্ক এখানে দিন (M3U8, MPD বা URL)...">
         <button class="play-btn" onclick="playCustom()">প্লে করুন</button>
     </div>
 
     <script>
-        // Security Controls
         ['contextmenu', 'selectstart', 'copy', 'cut', 'dragstart'].forEach(eventType => {
             document.addEventListener(eventType, e => e.preventDefault());
         });
@@ -589,7 +617,6 @@
         }
         setInterval(checkDevTools, 1000);
 
-        // Player & Category Filter Logic
         const videoEl = document.getElementById('my-video');
         const iframe = document.getElementById('custom-iframe');
         const clapprEl = document.getElementById('clappr-container');
@@ -630,7 +657,7 @@
             urls.forEach((link, index) => {
                 const sBtn = document.createElement('button');
                 sBtn.className = 'server-btn';
-                sBtn.innerText = `Server ${index + 1}`;
+                sBtn.innerText = `S ${index + 1}`;
                 if (index === 0) sBtn.classList.add('active');
 
                 sBtn.onclick = () => {
@@ -645,14 +672,12 @@
             loadChannelUrl(urls[0], currentMode);
         }
 
-        // Automatic Server Fallback Logic
         function handleFallback() {
             if (!currentChannelObj) return;
             let urls = Array.isArray(currentChannelObj.url) ? currentChannelObj.url : [currentChannelObj.url];
             
             if (currentServerIndex < urls.length - 1) {
                 currentServerIndex++;
-                console.warn(`Server ${currentServerIndex} failed. Switching to Server ${currentServerIndex + 1} automatically...`);
                 
                 const serverBtns = document.querySelectorAll('.server-btn');
                 serverBtns.forEach((b, idx) => {
@@ -814,7 +839,6 @@
                             if (videoEl.currentTime === lastTime) {
                                 stallCount++;
                                 if (stallCount >= 3) {
-                                    console.warn("Buffer stall detected. Recovering stream...");
                                     if (hls) hls.startLoad();
                                     stallCount = 0;
                                 }
@@ -836,7 +860,6 @@
                                     break;
                                 default:
                                     if (videoEl.canPlayType('application/vnd.apple.mpegurl') || finalUrl.includes('.m3u8')) {
-                                        console.warn("HLS.js failed, switching to Native HLS...");
                                         hls.destroy();
                                         hls = null;
                                         videoEl.src = finalUrl;
