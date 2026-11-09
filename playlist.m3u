@@ -36,7 +36,7 @@ https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/ts-
 https://rmtv.akamaized.net/hls/live/2043154/rmtv-en-web/bitrate_3.m3u8
 
 #EXTINF:-1 tvg-logo="https://tstatic.akash-go.com/cms-ui/images/custom-content/1778082545894.png" group-title="Bangla",BTV National
-https://robiproxi.bushmr263.workers.dev/?url=https://gov.iptv-network.workers.dev/live/national.m3u8   https://robiproxi.bushmr263.workers.dev/?url=https://btv.hridoytv-channel.workers.dev/btv.m3u8   https://mycoffeetime.net/play/tSDRdsaoGGQ2qYgRPDEe9jf8sm4JqAgGibsGkL1eU4mBNHzsh_iiJ6rzls5YqrpI/m3u8 
+https://nkafmbewiff.gpcdn.net/tile_2/master.m3u8   https://robiproxi.bushmr263.workers.dev/?url=https://btv.hridoytv-channel.workers.dev/btv.m3u8   https://mycoffeetime.net/play/tSDRdsaoGGQ2qYgRPDEe9jf8sm4JqAgGibsGkL1eU4mBNHzsh_iiJ6rzls5YqrpI/m3u8 
 
 #EXTINF:-1 tvg-id="019efa45-e602-76d0-b2f0-155f9f2b893d" tvg-name="BTV CTG" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-06-24/0cff8323fa888ccb69dde38a6880f150.jpg" group-title="Bangla",BTV CTG
 https://tvsen6.aynaott.com/TjGR1GcxKetHNVcMVxbq/index.m3u8
@@ -356,8 +356,8 @@ https://mumt05.tangotv.in/87NeALx2SANGEETBANGLA/index.m3u8
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/wTvMLMp2/20240823_021706.png" group-title="Cartoon",Kids cartoon
 https://stream.ottplus.live/live/discovery_kids_abr/index.m3u8
 
-#EXTINF:-1 tvg-logo="https://imglink.cc/cdn/TxPUulKGQh.jpg" group-title="Cartoon",Motu Patlu
-https://live20.bozztv.com/giatvplayout7/giatv-209622/tracks-v1a1/mono.ts.m3u8
+#EXTINF:-1 tvg-logo="https://imglink.cc/cdn/TxPUulKGQh.jpg" group-title="Cartoon",Berbe friends
+https://d1xqdnwy1bo05f.cloudfront.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-jh1ol665g3amg/b92b0971-d6ef-4bd2-b72c-e286339cb91b/0.m3u8
 
 #EXTINF:-1 tvg-logo="https://imglink.cc/cdn/YkXRQgC4-_.jpg" group-title="Cartoon",Tom & Jerry TV
 https://live20.bozztv.com/giatvplayout7/giatv-208314/tracks-v1a1/mono.ts.m3u8
@@ -372,10 +372,13 @@ https://amg00627-amg00627c29-rakuten-it-3989.playouts.now.amagi.tv/playlist/amg0
 https://stream.ottplus.live/live/sony_yay_abr/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/k4mDbyJR/20240823_021424.png" group-title="Cartoon",Cartoon Network HD
-https://drk6xq0vhn.gpcdn.net/live/cn_hd_abr/index.m3u8
+https://cdn4.skygo.mn/live/disk1/Cartoon_Network/HLSv3-FTA/Cartoon_Network-avc1_3000000=12-mp4a_256000_eng=6.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/C1s5Hf5P/20240823_021444.png" group-title="Cartoon",Pogo
 https://stream.ottplus.live/live/pogo_sd_abr/index.m3u8
+
+#EXTINF:-1, group-title="Cartoon",Miniamx
+https://vodzong.mjunoon.tv:8087/streamtest/disckids-157-1/live/157-1L/chunks.m3u8?nimblesessionid=743437668
 
 #EXTINF:-1 tvg-id="019de785-3a1e-7c94-91e5-6b6755d5ab6b" tvg-name="Disney Channel" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-16/images_92666995d4995d2bb46b92598d2b3e48_playmist_disney_channel_400x400.jpg" group-title="Cartoon",Disney Channel
 https://tvsen7.aynaott.com/disney/index.m3u8
