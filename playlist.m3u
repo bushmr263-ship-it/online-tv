@@ -302,10 +302,10 @@ https://live-dangal.akamaized.net/liveabr/pub-iodang10p4al/live_720p/chunks.m3u8
 #EXTINF:-1 tvg-id="DANGAL2 HIndi" tvg-logo="https://static.wikia.nocookie.net/logopedia/images/a/ac/Dangal_2.png" group-title="Hindi",DANGAL2
 https://live-dangal2.akamaized.net/liveabr/playlist.m3u8
 
-#EXTINF:-1 tvg-id="StarMaaMovies.in" tvg-name="STAR MAA MOVIES HD" tvg-logo="https://tinyurl.com/mr2dec8v" group-title="Hindi",STAR MAA MOVIES HD
+#EXTINF:-1 tvg-id="StarMaaMovies.in" tvg-name="STAR MAA MOVIES HD" tvg-logo="https://go4.pw/ASIA/INDIA/sky-star-movie.png", group-title="Hindi",STAR MAA MOVIES HD
 https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starmaa1.smil/chunklist_b2628000.m3u8
 
-#EXTINF:-1 tvg-logo="https://tinyurl.com/mr2dec8v" group-title="Hindi",Star maa movies
+#EXTINF:-1 tvg-id="StarMaaMovies.in" tvg-name="STAR MAA MOVIES HD" tvg-logo="https://go4.pw/ASIA/TELEGU/MAAMOVIESHD.png", group-title="Hindi", MAHA MOVIES
 https://da86m1sqpm3o0.cloudfront.net/28072023/smil:maamovies.smil/chunklist_b2628000.m3u8
 
 #EXTINF:-1 tvg-logo="" group-title="Hindi",South Indian Movies
@@ -353,7 +353,7 @@ https://5dd3981940faa.streamlock.net/thikanatv/thikanatv/chunklist_w1860781648.m
 #EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/LmVOSdl3ku.png", Sangeet Bangla
 https://mumt05.tangotv.in/87NeALx2SANGEETBANGLA/index.m3u8
 
-#EXTINF:-1 group-title="Music",Rana Cable Music
+#EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/IYDn_LwwiV.png", Rana Cable Music
 https://ranacable.duckdns.org/RanaCableMusic/tracks-v1a1/mono.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/wTvMLMp2/20240823_021706.png" group-title="Cartoon",Kids cartoon
