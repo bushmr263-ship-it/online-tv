@@ -654,15 +654,14 @@ https://436f59579436473e8168284cac5d725f.mediatailor.us-east-1.amazonaws.com/v1/
 #EXTINF:-1 group-title="hindi",C Malayalam Movie
 https://2-fss-2.streamhoster.com/pl_120/206508-3261972-1/playlist.m3u8
 
-#EXTINF:-1 group-title="hindi",Bollyflix Hindi
+#EXTINF:-1 tvg-id="" tvg-logo=""https://go4.pw/ASIA/INDIA/FLIX.png", group-title="hindi",Bollyflix
 https://cc-r5hupcym5oehh.akamaized.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-r5hupcym5oehh/ece6e311-8eb0-4fdf-8378-d337cba07ec2/0.m3u8
 
-#EXTINF:-1 tvg-id=" MH ONE HD hindi" tvg-logo="https://go4.pw/ASIA/INDIA/MH_ONE_HD.png" group-title="MH ONE HD HINDI 
+#EXTINF:-1 tvg-id="MH ONE HD hindi" tvg-logo="https://go4.pw/ASIA/INDIA/MH_ONE_HD.png" group-title="HINDI"MH ONE HD
 https://streams.tangotv.in/MHONE/ORIGIN/index.m3u8
 
-#EXTINF:-1 tvg-id="EPIC HD hindi" tvg-logo="https://go4.pw/India/EPIC.png", group-title=  EPIC HD HINDI
+#EXTINF:-1 tvg-id="EPIC HD hindi" tvg-logo="https://go4.pw/India/EPIC.png", group-title="HINDI" EPIC HD 
 https://cc-wsuyg2uxeak04.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-wsuyg2uxeak04/master.m3u8
-
 
 
 
