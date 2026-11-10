@@ -538,7 +538,7 @@
         </div>
 
         <div class="channel-list-container">
-            <!-- আপনার কাঙ্ক্ষিত ক্যাটাগরি বার ফরম্যাট -->
+            <!-- ক্যাটাগরি বার -->
             <div class="category-bar">
                 <button class="cat-btn active" onclick="filterCategory('all', this)">All</button>
                 <button class="cat-btn" onclick="filterCategory('sports', this)">Sports</button>
@@ -660,7 +660,6 @@
             
             if (currentServerIndex < urls.length - 1) {
                 currentServerIndex++;
-                console.warn(`Server ${currentServerIndex} failed. Switching to Server ${currentServerIndex + 1} automatically...`);
                 
                 const serverBtns = document.querySelectorAll('.server-btn');
                 serverBtns.forEach((b, idx) => {
@@ -822,7 +821,6 @@
                             if (videoEl.currentTime === lastTime) {
                                 stallCount++;
                                 if (stallCount >= 3) {
-                                    console.warn("Buffer stall detected. Recovering stream...");
                                     if (hls) hls.startLoad();
                                     stallCount = 0;
                                 }
@@ -881,7 +879,12 @@
 
             let filteredChannels = allChannels.filter(ch => {
                 if (currentFilter === 'all') return true;
-                return ch.group && ch.group.toLowerCase() === currentFilter.toLowerCase();
+                if (!ch.group) return false;
+                
+                let chGroup = ch.group.toLowerCase().replace(/[\s_]+/g, '');
+                let targetGroup = currentFilter.toLowerCase().replace(/[\s_]+/g, '');
+                
+                return chGroup === targetGroup;
             });
 
             if (filteredChannels.length > 0) {
@@ -903,8 +906,8 @@
                     container.appendChild(btn);
                 });
 
-                if (allChannels.length > 0 && !currentUrl) {
-                    loadChannel(allChannels[0]);
+                if (filteredChannels.length > 0 && (!currentUrl || !filteredChannels.some(c => Array.isArray(c.url) ? c.url.includes(currentUrl) : c.url === currentUrl))) {
+                    loadChannel(filteredChannels[0]);
                 }
             } else {
                 container.innerHTML = '<p style="text-align: center; color: #888; grid-column: span 4; padding: 20px;">এই ক্যাটাগরিতে কোনো চ্যানেল পাওয়া যায়নি।</p>';
@@ -933,14 +936,14 @@
                 for (let i = 0; i < lines.length; i++) {
                     let line = lines[i].trim();
 
-                    // ১. প্লেলিস্টের কমেন্ট বা হেডার থেকে ক্যাটাগরি ডিটেক্ট করার লজিক
+                    // ১. প্লেলিস্টের কমেন্ট বা হেডার থেকে ক্যাটাগরি ডিটেক্ট করা
                     if (line.startsWith('#') && !line.startsWith('#EXTINF')) {
                         let upperLine = line.toUpperCase();
                         
-                        if (upperLine.includes('SPORT') || upperLine.includes('CRICKET')) {
-                            currentGroup = 'sports';
-                        } else if (upperLine.includes('INDIAN BANGLA') || upperLine.includes('JALSHA') || upperLine.includes('ZEE BANGLA')) {
+                        if (upperLine.includes('INDIAN BANGLA') || upperLine.includes('JALSHA') || upperLine.includes('ZEE BANGLA')) {
                             currentGroup = 'indian_bangla';
+                        } else if (upperLine.includes('SPORT') || upperLine.includes('CRICKET')) {
+                            currentGroup = 'sports';
                         } else if (upperLine.includes('BANGLA') && !upperLine.includes('HINDI') && !upperLine.includes('INDIAN')) {
                             currentGroup = 'bangla';
                         } else if (upperLine.includes('HINDI') || upperLine.includes('REGIONAL') || upperLine.includes('BOLLYWOOD')) {
@@ -965,15 +968,23 @@
                         let groupMatch = line.match(/group-title="([^"]+)"/);
                         if (groupMatch) {
                             let gTitle = groupMatch[1].trim().toLowerCase();
-                            if (gTitle.includes('sport') || gTitle.includes('cricket')) currentGroup = 'sports';
-                            else if (gTitle.includes('bangla')) currentGroup = 'bangla';
-                            else if (gTitle.includes('indian')) currentGroup = 'indian_bangla';
-                            else if (gTitle.includes('hindi')) currentGroup = 'hindi';
-                            else if (gTitle.includes('cartoon') || gTitle.includes('kids')) currentGroup = 'cartoon';
-                            else if (gTitle.includes('english')) currentGroup = 'english';
-                            else if (gTitle.includes('music')) currentGroup = 'music';
-                            else if (gTitle.includes('docu')) currentGroup = 'documentary';
-                            
+                            if (gTitle.includes('indian')) {
+                                currentGroup = 'indian_bangla';
+                            } else if (gTitle.includes('sport') || gTitle.includes('cricket')) {
+                                currentGroup = 'sports';
+                            } else if (gTitle.includes('hindi')) {
+                                currentGroup = 'hindi';
+                            } else if (gTitle.includes('cartoon') || gTitle.includes('kids')) {
+                                currentGroup = 'cartoon';
+                            } else if (gTitle.includes('english')) {
+                                currentGroup = 'english';
+                            } else if (gTitle.includes('music')) {
+                                currentGroup = 'music';
+                            } else if (gTitle.includes('docu')) {
+                                currentGroup = 'documentary';
+                            } else if (gTitle.includes('bangla')) {
+                                currentGroup = 'bangla';
+                            }
                         }
                         
                         let nameParts = line.split(',');
