@@ -538,7 +538,7 @@
         </div>
 
         <div class="channel-list-container">
-            <!-- আপনার দেওয়া নির্দিষ্ট ফরম্যাট ও সিরিয়াল অনুযায়ী ক্যাটাগরি বাটন -->
+            <!-- আপনার কাঙ্ক্ষিত ক্যাটাগরি বার ফরম্যাট -->
             <div class="category-bar">
                 <button class="cat-btn active" onclick="filterCategory('all', this)">All</button>
                 <button class="cat-btn" onclick="filterCategory('sports', this)">Sports</button>
@@ -750,7 +750,7 @@
                     let playPromise = mediaObj.play();
                     if (playPromise !== undefined) {
                         playPromise.catch(() => {
-                            mediaObj.muted = true;
+                            mediaObj.muted(true);
                             mediaObj.play();
                         });
                     }
@@ -933,14 +933,15 @@
                 for (let i = 0; i < lines.length; i++) {
                     let line = lines[i].trim();
 
-                    // হেডার / কমেন্ট লাইন চেক
+                    // ১. প্লেলিস্টের কমেন্ট বা হেডার থেকে ক্যাটাগরি ডিটেক্ট করার লজিক
                     if (line.startsWith('#') && !line.startsWith('#EXTINF')) {
                         let upperLine = line.toUpperCase();
+                        
                         if (upperLine.includes('SPORT') || upperLine.includes('CRICKET')) {
                             currentGroup = 'sports';
                         } else if (upperLine.includes('INDIAN BANGLA') || upperLine.includes('JALSHA') || upperLine.includes('ZEE BANGLA')) {
                             currentGroup = 'indian_bangla';
-                        } else if (upperLine.includes('BANGLA') && !upperLine.includes('HINDI')) {
+                        } else if (upperLine.includes('BANGLA') && !upperLine.includes('HINDI') && !upperLine.includes('INDIAN')) {
                             currentGroup = 'bangla';
                         } else if (upperLine.includes('HINDI') || upperLine.includes('REGIONAL') || upperLine.includes('BOLLYWOOD')) {
                             currentGroup = 'hindi';
@@ -956,7 +957,7 @@
                         continue;
                     }
 
-                    // চ্যানেল লাইন চেক
+                    // ২. চ্যানেল ইনফো ও ইন্ডিভিজুয়াল group-title চেক করা
                     if (line.startsWith('#EXTINF')) {
                         let logoMatch = line.match(/tvg-logo="([^"]+)"/);
                         currentLogo = logoMatch ? logoMatch[1] : 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
@@ -965,13 +966,14 @@
                         if (groupMatch) {
                             let gTitle = groupMatch[1].trim().toLowerCase();
                             if (gTitle.includes('sport') || gTitle.includes('cricket')) currentGroup = 'sports';
+                            else if (gTitle.includes('bangla')) currentGroup = 'bangla';
                             else if (gTitle.includes('indian')) currentGroup = 'indian_bangla';
                             else if (gTitle.includes('hindi')) currentGroup = 'hindi';
                             else if (gTitle.includes('cartoon') || gTitle.includes('kids')) currentGroup = 'cartoon';
                             else if (gTitle.includes('english')) currentGroup = 'english';
                             else if (gTitle.includes('music')) currentGroup = 'music';
                             else if (gTitle.includes('docu')) currentGroup = 'documentary';
-                            else if (gTitle.includes('bangla')) currentGroup = 'bangla';
+                            
                         }
                         
                         let nameParts = line.split(',');
