@@ -317,8 +317,14 @@ https://mntv.livebox.co.in/mntvhls/live.m3u8
 # CATEGORY: ENGLISH (MOVIES & ENTERTAINMENT)
 #------------------------------------------------------------------------------
 
-#EXTINF:-1 group-title="English",Epix Movie
-https://tvsen3.aynaott.com/Ah3tLAfA/index.m3u8
+#EXTINF:-1 group-title="English",SONYONE HITS COMDIE
+https://7aa9671895264ec9a384dfed1b992171.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-818-FR-SONYONEHITSCOMDIE-LG_FR/playlist.m3u8#skym3u.dev
+
+#EXTINF:-1 group-title="English",Movies Thriller
+https://shd-amg-fast.edgenextcdn.net/tx012/playlist.m3u8#skym3u.dev
+
+#EXTINF:-1 group-title="English",AMC Thriller
+https://436f59579436473e8168284cac5d725f.mediatailor.us-east-1.amazonaws.com/v1/master/44f73ba4d03e9607dcd9bebdcb8494d86964f1d8/Plex_RushByAMC/playlist.m3u8#skym3u.dev
 
 #EXTINF:-1 group-title="English",HGTV Movie
 https://tvsen3.aynaott.com/Ge23xfY5/index.m3u8
@@ -347,8 +353,8 @@ https://cdn-apse1-prod.tsv2.amagi.tv/linear/amg01076-lightningintern-actionholly
 #EXTINF:-1 group-title="English",House of Scream
 https://cc-y2z89muounal4.akamaized.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-y2z89muounal4/b8b76fc9-0a70-4025-a234-9e29a150048f/0.m3u8
 
-#EXTINF:-1 group-title="English",Ex TV
-https://tvsen3.aynaott.com/P2fJzfsg/tracks-v1a1/mono.ts.m3u8
+#EXTINF:-1 group-title="English",screamin movie
+https://rakutenaa-zylo-screamin-rakuten-p11ej.amagi.tv/playlist/rakutenAA-zylo-screamin-rakuten/playlist.m3u8#skym3u.dev
 
 #EXTINF:-1 group-title="English",Movie Sphere UK
 https://moviesphereuk-samsunguk.amagi.tv/480p-vtt/index.m3u8
