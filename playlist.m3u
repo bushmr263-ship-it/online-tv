@@ -151,6 +151,12 @@ https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starjalsha.smil/chunklist_b19
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/5tjSrbLS/20240822-231445.png" group-title="Indian Bangla",Zee Bangla HD
 https://d1rc86nwwc9fag.cloudfront.net/260723/smil:zeebangla.smil/chunklist_b896000.m3u8
 
+#EXTINF:-1 tvg-id="ch_98" tvg-name="Bangla+ HD" tvg-logo="https://pub-dbd59bcc344f405ab5a1f9697b81831f.r2.dev/bangla-hd-bn.webp" group-title="Indian Bangla",Bangla+ HD
+https://live-stream.utkalbongo.com/hls/livebanglatvstream.m3u8
+
+#EXTINF:-1 tvg-id="ch_99" tvg-name="Aakash Aath" tvg-logo="https://pub-dbd59bcc344f405ab5a1f9697b81831f.r2.dev/aakash-aath.webp" group-title="Indian Bangla",Aakash Aath
+https://mumt03.tangotv.in/Dsly5z3HAAKASHAATH/index.m3u8
+
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/3w6F5VZ5/20240822-231514.png" group-title="Indian Bangla",Colors Bangla HD
 https://livetv.shamon-cable.net:8443/Colors-bangla/tracks-v1a1/mono.m3u8
 
@@ -302,7 +308,8 @@ https://vods2.aynaott.com/hindimovies/tracks-v1a1/mono.ts.m3u8
 #EXTINF:-1 tvg-id="" tvg-logo="https://go4.pw/India/STAR_BHARAT.png" group-title="Hindi",STAR BHARAT HD
 https://d1taaads3ztvmu.cloudfront.net/120723/smil:lifeokuk.smil/chunklist_b2628000.m3u8
 
-
+#EXTINF:-1 tvg-id="ch_175" tvg-name="MN TV" tvg-logo="https://pub-dbd59bcc344f405ab5a1f9697b81831f.r2.dev/mn-tv.webp" group-title="Hindi",MN TV
+https://mntv.livebox.co.in/mntvhls/live.m3u8
 
 
 
@@ -358,7 +365,8 @@ https://a-cdn.klowdtv.com/live1/smc_720p/chunks.m3u8
 #EXTINF:-1 tvg-id="" tvg-name="Sony PIX HD Movies" tvg-logo="https://assets-prod.services.toffeelive.com/Ly6C-JQBv9knK3AHOjXt/posters/252e64ca-8d99-46e7-a951-e10c1703c11d.webp" group-title="English",Movie Sony PIX HD 
 https://drk6xq0vhn.gpcdn.net/live/pix_hd_abr/live/sony_pix_hd_720/chunks.m3u8
 
-
+#EXTINF:-1 tvg-id="ch_150" tvg-name="Comet" tvg-logo="https://pub-dbd59bcc344f405ab5a1f9697b81831f.r2.dev/comet.webp" group-title="English",Comet
+https://fast-channels.sinclairstoryline.com/COMET/index.m3u8
 
 
 
@@ -619,6 +627,8 @@ https://mumt05.tangotv.in/87NeALx2SANGEETBANGLA/index.m3u8
 #EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/IYDn_LwwiV.png",Rana Cable Music
 https://ranacable.duckdns.org/RanaCableMusic/tracks-v1a1/mono.m3u8
 
+#EXTINF:-1 tvg-id="ch_160" tvg-name="Only Music" tvg-logo="https://pub-dbd59bcc344f405ab5a1f9697b81831f.r2.dev/only-music.webp" group-title="Music",Only Music
+https://mumbai-edge.smartplaytv.in/OnlyMusic/index.m3u8
 
 #------------------------------------------------------------------------------
 # CATEGORY: DOCUMENTARY
