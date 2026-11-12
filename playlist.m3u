@@ -322,10 +322,8 @@ https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallin
 #EXTINF:-1 group-title="AS | IN | HINDI" tvg-logo="https://go4.pw/India/SONY_PAL.png",HINDI - SONY PAL
 https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_pal.m3u8
 
-#EXTINF:-1 group-title="AS | IN | HINDI" tvg-logo="https://go4.pw/India/SONY_yay.png",HINDI - SONY YAY
-https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_yay.m3u8
-
-
+#EXTINF:-1 group-title="AS | IN | HINDI" tvg-logo="https://go4.pw/India/SONY_wah.png",HINDI - SONY WAH
+https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_wah.m3u8
 
 
 
@@ -624,15 +622,12 @@ https://server.thelegitpro.in/rongeentv/rongeentv/tracks-v1a1/mono.m3u8
 #EXTINF:-1 group-title="Cartoon",sonic hd
 https://live.devm3u.top/sonic/c29uaWMtanNvbi1zb25pY3w0OTg0NzM.fa08fef3b2983673766c9b1e4ebc94865118b4aec62831e963d766764eb262f1/playlist.m3u8
 
-#EXTINF:-1 group-title="Cartoon" tvg-logo="https://i.postimg.cc/G2F8757j/20240823_021053.png",Rongeen
-https://server.thelegitpro.in/rongeentv/rongeentv/tracks-v1a1/mono.m3u8
-
 #EXTINF:-1 tvg-id="ch_190" tvg-name="Teen Nick" tvg-logo="https://pub-dbd59bcc344f405ab5a1f9697b81831f.r2.dev/teen-nick.webp" group-title="Cartoon",Teen Nick
 https://tvsen7.aynaott.com/teennick/index.m3u8
 
+#EXTINF:-1 group-title="AS | IN | HINDI" tvg-logo="https://go4.pw/India/SONY_yay.png" group-title="Cartoon", SONY YAY
+https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_yay.m3u8
 
-#EXTINF:-1 group-title="AS | IN | HINDI" tvg-logo="https://go4.pw/India/SONY_wah.png",HINDI - SONY WAH
-https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_wah.m3u8
 
 #------------------------------------------------------------------------------
 # CATEGORY: MUSIC
