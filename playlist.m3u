@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 #EXTINF:-1 tvg-logo="https://static.wikia.nocookie.net/etv-gspn-bangla/images/6/6e/T_Sports_HD_logo_2021.png" group-title="Bangla",T Sports
-https://tvsen5.aynaott.com/TnMn5kZz8aLmjklkk/index.m3u8 https://livetv.shamon-cable.net:8443/T-Sports-FHD/tracks-v1a1/mono.m3u8    https://mycoffeetime.net/play/tSDRdsaoGGQ2qYgRPDEe9q-qMIzoahbJArH3W3vOiEaB97nXMpWmLb0Ts759Tjsp/m3u8   
+https://m3u8-proxy-v1.jahinalamshamim.workers.dev/proxy?url=https://live2.jorvakstreamcache.com/live/channel19.m3u8   https://tvsen5.aynaott.com/TnMn5kZz8aLmjklkk/index.m3u8 https://livetv.shamon-cable.net:8443/T-Sports-FHD/tracks-v1a1/mono.m3u8    https://mycoffeetime.net/play/tSDRdsaoGGQ2qYgRPDEe9q-qMIzoahbJArH3W3vOiEaB97nXMpWmLb0Ts759Tjsp/m3u8   
 
 #EXTINF:-1 tvg-logo="https://tstatic.akash-go.com/cms-ui/images/custom-content/1778082545894.png" group-title="Bangla",BTV National
 https://nkafmbewiff.gpcdn.net/tile_2/master.m3u8   
