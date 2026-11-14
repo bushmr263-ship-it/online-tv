@@ -60,8 +60,8 @@
     <link rel="icon" type="image/png" href="https://i.ibb.co.com/PvnVqbdS/cpt-1469868507562.jpg">
 
     <!-- Shaka Player -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css">
-    <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/shaka-player.ui.min.js"></script>
+    <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css">
 
     <!-- Video.js -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css" rel="stylesheet" />
@@ -318,14 +318,18 @@
             left: 0; 
         }
 
-        #player-container #video {
+        #player-container {
+            background: #000;
+        }
+
+        #player-container video {
             width: 100%;
             height: 100%;
             object-fit: contain;
             background: #000;
         }
 
-        #player-container #status {
+        #status {
             position: absolute;
             top: 15px;
             right: 15px;
@@ -536,20 +540,25 @@
             </div>
 
             <div class="video-box">
-                <video id="my-video" class="video-js vjs-big-play-centered" controls autoplay playsinline preload="auto"></video>
+                <div id="player-container">
+                  <video id="video"
+                    autoplay
+                    playsinline
+                    preload="metadata">
+                  </video>
+                </div>
+
+                <div id="status">Player Ready</div>
+                <video id="my-video" class="video-js vjs-big-play-centered" controls autoplay playsinline preload="auto" style="display:none;"></video>
                 <div id="clappr-container" style="display:none;"></div>
                 <video id="html5-video" controls autoplay playsinline preload="auto" style="display:none;"></video>
-                <div id="player-container" style="display:none;">
-                    <video id="video" autoplay playsinline preload="metadata"></video>
-                    <div id="status">Player Ready</div>
-                </div>
             </div>
 
             <div class="modes">
-                <button class="btn" onclick="switchMode('videojs')">Main (Video.js)</button>
+                <button class="btn" onclick="switchMode('shaka')">Main (Shaka)</button>
+                <button class="btn" onclick="switchMode('videojs')">HLS (Video.js)</button>
                 <button class="btn" onclick="switchMode('clappr')">Clappr</button>
                 <button class="btn" onclick="switchMode('html5')">HTML5</button>
-                <button class="btn" onclick="switchMode('shaka')">Shaka</button>
                 
                 <!-- Manual Quality Buttons -->
                 <div class="quality-buttons-wrap" id="qualityButtonsWrap">
@@ -596,6 +605,8 @@
         <button class="play-btn" onclick="playCustom()">প্লে করুন</button>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/shaka-player.ui.min.js"></script>
+
     <script>
         // Security Controls
         ['contextmenu', 'selectstart', 'copy', 'cut', 'dragstart'].forEach(eventType => {
@@ -629,76 +640,90 @@
         const videoEl = document.getElementById('my-video');
         const clapprEl = document.getElementById('clappr-container');
         const html5El = document.getElementById('html5-video');
-        const playerContainerEl = document.getElementById('player-container');
-        const shakaVideoEl = document.getElementById('video');
-        const shakaStatusEl = document.getElementById('status');
         let playerInstance = videojs('my-video', { autoplay: true });
         let clapprInstance;
-        let shakaPlayer = null;
-        let shakaUi = null;
         let hls; 
         let dashPlayer;
-        let currentMode = 'videojs';
+        let currentMode = 'shaka';
         let currentUrl = '';
         let allChannels = [];
         let currentFilter = 'all';
         let currentChannelObj = null;
         let currentServerIndex = 0;
         let stallCheckInterval = null;
+        let shakaPlayerInstance = null;
 
         async function initPlayer() {
-            const video = document.getElementById("video");
-            const container = document.getElementById("player-container");
-            const status = document.getElementById("status");
+          const video = document.getElementById("video");
+          const container = document.getElementById("player-container");
+          const status = document.getElementById("status");
 
-            try {
-                shaka.polyfill.installAll();
+          try {
+            shaka.polyfill.installAll();
 
-                if (!shaka.Player.isBrowserSupported()) {
-                    status.textContent = "Browser Not Supported";
-                    return;
-                }
-
-                shakaPlayer = new shaka.Player();
-                await shakaPlayer.attach(video);
-
-                shakaUi = new shaka.ui.Overlay(
-                    shakaPlayer,
-                    container,
-                    video
-                );
-
-                shakaUi.configure({
-                    addBigPlayButton: true,
-                    controlPanelElements: [
-                        "play_pause",
-                        "mute",
-                        "time_and_duration",
-                        "spacer",
-                        "quality",
-                        "picture_in_picture",
-                        "fullscreen"
-                    ]
-                });
-
-                video.addEventListener("playing", () => {
-                    status.textContent = "Playing";
-                });
-
-                shakaPlayer.addEventListener("error", (event) => {
-                    status.textContent = "Playback Error: " + event.detail.code;
-                });
-            } catch (error) {
-                status.textContent = "Unable to Play Video";
-                console.error(error);
+            if (!shaka.Player.isBrowserSupported()) {
+              status.textContent = "Browser Not Supported";
+              return;
             }
+
+            const player = new shaka.Player();
+            shakaPlayerInstance = player;
+            await player.attach(video);
+
+            const ui = new shaka.ui.Overlay(
+              player,
+              container,
+              video
+            );
+
+            ui.configure({
+              addBigPlayButton: true,
+              controlPanelElements: [
+                "play_pause",
+                "mute",
+                "time_and_duration",
+                "spacer",
+                "quality",
+                "picture_in_picture",
+                "fullscreen"
+              ]
+            });
+
+            // নিজের অনুমোদিত ভিডিও স্ট্রিম URL এখানে দিন
+            const streamUrl = "YOUR_AUTHORIZED_STREAM_URL";
+
+            status.textContent = "Loading...";
+
+            await player.load(streamUrl);
+
+            status.textContent = "Ready";
+            video.play().catch(() => {});
+
+            video.addEventListener("playing", () => {
+              status.textContent = "Playing";
+            });
+
+            player.addEventListener("error", (event) => {
+              status.textContent =
+                "Playback Error: " + event.detail.code;
+            });
+
+          } catch (error) {
+            status.textContent = "Unable to Play Video";
+            console.error(error);
+          }
         }
 
-        document.addEventListener("DOMContentLoaded", initPlayer);
+        document.addEventListener(
+          "DOMContentLoaded",
+          initPlayer
+        );
 
         function togglePIP() {
-            if (playerContainerEl.style.display !== 'none' && document.pictureInPictureEnabled) {
-                shakaVideoEl.requestPictureInPicture().catch(() => {});
+            const shakaVid = document.getElementById("video");
+            const shakaCont = document.getElementById("player-container");
+            if (shakaCont && shakaCont.style.display !== 'none' && document.pictureInPictureEnabled) {
+                shakaVid.requestPictureInPicture().catch(() => {});
             } else if (videoEl.style.display !== 'none' && document.pictureInPictureEnabled) {
                 videoEl.requestPictureInPicture();
             } else if (html5El.style.display !== 'none' && document.pictureInPictureEnabled) {
@@ -763,10 +788,10 @@
             document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active'));
             if (btnEl) btnEl.classList.add('active');
 
-            if (shakaPlayer && currentMode === 'shaka') {
-                const tracks = shakaPlayer.getVariantTracks();
+            if (shakaPlayerInstance && currentMode === 'shaka') {
+                const tracks = shakaPlayerInstance.getVariantTracks();
                 if (targetHeight === -1) {
-                    shakaPlayer.configure({ abr: { enabled: true } });
+                    shakaPlayerInstance.configure({ abr: { enabled: true } });
                     return;
                 }
                 if (tracks && tracks.length > 0) {
@@ -782,8 +807,8 @@
                         }
                     });
                     if (closestTrack) {
-                        shakaPlayer.configure({ abr: { enabled: false } });
-                        shakaPlayer.selectVariantTrack(closestTrack, true);
+                        shakaPlayerInstance.configure({ abr: { enabled: false } });
+                        shakaPlayerInstance.selectVariantTrack(closestTrack, true);
                     }
                 }
                 return;
@@ -816,31 +841,34 @@
             }
         }
 
-        async function loadChannelUrl(url, mode) {
-            const streamUrl = "YOUR_AUTHORIZED_STREAM_URL";
-            let finalUrl = url || streamUrl;
+        async function loadChannelUrl(url, mode = 'shaka') {
+            let finalUrl = url;
 
-            currentUrl = finalUrl; 
+            currentUrl = url; 
             currentMode = mode;
+
+            const shakaContainer = document.getElementById("player-container");
+            const shakaVideo = document.getElementById("video");
+            const shakaStatus = document.getElementById("status");
 
             videoEl.style.display = 'none';
             clapprEl.style.display = 'none';
             html5El.style.display = 'none';
-            playerContainerEl.style.display = 'none';
+            shakaContainer.style.display = 'none';
             
             if (stallCheckInterval) clearInterval(stallCheckInterval);
             if (hls) { hls.destroy(); hls = null; }
             if (dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
             if (clapprInstance) { clapprInstance.destroy(); clapprInstance = null; }
-            if (shakaPlayer) { await shakaPlayer.unload().catch(() => {}); }
+            if (shakaPlayerInstance) { await shakaPlayerInstance.unload().catch(() => {}); }
             
             playerInstance.pause();
             html5El.pause();
             html5El.src = "";
-            shakaVideoEl.pause();
-            shakaVideoEl.removeAttribute("src");
-            shakaVideoEl.load();
-            if (shakaStatusEl) shakaStatusEl.textContent = "Player Ready";
+            shakaVideo.pause();
+            shakaVideo.removeAttribute("src");
+            shakaVideo.load();
+            if (shakaStatus) shakaStatus.textContent = "Player Ready";
 
             const qBtns = document.querySelectorAll('.q-btn');
             qBtns.forEach((b, i) => {
@@ -872,23 +900,7 @@
                 }
             };
 
-            if (mode === 'shaka') {
-                playerContainerEl.style.display = 'block';
-                if (!shakaPlayer) {
-                    await initPlayer();
-                }
-                if (shakaPlayer && finalUrl && finalUrl !== "YOUR_AUTHORIZED_STREAM_URL") {
-                    try {
-                        shakaStatusEl.textContent = "Loading...";
-                        await shakaPlayer.load(finalUrl);
-                        shakaStatusEl.textContent = "Ready";
-                        shakaVideoEl.play().catch(() => {});
-                    } catch (error) {
-                        shakaStatusEl.textContent = "Unable to Play Video";
-                        console.error(error);
-                    }
-                }
-            } else if (mode === 'clappr') {
+            if (mode === 'clappr') {
                 clapprEl.style.display = 'block';
                 clapprInstance = new Clappr.Player({
                     source: finalUrl, 
@@ -903,7 +915,7 @@
                 html5El.src = finalUrl;
                 triggerInstantPlay(html5El, false);
                 html5El.onerror = () => handleFallback();
-            } else {
+            } else if (mode === 'videojs') {
                 videoEl.style.display = 'block';
                 
                 if (finalUrl.includes('.mpd') || finalUrl.includes('dash')) {
@@ -988,6 +1000,22 @@
                 } else {
                     playerInstance.src({ src: finalUrl, type: 'application/x-mpegURL' });
                     triggerInstantPlay(playerInstance, true);
+                }
+            } else {
+                shakaContainer.style.display = 'block';
+                if (!shakaPlayerInstance) {
+                    await initPlayer();
+                }
+                if (shakaPlayerInstance && finalUrl && finalUrl !== "YOUR_AUTHORIZED_STREAM_URL") {
+                    try {
+                        shakaStatus.textContent = "Loading...";
+                        await shakaPlayerInstance.load(finalUrl);
+                        shakaStatus.textContent = "Ready";
+                        shakaVideo.play().catch(() => {});
+                    } catch (error) {
+                        shakaStatus.textContent = "Unable to Play Video";
+                        console.error(error);
+                    }
                 }
             }
         }
