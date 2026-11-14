@@ -32,7 +32,7 @@
     <meta name="google-site-verification" content="4Wrkrkzr9ugDKvZi_NlCh9fztvhJWFl_4s5BlLBHyhM" />
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
     <meta name="referrer" content="no-referrer">
     
     <title>PB TV - Live TV Streaming, Sports, News & Bangla Channels</title>
@@ -309,7 +309,7 @@
             position: relative; 
         }
         
-        #my-video, #clappr-container, #html5-video, #player-container { 
+        #my-video, #clappr-container, #html5-video { 
             width: 100% !important; 
             height: 100% !important; 
             border: none; 
@@ -318,14 +318,11 @@
             left: 0; 
         }
 
-        #my-video .vjs-tech {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: contain;
-        }
-
         #player-container {
+            position: absolute;
+            inset: 0;
             background: #000;
+            box-sizing: border-box;
         }
 
         #player-container video {
@@ -555,6 +552,7 @@
                 </div>
 
                 <div id="status">Player Ready</div>
+
                 <video id="my-video" class="video-js vjs-big-play-centered" controls autoplay playsinline preload="auto" style="display:none;"></video>
                 <div id="clappr-container" style="display:none;"></div>
                 <video id="html5-video" controls autoplay playsinline preload="auto" style="display:none;"></video>
@@ -657,7 +655,8 @@
         let currentChannelObj = null;
         let currentServerIndex = 0;
         let stallCheckInterval = null;
-        let shakaPlayerInstance = null;
+        let shakaPlayerRef = null;
+        let shakaUiRef = null;
 
         async function initPlayer() {
           const video = document.getElementById("video");
@@ -673,7 +672,7 @@
             }
 
             const player = new shaka.Player();
-            shakaPlayerInstance = player;
+            shakaPlayerRef = player;
             await player.attach(video);
 
             const ui = new shaka.ui.Overlay(
@@ -681,6 +680,7 @@
               container,
               video
             );
+            shakaUiRef = ui;
 
             ui.configure({
               addBigPlayButton: true,
@@ -725,22 +725,13 @@
           initPlayer
         );
 
-        function getVjsRealVideo() {
-            if (playerInstance && playerInstance.el) {
-                const innerVideo = playerInstance.el().querySelector('video');
-                if (innerVideo) return innerVideo;
-            }
-            return videoEl;
-        }
-
         function togglePIP() {
-            const shakaVid = document.getElementById("video");
-            const shakaCont = document.getElementById("player-container");
-            const vjsVid = getVjsRealVideo();
-            if (shakaCont && shakaCont.style.display !== 'none' && document.pictureInPictureEnabled) {
-                shakaVid.requestPictureInPicture().catch(() => {});
+            const shakaContainer = document.getElementById("player-container");
+            const shakaVideo = document.getElementById("video");
+            if (shakaContainer && shakaContainer.style.display !== 'none' && document.pictureInPictureEnabled) {
+                shakaVideo.requestPictureInPicture().catch(() => {});
             } else if (videoEl.style.display !== 'none' && document.pictureInPictureEnabled) {
-                vjsVid.requestPictureInPicture().catch(() => {});
+                videoEl.requestPictureInPicture();
             } else if (html5El.style.display !== 'none' && document.pictureInPictureEnabled) {
                 html5El.requestPictureInPicture().catch(() => {});
             }
@@ -803,32 +794,6 @@
             document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active'));
             if (btnEl) btnEl.classList.add('active');
 
-            if (shakaPlayerInstance && currentMode === 'shaka') {
-                const tracks = shakaPlayerInstance.getVariantTracks();
-                if (targetHeight === -1) {
-                    shakaPlayerInstance.configure({ abr: { enabled: true } });
-                    return;
-                }
-                if (tracks && tracks.length > 0) {
-                    let closestTrack = null;
-                    let minDiff = Infinity;
-                    tracks.forEach((t) => {
-                        if (t.height) {
-                            let diff = Math.abs(t.height - targetHeight);
-                            if (diff < minDiff) {
-                                minDiff = diff;
-                                closestTrack = t;
-                            }
-                        }
-                    });
-                    if (closestTrack) {
-                        shakaPlayerInstance.configure({ abr: { enabled: false } });
-                        shakaPlayerInstance.selectVariantTrack(closestTrack, true);
-                    }
-                }
-                return;
-            }
-
             if (hls) {
                 if (targetHeight === -1) {
                     hls.currentLevel = -1;
@@ -865,7 +830,6 @@
             const shakaContainer = document.getElementById("player-container");
             const shakaVideo = document.getElementById("video");
             const shakaStatus = document.getElementById("status");
-            const vjsRealVideo = getVjsRealVideo();
 
             videoEl.style.display = 'none';
             clapprEl.style.display = 'none';
@@ -876,22 +840,10 @@
             if (hls) { hls.destroy(); hls = null; }
             if (dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
             if (clapprInstance) { clapprInstance.destroy(); clapprInstance = null; }
-            if (shakaPlayerInstance) { await shakaPlayerInstance.unload().catch(() => {}); }
             
-            if (playerInstance) {
-                playerInstance.pause();
-            }
-            if (vjsRealVideo) {
-                vjsRealVideo.pause();
-                vjsRealVideo.removeAttribute("src");
-                vjsRealVideo.load();
-            }
+            playerInstance.pause();
             html5El.pause();
             html5El.src = "";
-            shakaVideo.pause();
-            shakaVideo.removeAttribute("src");
-            shakaVideo.load();
-            if (shakaStatus) shakaStatus.textContent = "Player Ready";
 
             const qBtns = document.querySelectorAll('.q-btn');
             qBtns.forEach((b, i) => {
@@ -901,13 +853,13 @@
 
             const triggerInstantPlay = (mediaObj, isVjs = false) => {
                 if (isVjs) {
-                    mediaObj.muted = false;
-                    mediaObj.volume = 1.0;
+                    mediaObj.muted(false);
+                    mediaObj.volume(1.0);
                     let promise = mediaObj.play();
                     if (promise !== undefined) {
                         promise.catch(() => {
-                            mediaObj.muted = true;
-                            mediaObj.play().catch(() => {});
+                            mediaObj.muted(true);
+                            mediaObj.play();
                         });
                     }
                 } else {
@@ -917,13 +869,14 @@
                     if (playPromise !== undefined) {
                         playPromise.catch(() => {
                             mediaObj.muted = true;
-                            mediaObj.play().catch(() => {});
+                            mediaObj.play();
                         });
                     }
                 }
             };
 
             if (mode === 'clappr') {
+                if (shakaPlayerRef) await shakaPlayerRef.unload().catch(() => {});
                 clapprEl.style.display = 'block';
                 clapprInstance = new Clappr.Player({
                     source: finalUrl, 
@@ -934,31 +887,23 @@
                     mute: false
                 });
             } else if (mode === 'html5') {
+                if (shakaPlayerRef) await shakaPlayerRef.unload().catch(() => {});
                 html5El.style.display = 'block';
                 html5El.src = finalUrl;
                 triggerInstantPlay(html5El, false);
                 html5El.onerror = () => handleFallback();
             } else if (mode === 'videojs') {
+                if (shakaPlayerRef) await shakaPlayerRef.unload().catch(() => {});
                 videoEl.style.display = 'block';
-                if (playerInstance && playerInstance.el) {
-                    playerInstance.el().style.display = 'block';
-                    playerInstance.el().style.width = '100%';
-                    playerInstance.el().style.height = '100%';
-                }
-                vjsRealVideo.style.display = 'block';
-                vjsRealVideo.style.width = '100%';
-                vjsRealVideo.style.height = '100%';
-                vjsRealVideo.style.opacity = '1';
-                vjsRealVideo.style.visibility = 'visible';
                 
                 if (finalUrl.includes('.mpd') || finalUrl.includes('dash')) {
                     if (typeof dashjs !== 'undefined') {
                         dashPlayer = dashjs.MediaPlayer().create();
-                        dashPlayer.initialize(vjsRealVideo, finalUrl, true);
-                        triggerInstantPlay(vjsRealVideo, true);
+                        dashPlayer.initialize(videoEl, finalUrl, true);
+                        triggerInstantPlay(playerInstance, true);
                     } else {
                         playerInstance.src({ src: finalUrl, type: 'application/dash+xml' });
-                        triggerInstantPlay(vjsRealVideo, true);
+                        triggerInstantPlay(playerInstance, true);
                     }
                 } else if (Hls.isSupported() && !finalUrl.includes('.mpd')) {
                     hls = new Hls({
@@ -978,21 +923,21 @@
                     });
 
                     hls.loadSource(finalUrl);
-                    hls.attachMedia(vjsRealVideo);
+                    hls.attachMedia(videoEl);
 
                     hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-                        triggerInstantPlay(vjsRealVideo, true);
+                        triggerInstantPlay(playerInstance, true);
                     });
 
                     hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
-                        triggerInstantPlay(vjsRealVideo, true);
+                        triggerInstantPlay(playerInstance, true);
                     });
 
                     let lastTime = 0;
                     let stallCount = 0;
                     stallCheckInterval = setInterval(() => {
-                        if (vjsRealVideo && !vjsRealVideo.paused) {
-                            if (vjsRealVideo.currentTime === lastTime) {
+                        if (videoEl && !videoEl.paused) {
+                            if (videoEl.currentTime === lastTime) {
                                 stallCount++;
                                 if (stallCount >= 3) {
                                     if (hls) hls.startLoad();
@@ -1000,7 +945,7 @@
                                 }
                             } else {
                                 stallCount = 0;
-                                lastTime = vjsRealVideo.currentTime;
+                                lastTime = videoEl.currentTime;
                             }
                         }
                     }, 2000);
@@ -1015,11 +960,11 @@
                                     hls.recoverMediaError();
                                     break;
                                 default:
-                                    if (vjsRealVideo.canPlayType('application/vnd.apple.mpegurl') || finalUrl.includes('.m3u8')) {
+                                    if (videoEl.canPlayType('application/vnd.apple.mpegurl') || finalUrl.includes('.m3u8')) {
                                         hls.destroy();
                                         hls = null;
-                                        vjsRealVideo.src = finalUrl;
-                                        triggerInstantPlay(vjsRealVideo, true);
+                                        videoEl.src = finalUrl;
+                                        triggerInstantPlay(playerInstance, true);
                                     } else {
                                         handleFallback();
                                     }
@@ -1027,22 +972,22 @@
                             }
                         }
                     });
-                } else if (vjsRealVideo.canPlayType('application/vnd.apple.mpegurl')) {
-                    vjsRealVideo.src = finalUrl;
-                    triggerInstantPlay(vjsRealVideo, true);
+                } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+                    videoEl.src = finalUrl;
+                    triggerInstantPlay(playerInstance, true);
                 } else {
                     playerInstance.src({ src: finalUrl, type: 'application/x-mpegURL' });
-                    triggerInstantPlay(vjsRealVideo, true);
+                    triggerInstantPlay(playerInstance, true);
                 }
             } else {
                 shakaContainer.style.display = 'block';
-                if (!shakaPlayerInstance) {
+                if (!shakaPlayerRef) {
                     await initPlayer();
                 }
-                if (shakaPlayerInstance && finalUrl && finalUrl !== "YOUR_AUTHORIZED_STREAM_URL") {
+                if (shakaPlayerRef && finalUrl) {
                     try {
                         shakaStatus.textContent = "Loading...";
-                        await shakaPlayerInstance.load(finalUrl);
+                        await shakaPlayerRef.load(finalUrl);
                         shakaStatus.textContent = "Ready";
                         shakaVideo.play().catch(() => {});
                     } catch (error) {
