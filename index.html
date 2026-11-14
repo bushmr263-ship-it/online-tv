@@ -33,6 +33,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
     
     <title>PB TV - Live TV Streaming, Sports, News & Bangla Channels</title>
     <meta name="title" content="PB TV - Live TV Streaming, Sports, News & Bangla Channels">
@@ -57,6 +58,10 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://i.ibb.co.com/PvnVqbdS/cpt-1469868507562.jpg">
+
+    <!-- Shaka Player -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css">
+    <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/shaka-player.ui.min.js"></script>
 
     <!-- Video.js -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css" rel="stylesheet" />
@@ -304,13 +309,32 @@
             position: relative; 
         }
         
-        #my-video, #clappr-container, #html5-video, #custom-iframe { 
+        #my-video, #clappr-container, #html5-video, #player-container { 
             width: 100% !important; 
             height: 100% !important; 
             border: none; 
             position: absolute; 
             top: 0; 
             left: 0; 
+        }
+
+        #player-container #video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+
+        #player-container #status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+            color: white;
+            background: #222;
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 12px;
         }
         
         .modes { 
@@ -329,8 +353,8 @@
             padding: 8px 14px; 
             border-radius: 6px; 
             cursor: pointer; 
-            font-weight: bold;
-            font-size: 13px;
+            font-weight: bold; 
+            font-size: 13px; 
         }
         
         .btn:hover { 
@@ -373,7 +397,7 @@
         
         .pip-btn { 
             background: #ff4757 !important; 
-            color: #fff !important;
+            color: #fff !important; 
         }
         
         .ch-btn { 
@@ -384,14 +408,14 @@
             text-align: center; 
             border: 1px solid #30363d; 
             transition: 0.3s; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            height: 95px;
-            box-sizing: border-box;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            width: 100%; 
+            height: 95px; 
+            box-sizing: border-box; 
         }
         
         .ch-btn:hover { 
@@ -403,17 +427,17 @@
             width: 50px; 
             height: 50px; 
             object-fit: contain; 
-            pointer-events: none;
+            pointer-events: none; 
         }
         
         .ch-btn strong { 
             font-size: 13.2px; 
             font-weight: bold; 
-            color: var(--accent-color);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 100%;
+            color: var(--accent-color); 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            width: 100%; 
         }
         
         .input-box { 
@@ -515,14 +539,17 @@
                 <video id="my-video" class="video-js vjs-big-play-centered" controls autoplay playsinline preload="auto"></video>
                 <div id="clappr-container" style="display:none;"></div>
                 <video id="html5-video" controls autoplay playsinline preload="auto" style="display:none;"></video>
-                <iframe id="custom-iframe" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen="true" style="display:none;"></iframe>
+                <div id="player-container" style="display:none;">
+                    <video id="video" autoplay playsinline preload="metadata"></video>
+                    <div id="status">Player Ready</div>
+                </div>
             </div>
 
             <div class="modes">
                 <button class="btn" onclick="switchMode('videojs')">Main (Video.js)</button>
                 <button class="btn" onclick="switchMode('clappr')">Clappr</button>
                 <button class="btn" onclick="switchMode('html5')">HTML5</button>
-                <button class="btn" onclick="switchMode('iframe')">Iframe</button>
+                <button class="btn" onclick="switchMode('shaka')">Shaka</button>
                 
                 <!-- Manual Quality Buttons -->
                 <div class="quality-buttons-wrap" id="qualityButtonsWrap">
@@ -600,11 +627,15 @@
 
         // Player & Category Filter Logic
         const videoEl = document.getElementById('my-video');
-        const iframe = document.getElementById('custom-iframe');
         const clapprEl = document.getElementById('clappr-container');
         const html5El = document.getElementById('html5-video');
+        const playerContainerEl = document.getElementById('player-container');
+        const shakaVideoEl = document.getElementById('video');
+        const shakaStatusEl = document.getElementById('status');
         let playerInstance = videojs('my-video', { autoplay: true });
         let clapprInstance;
+        let shakaPlayer = null;
+        let shakaUi = null;
         let hls; 
         let dashPlayer;
         let currentMode = 'videojs';
@@ -615,9 +646,63 @@
         let currentServerIndex = 0;
         let stallCheckInterval = null;
 
+        async function initPlayer() {
+            const video = document.getElementById("video");
+            const container = document.getElementById("player-container");
+            const status = document.getElementById("status");
+
+            try {
+                shaka.polyfill.installAll();
+
+                if (!shaka.Player.isBrowserSupported()) {
+                    status.textContent = "Browser Not Supported";
+                    return;
+                }
+
+                shakaPlayer = new shaka.Player();
+                await shakaPlayer.attach(video);
+
+                shakaUi = new shaka.ui.Overlay(
+                    shakaPlayer,
+                    container,
+                    video
+                );
+
+                shakaUi.configure({
+                    addBigPlayButton: true,
+                    controlPanelElements: [
+                        "play_pause",
+                        "mute",
+                        "time_and_duration",
+                        "spacer",
+                        "quality",
+                        "picture_in_picture",
+                        "fullscreen"
+                    ]
+                });
+
+                video.addEventListener("playing", () => {
+                    status.textContent = "Playing";
+                });
+
+                shakaPlayer.addEventListener("error", (event) => {
+                    status.textContent = "Playback Error: " + event.detail.code;
+                });
+            } catch (error) {
+                status.textContent = "Unable to Play Video";
+                console.error(error);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", initPlayer);
+
         function togglePIP() {
-            if (videoEl.style.display !== 'none' && document.pictureInPictureEnabled) {
+            if (playerContainerEl.style.display !== 'none' && document.pictureInPictureEnabled) {
+                shakaVideoEl.requestPictureInPicture().catch(() => {});
+            } else if (videoEl.style.display !== 'none' && document.pictureInPictureEnabled) {
                 videoEl.requestPictureInPicture();
+            } else if (html5El.style.display !== 'none' && document.pictureInPictureEnabled) {
+                html5El.requestPictureInPicture().catch(() => {});
             }
         }
 
@@ -678,6 +763,32 @@
             document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active'));
             if (btnEl) btnEl.classList.add('active');
 
+            if (shakaPlayer && currentMode === 'shaka') {
+                const tracks = shakaPlayer.getVariantTracks();
+                if (targetHeight === -1) {
+                    shakaPlayer.configure({ abr: { enabled: true } });
+                    return;
+                }
+                if (tracks && tracks.length > 0) {
+                    let closestTrack = null;
+                    let minDiff = Infinity;
+                    tracks.forEach((t) => {
+                        if (t.height) {
+                            let diff = Math.abs(t.height - targetHeight);
+                            if (diff < minDiff) {
+                                minDiff = diff;
+                                closestTrack = t;
+                            }
+                        }
+                    });
+                    if (closestTrack) {
+                        shakaPlayer.configure({ abr: { enabled: false } });
+                        shakaPlayer.selectVariantTrack(closestTrack, true);
+                    }
+                }
+                return;
+            }
+
             if (hls) {
                 if (targetHeight === -1) {
                     hls.currentLevel = -1;
@@ -705,26 +816,31 @@
             }
         }
 
-        function loadChannelUrl(url, mode) {
-            let finalUrl = url;
+        async function loadChannelUrl(url, mode) {
+            const streamUrl = "YOUR_AUTHORIZED_STREAM_URL";
+            let finalUrl = url || streamUrl;
 
-            currentUrl = url; 
+            currentUrl = finalUrl; 
             currentMode = mode;
 
             videoEl.style.display = 'none';
-            iframe.style.display = 'none';
             clapprEl.style.display = 'none';
             html5El.style.display = 'none';
+            playerContainerEl.style.display = 'none';
             
             if (stallCheckInterval) clearInterval(stallCheckInterval);
             if (hls) { hls.destroy(); hls = null; }
             if (dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
             if (clapprInstance) { clapprInstance.destroy(); clapprInstance = null; }
+            if (shakaPlayer) { await shakaPlayer.unload().catch(() => {}); }
             
             playerInstance.pause();
             html5El.pause();
             html5El.src = "";
-            iframe.src = "about:blank";
+            shakaVideoEl.pause();
+            shakaVideoEl.removeAttribute("src");
+            shakaVideoEl.load();
+            if (shakaStatusEl) shakaStatusEl.textContent = "Player Ready";
 
             const qBtns = document.querySelectorAll('.q-btn');
             qBtns.forEach((b, i) => {
@@ -749,16 +865,29 @@
                     let playPromise = mediaObj.play();
                     if (playPromise !== undefined) {
                         playPromise.catch(() => {
-                            mediaObj.muted(true);
+                            mediaObj.muted = true;
                             mediaObj.play();
                         });
                     }
                 }
             };
 
-            if (mode === 'iframe') {
-                iframe.src = finalUrl;
-                iframe.style.display = 'block';
+            if (mode === 'shaka') {
+                playerContainerEl.style.display = 'block';
+                if (!shakaPlayer) {
+                    await initPlayer();
+                }
+                if (shakaPlayer && finalUrl && finalUrl !== "YOUR_AUTHORIZED_STREAM_URL") {
+                    try {
+                        shakaStatusEl.textContent = "Loading...";
+                        await shakaPlayer.load(finalUrl);
+                        shakaStatusEl.textContent = "Ready";
+                        shakaVideoEl.play().catch(() => {});
+                    } catch (error) {
+                        shakaStatusEl.textContent = "Unable to Play Video";
+                        console.error(error);
+                    }
+                }
             } else if (mode === 'clappr') {
                 clapprEl.style.display = 'block';
                 clapprInstance = new Clappr.Player({
