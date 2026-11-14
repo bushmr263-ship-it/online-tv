@@ -2,30 +2,40 @@
 <html lang="bn">
 <head>
     <script>
-        const currentDomain = window.location.hostname;
+        (function() {
+            const currentDomain = window.location.hostname;
 
-        // শুধুমাত্র কাস্টমার ডোমেইনে ঢুকলেই লগইন ও ব্লকড স্ট্যাটাস চেক করবে
-        if (currentDomain.includes("online-tv-5je.pages.dev")) {
-            const user = localStorage.getItem("pb_logged_username");
-            const device = localStorage.getItem("pb_device_id");
-            
-            // লগইন না করা থাকলে লগইন পেজে পাঠাবে
-            if (!user || !device) {
-                window.location.href = "login.html";
-            } else {
-                // রিয়েল-টাইমে চেক করবে ইউজার ব্লক কিনা
+            if (currentDomain.includes("online-tv-5je.pages.dev")) {
+                const user = localStorage.getItem("pb_logged_username");
+                let device = localStorage.getItem("pb_device_id");
+
+                if (!device) {
+                    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+                    const prefix = isMobile ? "MOBILE" : "PC";
+                    const hex = () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0").toUpperCase();
+                    device = `${prefix}-${hex()}:${hex()}:${hex()}:${hex()}:${hex()}:${hex()}`;
+                    localStorage.setItem("pb_device_id", device);
+                }
+
+                if (!user) {
+                    window.location.replace("login.html");
+                    return;
+                }
+
+                // ইউজার স্পষ্টভাবে active: false হলেই শুধু লগআউট করবে
                 fetch("https://admin.bushmr263.workers.dev/get-users")
                     .then(res => res.json())
                     .then(users => {
-                        if (!users[user] || !users[user].active) {
+                        const userObj = users && users[user] ? users[user] : (users && users.users && users.users[user]);
+                        if (userObj && userObj.active === false) {
                             alert("আপনার অ্যাকাউন্টটি ব্লক বা বাতিল করা হয়েছে!");
                             localStorage.removeItem("pb_logged_username");
-                            window.location.href = "login.html";
+                            window.location.replace("login.html");
                         }
                     })
                     .catch(err => console.error("Status check failed:", err));
             }
-        }
+        })();
     </script>
 
     <!-- Google Search Console Verification Tag -->
