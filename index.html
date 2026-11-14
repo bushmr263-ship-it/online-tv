@@ -318,6 +318,14 @@
             left: 0; 
         }
 
+        #my-video video,
+        #my-video .vjs-tech {
+            display: block !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain;
+        }
+
         #player-container {
             position: absolute;
             inset: 0;
@@ -644,7 +652,7 @@
         const videoEl = document.getElementById('my-video');
         const clapprEl = document.getElementById('clappr-container');
         const html5El = document.getElementById('html5-video');
-        let playerInstance = videojs('my-video', { autoplay: true });
+        let playerInstance = videojs('my-video', { autoplay: true, fluid: false });
         let clapprInstance;
         let hls; 
         let dashPlayer;
@@ -725,13 +733,22 @@
           initPlayer
         );
 
+        function getVjsTargetVideo() {
+            if (playerInstance && playerInstance.el) {
+                const inner = playerInstance.el().querySelector('video');
+                if (inner) return inner;
+            }
+            return document.querySelector('#my-video video') || videoEl;
+        }
+
         function togglePIP() {
             const shakaContainer = document.getElementById("player-container");
             const shakaVideo = document.getElementById("video");
+            const vjsTarget = getVjsTargetVideo();
             if (shakaContainer && shakaContainer.style.display !== 'none' && document.pictureInPictureEnabled) {
                 shakaVideo.requestPictureInPicture().catch(() => {});
             } else if (videoEl.style.display !== 'none' && document.pictureInPictureEnabled) {
-                videoEl.requestPictureInPicture();
+                vjsTarget.requestPictureInPicture().catch(() => {});
             } else if (html5El.style.display !== 'none' && document.pictureInPictureEnabled) {
                 html5El.requestPictureInPicture().catch(() => {});
             }
@@ -830,8 +847,12 @@
             const shakaContainer = document.getElementById("player-container");
             const shakaVideo = document.getElementById("video");
             const shakaStatus = document.getElementById("status");
+            const vjsTarget = getVjsTargetVideo();
 
             videoEl.style.display = 'none';
+            if (playerInstance && playerInstance.el) {
+                playerInstance.el().style.display = 'none';
+            }
             clapprEl.style.display = 'none';
             html5El.style.display = 'none';
             shakaContainer.style.display = 'none';
@@ -841,7 +862,14 @@
             if (dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
             if (clapprInstance) { clapprInstance.destroy(); clapprInstance = null; }
             
-            playerInstance.pause();
+            if (playerInstance) {
+                playerInstance.pause();
+            }
+            if (vjsTarget) {
+                vjsTarget.pause();
+                vjsTarget.removeAttribute("src");
+                vjsTarget.load();
+            }
             html5El.pause();
             html5El.src = "";
 
@@ -853,13 +881,13 @@
 
             const triggerInstantPlay = (mediaObj, isVjs = false) => {
                 if (isVjs) {
-                    mediaObj.muted(false);
-                    mediaObj.volume(1.0);
+                    mediaObj.muted = false;
+                    mediaObj.volume = 1.0;
                     let promise = mediaObj.play();
                     if (promise !== undefined) {
                         promise.catch(() => {
-                            mediaObj.muted(true);
-                            mediaObj.play();
+                            mediaObj.muted = true;
+                            mediaObj.play().catch(() => {});
                         });
                     }
                 } else {
@@ -869,7 +897,7 @@
                     if (playPromise !== undefined) {
                         playPromise.catch(() => {
                             mediaObj.muted = true;
-                            mediaObj.play();
+                            mediaObj.play().catch(() => {});
                         });
                     }
                 }
@@ -895,15 +923,27 @@
             } else if (mode === 'videojs') {
                 if (shakaPlayerRef) await shakaPlayerRef.unload().catch(() => {});
                 videoEl.style.display = 'block';
+                if (playerInstance && playerInstance.el) {
+                    playerInstance.el().style.display = 'block';
+                    playerInstance.el().style.width = '100%';
+                    playerInstance.el().style.height = '100%';
+                }
+                if (vjsTarget) {
+                    vjsTarget.style.display = 'block';
+                    vjsTarget.style.width = '100%';
+                    vjsTarget.style.height = '100%';
+                    vjsTarget.style.visibility = 'visible';
+                    vjsTarget.style.opacity = '1';
+                }
                 
                 if (finalUrl.includes('.mpd') || finalUrl.includes('dash')) {
                     if (typeof dashjs !== 'undefined') {
                         dashPlayer = dashjs.MediaPlayer().create();
-                        dashPlayer.initialize(videoEl, finalUrl, true);
-                        triggerInstantPlay(playerInstance, true);
+                        dashPlayer.initialize(vjsTarget, finalUrl, true);
+                        triggerInstantPlay(vjsTarget, true);
                     } else {
                         playerInstance.src({ src: finalUrl, type: 'application/dash+xml' });
-                        triggerInstantPlay(playerInstance, true);
+                        triggerInstantPlay(vjsTarget, true);
                     }
                 } else if (Hls.isSupported() && !finalUrl.includes('.mpd')) {
                     hls = new Hls({
@@ -923,21 +963,21 @@
                     });
 
                     hls.loadSource(finalUrl);
-                    hls.attachMedia(videoEl);
+                    hls.attachMedia(vjsTarget);
 
                     hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-                        triggerInstantPlay(playerInstance, true);
+                        triggerInstantPlay(vjsTarget, true);
                     });
 
                     hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
-                        triggerInstantPlay(playerInstance, true);
+                        triggerInstantPlay(vjsTarget, true);
                     });
 
                     let lastTime = 0;
                     let stallCount = 0;
                     stallCheckInterval = setInterval(() => {
-                        if (videoEl && !videoEl.paused) {
-                            if (videoEl.currentTime === lastTime) {
+                        if (vjsTarget && !vjsTarget.paused) {
+                            if (vjsTarget.currentTime === lastTime) {
                                 stallCount++;
                                 if (stallCount >= 3) {
                                     if (hls) hls.startLoad();
@@ -945,7 +985,7 @@
                                 }
                             } else {
                                 stallCount = 0;
-                                lastTime = videoEl.currentTime;
+                                lastTime = vjsTarget.currentTime;
                             }
                         }
                     }, 2000);
@@ -960,11 +1000,11 @@
                                     hls.recoverMediaError();
                                     break;
                                 default:
-                                    if (videoEl.canPlayType('application/vnd.apple.mpegurl') || finalUrl.includes('.m3u8')) {
+                                    if (vjsTarget.canPlayType('application/vnd.apple.mpegurl') || finalUrl.includes('.m3u8')) {
                                         hls.destroy();
                                         hls = null;
-                                        videoEl.src = finalUrl;
-                                        triggerInstantPlay(playerInstance, true);
+                                        vjsTarget.src = finalUrl;
+                                        triggerInstantPlay(vjsTarget, true);
                                     } else {
                                         handleFallback();
                                     }
@@ -972,12 +1012,12 @@
                             }
                         }
                     });
-                } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-                    videoEl.src = finalUrl;
-                    triggerInstantPlay(playerInstance, true);
+                } else if (vjsTarget.canPlayType('application/vnd.apple.mpegurl')) {
+                    vjsTarget.src = finalUrl;
+                    triggerInstantPlay(vjsTarget, true);
                 } else {
                     playerInstance.src({ src: finalUrl, type: 'application/x-mpegURL' });
-                    triggerInstantPlay(playerInstance, true);
+                    triggerInstantPlay(vjsTarget, true);
                 }
             } else {
                 shakaContainer.style.display = 'block';
