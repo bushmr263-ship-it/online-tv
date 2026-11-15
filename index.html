@@ -3,29 +3,97 @@
 <head>
     <script>
         const currentDomain = window.location.hostname;
+        const AUTH_API_BASE = "https://admin.bushmr263.workers.dev";
+        const IS_PAID_DOMAIN = currentDomain.includes("online-tv-5je.pages.dev");
 
-        // শুধুমাত্র কাস্টমার ডোমেইনে ঢুকলেই লগইন ও ব্লকড স্ট্যাটাস চেক করবে
-        if (currentDomain.includes("online-tv-5je.pages.dev")) {
-            const user = localStorage.getItem("pb_logged_username");
-            const device = localStorage.getItem("pb_device_id");
-            
-            // লগইন না করা থাকলে লগইন পেজে পাঠাবে
-            if (!user || !device) {
-                window.location.href = "login.html";
-            } else {
-                // রিয়েল-টাইমে চেক করবে ইউজার ব্লক কিনা
-                fetch("https://admin.bushmr263.workers.dev/get-users")
-                    .then(res => res.json())
-                    .then(users => {
-                        if (!users[user] || !users[user].active) {
-                            alert("আপনার অ্যাকাউন্টটি ব্লক বা বাতিল করা হয়েছে!");
-                            localStorage.removeItem("pb_logged_username");
-                            window.location.href = "login.html";
-                        }
-                    })
-                    .catch(err => console.error("Status check failed:", err));
+        function getOrCreateDeviceId() {
+            let deviceId = localStorage.getItem("pb_device_id");
+            if (!deviceId) {
+                deviceId = "dev_" + Date.now() + "_" + Math.random().toString(36).substring(2, 10);
+                localStorage.setItem("pb_device_id", deviceId);
+            }
+            return deviceId;
+        }
+
+        function normalizeUsersData(data) {
+            if (!data) return {};
+            if (Array.isArray(data)) {
+                const map = {};
+                data.forEach(item => {
+                    if (item && item.username) {
+                        map[item.username] = item;
+                    }
+                });
+                return map;
+            }
+            if (data.users && typeof data.users === "object") {
+                return normalizeUsersData(data.users);
+            }
+            return data;
+        }
+
+        function isUserActive(userEntry) {
+            if (!userEntry) return false;
+            if (typeof userEntry === "boolean") return userEntry;
+            if (typeof userEntry === "object") {
+                if (typeof userEntry.active === "boolean") return userEntry.active;
+                if (typeof userEntry.status === "string") {
+                    return userEntry.status.toLowerCase() === "active";
+                }
+                return true;
+            }
+            return Boolean(userEntry);
+        }
+
+        async function fetchUsersList() {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            try {
+                const res = await fetch(`${AUTH_API_BASE}/get-users`, {
+                    cache: "no-store",
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                if (!res.ok) {
+                    throw new Error("HTTP " + res.status);
+                }
+                const raw = await res.json();
+                return normalizeUsersData(raw);
+            } catch (err) {
+                clearTimeout(timeoutId);
+                throw err;
             }
         }
+
+        // শুধুমাত্র online-tv-5je.pages.dev ডোমেইনে ঢুকলেই ইউজারনেম ও পাসওয়ার্ড লগইন চেক করবে
+        // palashbari-plex.pages.dev সম্পূর্ণ ফ্রি থাকবে
+        window.__PB_AUTH_READY__ = (async function checkDomainAccess() {
+            if (!IS_PAID_DOMAIN) {
+                return true;
+            }
+
+            const user = localStorage.getItem("pb_logged_username");
+            const device = localStorage.getItem("pb_device_id");
+
+            if (!user || !device) {
+                return false;
+            }
+
+            try {
+                const users = await fetchUsersList();
+                const entry = users[user];
+                if (!entry || !isUserActive(entry)) {
+                    alert("আপনার অ্যাকাউন্টটি ব্লক বা বাতিল করা হয়েছে!");
+                    localStorage.removeItem("pb_logged_username");
+                    localStorage.removeItem("pb_device_id");
+                    return false;
+                }
+                return true;
+            } catch (err) {
+                console.error("Status check failed:", err);
+                return false;
+            }
+        })();
     </script>
 
     <!-- Google Search Console Verification Tag -->
@@ -507,6 +575,73 @@
             color: #000; 
         }
 
+        /* Login Gate Overlay (শুধুমাত্র online-tv-5je.pages.dev এর জন্য) */
+        #pbLoginOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 14, 20, 0.96);
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .pb-login-card {
+            background: var(--bg-color);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 28px 24px;
+            width: 100%;
+            max-width: 380px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .pb-login-card h2 {
+            margin: 0 0 8px 0;
+            color: var(--accent-color);
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        .pb-login-card p {
+            margin: 0 0 18px 0;
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        .pb-login-card input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .pb-login-card button {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        #pbLoginMsg {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #ff6b81;
+            min-height: 18px;
+        }
+
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
 
@@ -560,6 +695,18 @@
     </style>
 </head>
 <body>
+
+    <!-- Login Box (শুধুমাত্র online-tv-5je.pages.dev এর জন্য) -->
+    <div id="pbLoginOverlay">
+        <div class="pb-login-card">
+            <h2>PB TV LOGIN</h2>
+            <p>ইউজারনেম এবং পাসওয়ার্ড দিয়ে লগইন করুন</p>
+            <input type="text" id="pbLoginUsername" placeholder="Username" autocomplete="username">
+            <input type="password" id="pbLoginPassword" placeholder="Password" autocomplete="current-password">
+            <button type="button" id="pbLoginSubmitBtn" onclick="handlePbLogin()">লগইন করুন</button>
+            <div id="pbLoginMsg"></div>
+        </div>
+    </div>
 
     <div class="main-container">
         <div class="player-section">
@@ -659,6 +806,67 @@
     <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/shaka-player.ui.min.js"></script>
 
     <script>
+        async function handlePbLogin() {
+            const usernameInput = document.getElementById("pbLoginUsername");
+            const passwordInput = document.getElementById("pbLoginPassword");
+            const submitBtn = document.getElementById("pbLoginSubmitBtn");
+            const msgEl = document.getElementById("pbLoginMsg");
+
+            const username = (usernameInput.value || "").trim();
+            const password = (passwordInput.value || "").trim();
+
+            if (!username || !password) {
+                msgEl.textContent = "ইউজারনেম এবং পাসওয়ার্ড দিন।";
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "যাচাই হচ্ছে...";
+            msgEl.textContent = "";
+
+            try {
+                const users = await fetchUsersList();
+                const userRecord = users[username];
+
+                if (!userRecord) {
+                    msgEl.textContent = "ইউজারনেম খুঁজে পাওয়া যায়নি।";
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "লগইন করুন";
+                    return;
+                }
+
+                if (!isUserActive(userRecord)) {
+                    msgEl.textContent = "আপনার অ্যাকাউন্টটি ব্লক বা বাতিল করা হয়েছে!";
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "লগইন করুন";
+                    return;
+                }
+
+                if (
+                    typeof userRecord === "object" &&
+                    userRecord.password !== undefined &&
+                    String(userRecord.password) !== password
+                ) {
+                    msgEl.textContent = "ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।";
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "লগইন করুন";
+                    return;
+                }
+
+                const deviceId = getOrCreateDeviceId();
+                localStorage.setItem("pb_logged_username", username);
+                localStorage.setItem("pb_device_id", deviceId);
+
+                document.getElementById("pbLoginOverlay").style.display = "none";
+                startAppAfterAuth();
+            } catch (err) {
+                console.error("Login failed:", err);
+                msgEl.textContent = "সার্ভারে সংযোগ করা যাচ্ছে না, আবার চেষ্টা করুন।";
+                submitBtn.disabled = false;
+                submitBtn.textContent = "লগইন করুন";
+            }
+        }
+
         // Security Controls
         ['contextmenu', 'selectstart', 'copy', 'cut', 'dragstart'].forEach(eventType => {
             document.addEventListener(eventType, e => e.preventDefault());
@@ -677,6 +885,7 @@
         });
 
         function checkDevTools() {
+            if (window.innerWidth <= 768) return;
             const widthThreshold = window.outerWidth - window.innerWidth > 160;
             const heightThreshold = window.outerHeight - window.innerHeight > 160;
             
@@ -706,6 +915,7 @@
         let loadSessionId = 0;
         let shakaPlayerRef = null;
         let shakaUiRef = null;
+        let playlistLoaded = false;
 
         async function initPlayer() {
           const video = document.getElementById("video");
@@ -781,11 +991,6 @@
           }
         }
 
-        document.addEventListener(
-          "DOMContentLoaded",
-          initPlayer
-        );
-
         function getVjsTargetVideo() {
             if (playerInstance && playerInstance.el) {
                 const inner = playerInstance.el().querySelector('video');
@@ -850,7 +1055,7 @@
 
         function handleFallback() {
             if (!currentChannelObj) {
-                playNextChannel();
+                document.getElementById("status").textContent = "Unable to Play";
                 return;
             }
             let urls = Array.isArray(currentChannelObj.url) ? currentChannelObj.url : [currentChannelObj.url];
@@ -869,7 +1074,12 @@
 
                 loadChannelUrl(urls[currentServerIndex], currentMode);
             } else {
-                playNextChannel();
+                const idx = allChannels.indexOf(currentChannelObj);
+                if (idx !== -1 && idx + 1 < allChannels.length) {
+                    playNextChannel();
+                } else {
+                    document.getElementById("status").textContent = "Stream Unavailable";
+                }
             }
         }
 
@@ -1114,7 +1324,7 @@
                         shakaStatus.textContent = "Loading...";
                         await shakaPlayerRef.load(finalUrl);
                         if (sessionId !== loadSessionId) return;
-                        shakaStatus.textContent = "Ready";
+                        shakaStatus.textContent = "Playing";
                         triggerInstantPlay(shakaVideo, false);
                     } catch (error) {
                         if (sessionId === loadSessionId) {
@@ -1184,100 +1394,119 @@
             renderChannels();
         }
 
-        const playlistUrl = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/main/playlist.m3u?t=' + new Date().getTime();
+        function loadPlaylistData() {
+            if (playlistLoaded) return;
+            playlistLoaded = true;
 
-        fetch(playlistUrl, { cache: 'no-store' })
-            .then(response => response.text())
-            .then(data => {
-                const lines = data.split(/\r?\n/);
-                allChannels = [];
-                
-                let currentTitle = '';
-                let currentLogo = 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
-                let currentGroup = 'bangla';
+            const playlistUrl = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/main/playlist.m3u?t=' + new Date().getTime();
 
-                for (let i = 0; i < lines.length; i++) {
-                    let line = lines[i].trim();
+            fetch(playlistUrl, { cache: 'no-store' })
+                .then(response => response.text())
+                .then(data => {
+                    const lines = data.split(/\r?\n/);
+                    allChannels = [];
+                    
+                    let currentTitle = '';
+                    let currentLogo = 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
+                    let currentGroup = 'bangla';
 
-                    if (line.startsWith('#') && !line.startsWith('#EXTINF')) {
-                        let upperLine = line.toUpperCase();
-                        
-                        if (upperLine.includes('INDIAN BANGLA') || upperLine.includes('JALSHA') || upperLine.includes('ZEE BANGLA')) {
-                            currentGroup = 'indian_bangla';
-                        } else if (upperLine.includes('SPORT') || upperLine.includes('CRICKET')) {
-                            currentGroup = 'sports';
-                        } else if (upperLine.includes('BANGLA') && !upperLine.includes('HINDI') && !upperLine.includes('INDIAN')) {
-                            currentGroup = 'bangla';
-                        } else if (upperLine.includes('HINDI') || upperLine.includes('REGIONAL') || upperLine.includes('BOLLYWOOD')) {
-                            currentGroup = 'hindi';
-                        } else if (upperLine.includes('CARTOON') || upperLine.includes('KIDS')) {
-                            currentGroup = 'cartoon';
-                        } else if (upperLine.includes('ENGLISH') || upperLine.includes('MOVIES')) {
-                            currentGroup = 'english';
-                        } else if (upperLine.includes('MUSIC')) {
-                            currentGroup = 'music';
-                        } else if (upperLine.includes('DOCUMENTARY') || upperLine.includes('DOCU')) {
-                            currentGroup = 'documentary';
-                        }
-                        continue;
-                    }
+                    for (let i = 0; i < lines.length; i++) {
+                        let line = lines[i].trim();
 
-                    if (line.startsWith('#EXTINF')) {
-                        let logoMatch = line.match(/tvg-logo="([^"]+)"/);
-                        currentLogo = logoMatch ? logoMatch[1] : 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
-                        
-                        let groupMatch = line.match(/group-title="([^"]+)"/);
-                        if (groupMatch) {
-                            let gTitle = groupMatch[1].trim().toLowerCase();
-                            if (gTitle.includes('indian')) {
+                        if (line.startsWith('#') && !line.startsWith('#EXTINF')) {
+                            let upperLine = line.toUpperCase();
+                            
+                            if (upperLine.includes('INDIAN BANGLA') || upperLine.includes('JALSHA') || upperLine.includes('ZEE BANGLA')) {
                                 currentGroup = 'indian_bangla';
-                            } else if (gTitle.includes('sport') || gTitle.includes('cricket')) {
+                            } else if (upperLine.includes('SPORT') || upperLine.includes('CRICKET')) {
                                 currentGroup = 'sports';
-                            } else if (gTitle.includes('hindi')) {
-                                currentGroup = 'hindi';
-                            } else if (gTitle.includes('cartoon') || gTitle.includes('kids')) {
-                                currentGroup = 'cartoon';
-                            } else if (gTitle.includes('english')) {
-                                currentGroup = 'english';
-                            } else if (gTitle.includes('music')) {
-                                currentGroup = 'music';
-                            } else if (gTitle.includes('docu')) {
-                                currentGroup = 'documentary';
-                            } else if (gTitle.includes('bangla')) {
+                            } else if (upperLine.includes('BANGLA') && !upperLine.includes('HINDI') && !upperLine.includes('INDIAN')) {
                                 currentGroup = 'bangla';
+                            } else if (upperLine.includes('HINDI') || upperLine.includes('REGIONAL') || upperLine.includes('BOLLYWOOD')) {
+                                currentGroup = 'hindi';
+                            } else if (upperLine.includes('CARTOON') || upperLine.includes('KIDS')) {
+                                currentGroup = 'cartoon';
+                            } else if (upperLine.includes('ENGLISH') || upperLine.includes('MOVIES')) {
+                                currentGroup = 'english';
+                            } else if (upperLine.includes('MUSIC')) {
+                                currentGroup = 'music';
+                            } else if (upperLine.includes('DOCUMENTARY') || upperLine.includes('DOCU')) {
+                                currentGroup = 'documentary';
                             }
+                            continue;
                         }
-                        
-                        let nameParts = line.split(',');
-                        currentTitle = nameParts[nameParts.length - 1].trim();
-                    } 
-                    else if (line && !line.startsWith('#')) {
-                        if (currentTitle) {
-                            let rawUrls = [];
-                            let matches = line.match(/(https?:\/\/[^\s]+)/g);
-                            if (matches) {
-                                rawUrls = matches.map(u => u.trim());
-                            } else {
-                                rawUrls = [line];
+
+                        if (line.startsWith('#EXTINF')) {
+                            let logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                            currentLogo = logoMatch ? logoMatch[1] : 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
+                            
+                            let groupMatch = line.match(/group-title="([^"]+)"/);
+                            if (groupMatch) {
+                                let gTitle = groupMatch[1].trim().toLowerCase();
+                                if (gTitle.includes('indian')) {
+                                    currentGroup = 'indian_bangla';
+                                } else if (gTitle.includes('sport') || gTitle.includes('cricket')) {
+                                    currentGroup = 'sports';
+                                } else if (gTitle.includes('hindi')) {
+                                    currentGroup = 'hindi';
+                                } else if (gTitle.includes('cartoon') || gTitle.includes('kids')) {
+                                    currentGroup = 'cartoon';
+                                } else if (gTitle.includes('english')) {
+                                    currentGroup = 'english';
+                                } else if (gTitle.includes('music')) {
+                                    currentGroup = 'music';
+                                } else if (gTitle.includes('docu')) {
+                                    currentGroup = 'documentary';
+                                } else if (gTitle.includes('bangla')) {
+                                    currentGroup = 'bangla';
+                                }
                             }
+                            
+                            let nameParts = line.split(',');
+                            currentTitle = nameParts[nameParts.length - 1].trim();
+                        } 
+                        else if (line && !line.startsWith('#')) {
+                            if (currentTitle) {
+                                let rawUrls = [];
+                                let matches = line.match(/(https?:\/\/[^\s]+)/g);
+                                if (matches) {
+                                    rawUrls = matches.map(u => u.trim());
+                                } else {
+                                    rawUrls = [line];
+                                }
 
-                            allChannels.push({
-                                name: currentTitle,
-                                logo: currentLogo,
-                                url: rawUrls.length === 1 ? rawUrls[0] : rawUrls,
-                                group: currentGroup
-                            });
+                                allChannels.push({
+                                    name: currentTitle,
+                                    logo: currentLogo,
+                                    url: rawUrls.length === 1 ? rawUrls[0] : rawUrls,
+                                    group: currentGroup
+                                });
 
-                            currentTitle = '';
+                                currentTitle = '';
+                            }
                         }
                     }
-                }
-                renderChannels();
-            })
-            .catch(err => {
-                console.error('Error fetching playlist:', err);
-                document.getElementById('channelContainer').innerHTML = '<p style="text-align: center; color: red; grid-column: span 4; padding: 20px;">প্লেলিস্ট লোড করতে সমস্যা হয়েছে!</p>';
-            });
+                    renderChannels();
+                })
+                .catch(err => {
+                    console.error('Error fetching playlist:', err);
+                    document.getElementById('channelContainer').innerHTML = '<p style="text-align: center; color: red; grid-column: span 4; padding: 20px;">প্লেলিস্ট লোড করতে সমস্যা হয়েছে!</p>';
+                });
+        }
+
+        function startAppAfterAuth() {
+            initPlayer();
+            loadPlaylistData();
+        }
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            const allowed = await window.__PB_AUTH_READY__;
+            if (!allowed && IS_PAID_DOMAIN) {
+                document.getElementById("pbLoginOverlay").style.display = "flex";
+                return;
+            }
+            startAppAfterAuth();
+        });
     </script>
 </body>
 </html>
