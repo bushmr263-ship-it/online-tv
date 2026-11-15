@@ -76,7 +76,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
     <meta name="referrer" content="no-referrer">
-    
+
     <title>PB TV - Live TV Streaming, Sports, News & Bangla Channels</title>
     <meta name="title" content="PB TV - Live TV Streaming, Sports, News & Bangla Channels">
     <meta name="description" content="Watch live TV streaming, sports channels like T Sports, A Sports, Star Sports, and Bangladeshi, Indian news & entertainment channels for free on PB TV.">
@@ -102,13 +102,13 @@
     <link rel="icon" type="image/png" href="https://i.ibb.co.com/PvnVqbdS/cpt-1469868507562.jpg">
 
     <!-- Shaka Player -->
-    <link rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css">
+    <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/shaka-player.ui.min.js"></script>
 
     <!-- Video.js -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"></script>
-    
+
     <!-- HLS.js -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
@@ -121,42 +121,42 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/4.7.2/dash.all.min.js"></script>
     <!-- Clappr -->
     <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
-    
+
     <style>
         :root {
-            --bg-color: #161b22; 
-            --accent-color: #e5b860; 
+            --bg-color: #161b22;
+            --accent-color: #e5b860;
         }
 
-        body { 
-            background: #0b0e14; 
-            color: #fff; 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            padding: 20px; 
+        body {
+            background: #0b0e14;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
         }
 
-        .main-container { 
-            display: flex; 
-            gap: 20px; 
-            max-width: 1800px; 
-            margin: auto; 
-            flex-wrap: wrap; 
-            justify-content: center; 
+        .main-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1800px;
+            margin: auto;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        .player-section { 
-            flex: 3.7; 
-            min-width: 320px; 
-            background: var(--bg-color); 
-            padding: 20px; 
-            border-radius: 12px; 
-        } 
-        
+        .player-section {
+            flex: 3.7;
+            min-width: 320px;
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
         .header-wrapper {
             display: flex;
             align-items: center;
@@ -166,11 +166,11 @@
             flex-wrap: wrap;
         }
 
-        .logo-header { 
-            font-size: 26px; 
-            font-weight: 800; 
-            color: var(--accent-color); 
-            letter-spacing: 2px; 
+        .logo-header {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--accent-color);
+            letter-spacing: 2px;
             text-transform: uppercase;
             text-shadow: 0 0 10px rgba(229, 184, 96, 0.3);
             margin: 0;
@@ -229,7 +229,7 @@
             justify-content: center;
             flex-wrap: wrap;
         }
-        
+
         .server-btn {
             background: #21262d;
             color: #fff;
@@ -295,16 +295,16 @@
             border-color: var(--accent-color);
         }
 
-        .channel-list { 
-            display: grid; 
-            grid-template-columns: repeat(4, minmax(0, 1fr)); 
-            height: 72vh; 
+        .channel-list {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            height: 72vh;
             overflow-y: auto;
-            background: var(--bg-color); 
-            padding: 15px; 
+            background: var(--bg-color);
+            padding: 15px;
             padding-right: 10px;
-            border-radius: 12px 12px 0 0; 
-            align-content: start; 
+            border-radius: 12px 12px 0 0;
+            align-content: start;
             gap: 10px;
         }
 
@@ -342,22 +342,22 @@
         .whatsapp-btn { background: #25d366; }
         .whatsapp-btn:hover { background: #1ebe5d; border-color: #fff; }
 
-        .video-box { 
-            width: 100%; 
-            aspect-ratio: 16/9; 
-            background: #000; 
-            border-radius: 8px; 
-            overflow: hidden; 
-            position: relative; 
+        .video-box {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
         }
-        
-        #my-video, #clappr-container, #html5-video { 
-            width: 100% !important; 
-            height: 100% !important; 
-            border: none; 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
+
+        #my-video, #clappr-container, #html5-video {
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         #my-video video,
@@ -419,30 +419,30 @@
             padding: 8px 12px;
             font-size: 12px;
         }
-        
-        .modes { 
-            display: flex; 
-            gap: 8px; 
-            margin-top: 15px; 
-            justify-content: center; 
-            flex-wrap: wrap; 
+
+        .modes {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
             align-items: center;
         }
-        
-        .btn { 
-            background: #333; 
-            color: #fff; 
-            border: none; 
-            padding: 8px 14px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 13px; 
+
+        .btn {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
         }
-        
-        .btn:hover { 
-            background: var(--accent-color); 
-            color: #000; 
+
+        .btn:hover {
+            background: var(--accent-color);
+            color: #000;
         }
 
         .quality-buttons-wrap {
@@ -477,76 +477,76 @@
             color: #000;
             border-color: var(--accent-color);
         }
-        
-        .pip-btn { 
-            background: #ff4757 !important; 
-            color: #fff !important; 
+
+        .pip-btn {
+            background: #ff4757 !important;
+            color: #fff !important;
         }
-        
-        .ch-btn { 
-            background: #21262d; 
-            padding: 10px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            text-align: center; 
-            border: 1px solid #30363d; 
-            transition: 0.3s; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 8px; 
-            width: 100%; 
-            height: 95px; 
-            box-sizing: border-box; 
+
+        .ch-btn {
+            background: #21262d;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            border: 1px solid #30363d;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            height: 95px;
+            box-sizing: border-box;
         }
-        
-        .ch-btn:hover { 
-            background: #30363d; 
-            border-color: var(--accent-color); 
+
+        .ch-btn:hover {
+            background: #30363d;
+            border-color: var(--accent-color);
         }
-        
-        .ch-btn img { 
-            width: 50px; 
-            height: 50px; 
-            object-fit: contain; 
-            pointer-events: none; 
+
+        .ch-btn img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            pointer-events: none;
         }
-        
-        .ch-btn strong { 
-            font-size: 13.2px; 
-            font-weight: bold; 
-            color: var(--accent-color); 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            width: 100%; 
+
+        .ch-btn strong {
+            font-size: 13.2px;
+            font-weight: bold;
+            color: var(--accent-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
         }
-        
-        .input-box { 
-            display: flex; 
-            gap: 10px; 
-            max-width: 1800px; 
-            margin: 20px auto 10px auto; 
+
+        .input-box {
+            display: flex;
+            gap: 10px;
+            max-width: 1800px;
+            margin: 20px auto 10px auto;
         }
-        
-        #customUrlInput { 
-            flex: 1; 
-            padding: 15px; 
-            background: var(--bg-color); 
-            border: 1px solid #30363d; 
-            color: white; 
-            border-radius: 6px; 
+
+        #customUrlInput {
+            flex: 1;
+            padding: 15px;
+            background: var(--bg-color);
+            border: 1px solid #30363d;
+            color: white;
+            border-radius: 6px;
         }
-        
-        .play-btn { 
-            background: var(--accent-color); 
-            border: none; 
-            padding: 15px 30px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            color: #000; 
+
+        .play-btn {
+            background: var(--accent-color);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #000;
         }
 
         /* Login Gate Overlay (শুধুমাত্র online-tv-5je.pages.dev এর জন্য) */
@@ -696,14 +696,14 @@
 
     <div class="main-container">
         <div class="player-section">
-            
+
             <div class="header-wrapper">
                 <div class="logo-header">PB TV</div>
-                
+
                 <div id="serverSwitcherBox" class="header-server-switcher">
                     <div class="server-title-notice-row">
                         <div class="server-title" id="activeChannelName">চ্যানেল সিলেক্ট করুন</div>
-                        
+
                         <div class="server-stacked-notices">
                             <div class="server-inline-notice">
                                 <marquee behavior="scroll" direction="left" scrollamount="4">
@@ -717,7 +717,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="server-buttons-wrap" id="serverButtonsContainer"></div>
                 </div>
             </div>
@@ -743,7 +743,7 @@
                 <button class="btn" onclick="switchMode('videojs')">HLS (Video.js)</button>
                 <button class="btn" onclick="switchMode('clappr')">Clappr</button>
                 <button class="btn" onclick="switchMode('html5')">HTML5</button>
-                
+
                 <!-- Manual Quality Buttons -->
                 <div class="quality-buttons-wrap" id="qualityButtonsWrap">
                     <button class="q-btn active" onclick="setManualQualityByHeight(-1, this)">Auto</button>
@@ -789,8 +789,6 @@
         <button class="play-btn" onclick="playCustom()">প্লে করুন</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/shaka-player.ui.min.js"></script>
-
     <script>
         let liveSessionInterval = null;
 
@@ -803,13 +801,13 @@
             return devId;
         }
 
-        function forceLogoutToLogin(messageText) {
+        async function forceLogoutToLogin(messageText) {
             if (liveSessionInterval) {
                 clearInterval(liveSessionInterval);
                 liveSessionInterval = null;
             }
             if (typeof cleanupPreviousPlayers === "function") {
-                cleanupPreviousPlayers();
+                await cleanupPreviousPlayers();
             }
             localStorage.removeItem("pb_logged_username");
             localStorage.removeItem("pb_device_id");
@@ -834,7 +832,7 @@
             const device = localStorage.getItem("pb_device_id");
 
             if (!user || !device) {
-                forceLogoutToLogin("");
+                await forceLogoutToLogin("");
                 return false;
             }
 
@@ -843,12 +841,12 @@
                 const entry = users && users[user];
 
                 if (!entry || !entry.active) {
-                    forceLogoutToLogin("আপনার অ্যাকাউন্টটি ব্লক বা বাতিল করা হয়েছে!");
+                    await forceLogoutToLogin("আপনার অ্যাকাউন্টটি ব্লক বা বাতিল করা হয়েছে!");
                     return false;
                 }
 
                 if (entry.deviceId && entry.deviceId !== device) {
-                    forceLogoutToLogin("অন্য ডিভাইস থেকে লগইন করা হয়েছে! এই সেশনটি লগআউট করা হয়েছে।");
+                    await forceLogoutToLogin("অন্য ডিভাইস থেকে লগইন করা হয়েছে! এই সেশনটি লগআউট করা হয়েছে।");
                     return false;
                 }
 
@@ -956,10 +954,9 @@
             if (window.innerWidth <= 768) return;
             const widthThreshold = window.outerWidth - window.innerWidth > 160;
             const heightThreshold = window.outerHeight - window.innerHeight > 160;
-            
+
             if (widthThreshold || heightThreshold) {
                 document.body.innerHTML = "<div style='background:black;height:100vh;display:flex;justify-content:center;align-items:center;'><h1 style='color:red;font-family:sans-serif;text-align:center;'>⛔ Security Alert: Developer Tools are blocked on this site!</h1></div>";
-                window.location.href = "about:blank";
             }
         }
         setInterval(checkDevTools, 1000);
@@ -970,7 +967,7 @@
         const html5El = document.getElementById('html5-video');
         let playerInstance = videojs('my-video', { autoplay: true, fluid: false });
         let clapprInstance;
-        let hls; 
+        let hls;
         let dashPlayer;
         let currentMode = 'shaka';
         let currentUrl = '';
@@ -986,77 +983,78 @@
         let playlistLoaded = false;
 
         async function initPlayer() {
-          const video = document.getElementById("video");
-          const container = document.getElementById("player-container");
-          const status = document.getElementById("status");
+            const video = document.getElementById("video");
+            const container = document.getElementById("player-container");
+            const status = document.getElementById("status");
 
-          try {
-            shaka.polyfill.installAll();
+            try {
+                shaka.polyfill.installAll();
 
-            if (!shaka.Player.isBrowserSupported()) {
-              status.textContent = "Browser Not Supported";
-              return;
+                if (!shaka.Player.isBrowserSupported()) {
+                    status.textContent = "Browser Not Supported";
+                    return;
+                }
+
+                const player = new shaka.Player();
+                shakaPlayerRef = player;
+                await player.attach(video);
+
+                player.configure({
+                    streaming: {
+                        retryParameters: {
+                            timeout: 6000,
+                            maxAttempts: 1,
+                            baseDelay: 300,
+                            backoffFactor: 1.5,
+                            fuzzFactor: 0.2
+                        }
+                    },
+                    manifest: {
+                        retryParameters: {
+                            timeout: 6000,
+                            maxAttempts: 1,
+                            baseDelay: 300,
+                            backoffFactor: 1.5,
+                            fuzzFactor: 0.2
+                        }
+                    }
+                });
+
+                const ui = new shaka.ui.Overlay(
+                    player,
+                    container,
+                    video
+                );
+                shakaUiRef = ui;
+
+                ui.configure({
+                    addBigPlayButton: false,
+                    controlPanelElements: [
+                        "play_pause",
+                        "volume",
+                        "time_and_duration",
+                        "spacer",
+                        "quality",
+                        "picture_in_picture",
+                        "fullscreen"
+                    ]
+                });
+
+                video.addEventListener("playing", () => {
+                    if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
+                    status.textContent = "Playing";
+                });
+
+                // অটো সার্ভার চেঞ্জ বন্ধ: এরর হলে শুধু স্ট্যাটাস দেখাবে
+                player.addEventListener("error", () => {
+                    if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
+                    status.textContent = "Playback Error";
+                });
+
+            } catch (error) {
+                status.textContent = "Unable to Play Video";
+                console.error(error);
             }
-
-            const player = new shaka.Player();
-            shakaPlayerRef = player;
-            await player.attach(video);
-
-            player.configure({
-              streaming: {
-                retryParameters: {
-                  timeout: 6000,
-                  maxAttempts: 1,
-                  baseDelay: 300,
-                  backoffFactor: 1.5,
-                  fuzzFactor: 0.2
-                }
-              },
-              manifest: {
-                retryParameters: {
-                  timeout: 6000,
-                  maxAttempts: 1,
-                  baseDelay: 300,
-                  backoffFactor: 1.5,
-                  fuzzFactor: 0.2
-                }
-              }
-            });
-
-            const ui = new shaka.ui.Overlay(
-              player,
-              container,
-              video
-            );
-            shakaUiRef = ui;
-
-            ui.configure({
-              addBigPlayButton: false,
-              controlPanelElements: [
-                "play_pause",
-                "volume",
-                "time_and_duration",
-                "spacer",
-                "quality",
-                "picture_in_picture",
-                "fullscreen"
-              ]
-            });
-
-            video.addEventListener("playing", () => {
-              if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
-              status.textContent = "Playing";
-            });
-
-            player.addEventListener("error", (event) => {
-              status.textContent = "Skipping...";
-              handleFallback();
-            });
-
-          } catch (error) {
-            status.textContent = "Unable to Play Video";
-            console.error(error);
-          }
         }
 
         function getVjsTargetVideo() {
@@ -1095,6 +1093,7 @@
             let urls = Array.isArray(ch.url) ? ch.url : [ch.url];
             channelNameEl.innerText = ch.name + " - সার্ভার পরিবর্তন করুন";
 
+            // শুধু বাটনে ক্লিক করলেই সার্ভার পরিবর্তন হবে
             urls.forEach((link, index) => {
                 const sBtn = document.createElement('button');
                 sBtn.className = 'server-btn';
@@ -1121,30 +1120,15 @@
             }
         }
 
+        // অটো সার্ভার সুইচ সম্পূর্ণ নিষ্ক্রিয় রাখা হয়েছে
         function handleFallback() {
-            if (!currentChannelObj) {
-                document.getElementById("status").textContent = "Unable to Play";
-                return;
+            if (loadTimeoutTimer) {
+                clearTimeout(loadTimeoutTimer);
+                loadTimeoutTimer = null;
             }
-            let urls = Array.isArray(currentChannelObj.url) ? currentChannelObj.url : [currentChannelObj.url];
-            
-            // বর্তমান চ্যানেলে থাকা সার্ভারগুলোর ভেতরে চেঞ্জ হবে
-            if (currentServerIndex < urls.length - 1) {
-                currentServerIndex++;
-                
-                const serverBtns = document.querySelectorAll('.server-btn');
-                serverBtns.forEach((b, idx) => {
-                    if (idx === currentServerIndex) {
-                        b.classList.add('active');
-                    } else {
-                        b.classList.remove('active');
-                    }
-                });
-
-                loadChannelUrl(urls[currentServerIndex], currentMode);
-            } else {
-                // সব সার্ভার শেষ হলে পরের চ্যানেলে অটোমেটিক যাবে না
-                document.getElementById("status").textContent = "Stream Unavailable";
+            const statusEl = document.getElementById("status");
+            if (statusEl) {
+                statusEl.textContent = "Stream Unavailable";
             }
         }
 
@@ -1179,7 +1163,7 @@
             }
         }
 
-        function cleanupPreviousPlayers() {
+        async function cleanupPreviousPlayers() {
             if (stallCheckInterval) {
                 clearInterval(stallCheckInterval);
                 stallCheckInterval = null;
@@ -1201,7 +1185,7 @@
                 clapprInstance = null;
             }
             if (shakaPlayerRef) {
-                shakaPlayerRef.unload().catch(() => {});
+                try { await shakaPlayerRef.unload(); } catch (e) {}
             }
 
             const vjsTarget = getVjsTargetVideo();
@@ -1222,7 +1206,7 @@
             const sessionId = ++loadSessionId;
             let finalUrl = url;
 
-            currentUrl = url; 
+            currentUrl = url;
             currentMode = mode;
 
             const shakaContainer = document.getElementById("player-container");
@@ -1238,16 +1222,10 @@
             html5El.style.display = 'none';
             shakaContainer.style.display = 'none';
 
-            cleanupPreviousPlayers();
-            shakaStatus.textContent = "Loading...";
+            await cleanupPreviousPlayers();
+            if (sessionId !== loadSessionId) return;
 
-            // ৭ সেকেন্ডে ভিডিও চালু না হলে বর্তমান চ্যানেলের পরের সার্ভারে চেঞ্জ হবে
-            loadTimeoutTimer = setTimeout(() => {
-                if (sessionId === loadSessionId) {
-                    shakaStatus.textContent = "Switching...";
-                    handleFallback();
-                }
-            }, 7000);
+            shakaStatus.textContent = "Loading...";
 
             const qBtns = document.querySelectorAll('.q-btn');
             qBtns.forEach((b, i) => {
@@ -1255,7 +1233,7 @@
                 else b.classList.remove('active');
             });
 
-            const triggerInstantPlay = (mediaObj, isVjs = false) => {
+            const triggerInstantPlay = (mediaObj) => {
                 mediaObj.muted = false;
                 mediaObj.volume = 1.0;
                 let playPromise = mediaObj.play();
@@ -1270,23 +1248,24 @@
             if (mode === 'clappr') {
                 clapprEl.style.display = 'block';
                 clapprInstance = new Clappr.Player({
-                    source: finalUrl, 
-                    parentId: "#clappr-container", 
-                    width: '100%', 
-                    height: '100%', 
+                    source: finalUrl,
+                    parentId: "#clappr-container",
+                    width: '100%',
+                    height: '100%',
                     autoPlay: true,
                     mute: false
                 });
             } else if (mode === 'html5') {
                 html5El.style.display = 'block';
                 html5El.src = finalUrl;
-                triggerInstantPlay(html5El, false);
+                triggerInstantPlay(html5El);
                 html5El.onplaying = () => {
-                    if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
                     shakaStatus.textContent = "Playing";
                 };
                 html5El.onerror = () => {
-                    if (sessionId === loadSessionId) handleFallback();
+                    if (sessionId === loadSessionId) {
+                        shakaStatus.textContent = "Stream Unavailable";
+                    }
                 };
             } else if (mode === 'videojs') {
                 videoEl.style.display = 'block';
@@ -1302,19 +1281,18 @@
                     vjsTarget.style.visibility = 'visible';
                     vjsTarget.style.opacity = '1';
                     vjsTarget.onplaying = () => {
-                        if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
                         shakaStatus.textContent = "Playing";
                     };
                 }
-                
+
                 if (finalUrl.includes('.mpd') || finalUrl.includes('dash')) {
                     if (typeof dashjs !== 'undefined') {
                         dashPlayer = dashjs.MediaPlayer().create();
                         dashPlayer.initialize(vjsTarget, finalUrl, true);
-                        triggerInstantPlay(vjsTarget, true);
+                        triggerInstantPlay(vjsTarget);
                     } else {
                         playerInstance.src({ src: finalUrl, type: 'application/dash+xml' });
-                        triggerInstantPlay(vjsTarget, true);
+                        triggerInstantPlay(vjsTarget);
                     }
                 } else if (Hls.isSupported() && !finalUrl.includes('.mpd')) {
                     hls = new Hls({
@@ -1339,11 +1317,11 @@
                     hls.attachMedia(vjsTarget);
 
                     hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-                        triggerInstantPlay(vjsTarget, true);
+                        triggerInstantPlay(vjsTarget);
                     });
 
                     hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                        triggerInstantPlay(vjsTarget, true);
+                        triggerInstantPlay(vjsTarget);
                     });
 
                     let lastTime = 0;
@@ -1358,7 +1336,7 @@
                                 stallCount++;
                                 if (stallCount >= 3) {
                                     clearInterval(stallCheckInterval);
-                                    handleFallback();
+                                    shakaStatus.textContent = "Stalled";
                                 }
                             } else {
                                 stallCount = 0;
@@ -1369,15 +1347,15 @@
 
                     hls.on(Hls.Events.ERROR, function (event, data) {
                         if (data.fatal && sessionId === loadSessionId) {
-                            handleFallback();
+                            shakaStatus.textContent = "Stream Unavailable";
                         }
                     });
                 } else if (vjsTarget.canPlayType('application/vnd.apple.mpegurl')) {
                     vjsTarget.src = finalUrl;
-                    triggerInstantPlay(vjsTarget, true);
+                    triggerInstantPlay(vjsTarget);
                 } else {
                     playerInstance.src({ src: finalUrl, type: 'application/x-mpegURL' });
-                    triggerInstantPlay(vjsTarget, true);
+                    triggerInstantPlay(vjsTarget);
                 }
             } else {
                 shakaContainer.style.display = 'block';
@@ -1390,11 +1368,10 @@
                         await shakaPlayerRef.load(finalUrl);
                         if (sessionId !== loadSessionId) return;
                         shakaStatus.textContent = "Playing";
-                        triggerInstantPlay(shakaVideo, false);
+                        triggerInstantPlay(shakaVideo);
                     } catch (error) {
                         if (sessionId === loadSessionId) {
-                            shakaStatus.textContent = "Switching...";
-                            handleFallback();
+                            shakaStatus.textContent = "Stream Unavailable";
                         }
                     }
                 }
@@ -1403,7 +1380,7 @@
 
         function playCustom() {
             const url = document.getElementById('customUrlInput').value;
-            if(url) {
+            if (url) {
                 document.getElementById('serverButtonsContainer').innerHTML = "";
                 document.getElementById('activeChannelName').innerText = "Custom URL - সার্ভার পরিবর্তন করুন";
                 currentChannelObj = null;
@@ -1418,10 +1395,10 @@
             let filteredChannels = allChannels.filter(ch => {
                 if (currentFilter === 'all') return true;
                 if (!ch.group) return false;
-                
+
                 let chGroup = ch.group.toLowerCase().replace(/[\s_]+/g, '');
                 let targetGroup = currentFilter.toLowerCase().replace(/[\s_]+/g, '');
-                
+
                 return chGroup === targetGroup;
             });
 
@@ -1429,17 +1406,17 @@
                 filteredChannels.forEach((ch) => {
                     const btn = document.createElement('div');
                     btn.className = 'ch-btn';
-                    
+
                     let img = document.createElement('img');
                     img.src = ch.logo;
                     img.onerror = () => { img.src = "https://i.postimg.cc/W1z5BGPZ/20240823_024712.png"; };
-                    
+
                     let strong = document.createElement('strong');
                     strong.innerText = ch.name;
-                    
+
                     btn.appendChild(img);
                     btn.appendChild(strong);
-                    
+
                     btn.onclick = () => loadChannel(ch);
                     container.appendChild(btn);
                 });
@@ -1470,7 +1447,7 @@
                 .then(data => {
                     const lines = data.split(/\r?\n/);
                     allChannels = [];
-                    
+
                     let currentTitle = '';
                     let currentLogo = 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
                     let currentGroup = 'bangla';
@@ -1480,7 +1457,7 @@
 
                         if (line.startsWith('#') && !line.startsWith('#EXTINF')) {
                             let upperLine = line.toUpperCase();
-                            
+
                             if (upperLine.includes('INDIAN BANGLA') || upperLine.includes('JALSHA') || upperLine.includes('ZEE BANGLA')) {
                                 currentGroup = 'indian_bangla';
                             } else if (upperLine.includes('SPORT') || upperLine.includes('CRICKET')) {
@@ -1504,7 +1481,7 @@
                         if (line.startsWith('#EXTINF')) {
                             let logoMatch = line.match(/tvg-logo="([^"]+)"/);
                             currentLogo = logoMatch ? logoMatch[1] : 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
-                            
+
                             let groupMatch = line.match(/group-title="([^"]+)"/);
                             if (groupMatch) {
                                 let gTitle = groupMatch[1].trim().toLowerCase();
@@ -1526,11 +1503,10 @@
                                     currentGroup = 'bangla';
                                 }
                             }
-                            
+
                             let nameParts = line.split(',');
                             currentTitle = nameParts[nameParts.length - 1].trim();
-                        } 
-                        else if (line && !line.startsWith('#')) {
+                        } else if (line && !line.startsWith('#')) {
                             if (currentTitle) {
                                 let rawUrls = [];
                                 let matches = line.match(/(https?:\/\/[^\s]+)/g);
