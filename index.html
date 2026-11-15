@@ -982,6 +982,32 @@
         let shakaUiRef = null;
         let playlistLoaded = false;
 
+        function isMpdUrl(rawUrl) {
+            const clean = String(rawUrl || '').split('|')[0].split('?')[0].trim().toLowerCase();
+            return clean.endsWith('.mpd') || String(rawUrl || '').toLowerCase().includes('.mpd');
+        }
+
+        function extractClearKeys(rawUrl, fallbackDrm = null) {
+            const rawStr = String(rawUrl || '').trim();
+            const pipePart = rawStr.includes('|') ? rawStr.split('|')[1] : '';
+            let scheme = (fallbackDrm && fallbackDrm.scheme) ? String(fallbackDrm.scheme).trim().toLowerCase() : '';
+            let license = (fallbackDrm && fallbackDrm.license) ? String(fallbackDrm.license).trim() : '';
+
+            if (pipePart) {
+                const params = new URLSearchParams(pipePart.replace(/&amp;/g, '&'));
+                if (!scheme && params.get('drmScheme')) scheme = params.get('drmScheme').trim().toLowerCase();
+                if (!license && params.get('drmLicense')) license = params.get('drmLicense').trim();
+            }
+
+            if ((!scheme || scheme === 'clearkey') && license && license.includes(':')) {
+                const [kidPart, keyPart] = license.split(':');
+                const kid = (kidPart || '').replace(/[^0-9a-fA-F]/g, '').toLowerCase();
+                const key = (keyPart || '').replace(/[^0-9a-fA-F]/g, '').toLowerCase();
+                if (kid && key) return { [kid]: key };
+            }
+            return null;
+        }
+
         async function initPlayer() {
             const video = document.getElementById("video");
             const container = document.getElementById("player-container");
@@ -1079,7 +1105,11 @@
         }
 
         function switchMode(mode) {
-            if (currentUrl) loadChannelUrl(currentUrl, mode);
+            if (currentUrl) {
+                // .mpd ফাইল শুধু Shaka Player দিয়ে লোড হবে
+                const targetMode = isMpdUrl(currentUrl) ? 'shaka' : mode;
+                loadChannelUrl(currentUrl, targetMode);
+            }
         }
 
         function loadChannel(ch) {
@@ -1120,7 +1150,7 @@
             }
         }
 
-        // অটো সার্ভার সুইচ সম্পূর্ণ নিষ্ক্রিয় রাখা হয়েছে
+        // অটো সার্ভার সুইচ সম্পূর্ণ নিষ্ক্রিয় রাখা হয়েছে
         function handleFallback() {
             if (loadTimeoutTimer) {
                 clearTimeout(loadTimeoutTimer);
@@ -1185,7 +1215,10 @@
                 clapprInstance = null;
             }
             if (shakaPlayerRef) {
-                try { await shakaPlayerRef.unload(); } catch (e) {}
+                try {
+                    await shakaPlayerRef.unload();
+                    shakaPlayerRef.configure({ drm: { clearKeys: {} } });
+                } catch (e) {}
             }
 
             const vjsTarget = getVjsTargetVideo();
@@ -1204,10 +1237,13 @@
 
         async function loadChannelUrl(url, mode = 'shaka') {
             const sessionId = ++loadSessionId;
-            let finalUrl = url;
+            // .mpd ফাইল হলে শুধুমাত্র Shaka Player দিয়ে লোড হবে
+            const effectiveMode = isMpdUrl(url) ? 'shaka' : mode;
+            const clearKeys = extractClearKeys(url, currentChannelObj ? currentChannelObj.drm : null);
+            let finalUrl = String(url || '').split('|')[0].trim();
 
             currentUrl = url;
-            currentMode = mode;
+            currentMode = effectiveMode;
 
             const shakaContainer = document.getElementById("player-container");
             const shakaVideo = document.getElementById("video");
@@ -1245,7 +1281,7 @@
                 }
             };
 
-            if (mode === 'clappr') {
+            if (effectiveMode === 'clappr') {
                 clapprEl.style.display = 'block';
                 clapprInstance = new Clappr.Player({
                     source: finalUrl,
@@ -1255,7 +1291,7 @@
                     autoPlay: true,
                     mute: false
                 });
-            } else if (mode === 'html5') {
+            } else if (effectiveMode === 'html5') {
                 html5El.style.display = 'block';
                 html5El.src = finalUrl;
                 triggerInstantPlay(html5El);
@@ -1267,7 +1303,7 @@
                         shakaStatus.textContent = "Stream Unavailable";
                     }
                 };
-            } else if (mode === 'videojs') {
+            } else if (effectiveMode === 'videojs') {
                 videoEl.style.display = 'block';
                 if (playerInstance && playerInstance.el) {
                     playerInstance.el().style.display = 'block';
@@ -1285,16 +1321,7 @@
                     };
                 }
 
-                if (finalUrl.includes('.mpd') || finalUrl.includes('dash')) {
-                    if (typeof dashjs !== 'undefined') {
-                        dashPlayer = dashjs.MediaPlayer().create();
-                        dashPlayer.initialize(vjsTarget, finalUrl, true);
-                        triggerInstantPlay(vjsTarget);
-                    } else {
-                        playerInstance.src({ src: finalUrl, type: 'application/dash+xml' });
-                        triggerInstantPlay(vjsTarget);
-                    }
-                } else if (Hls.isSupported() && !finalUrl.includes('.mpd')) {
+                if (Hls.isSupported() && !isMpdUrl(finalUrl)) {
                     hls = new Hls({
                         enableWorker: true,
                         lowLatencyMode: false,
@@ -1365,6 +1392,11 @@
                 if (shakaPlayerRef && finalUrl && sessionId === loadSessionId) {
                     try {
                         shakaStatus.textContent = "Loading...";
+                        if (clearKeys) {
+                            shakaPlayerRef.configure({
+                                drm: { clearKeys: clearKeys }
+                            });
+                        }
                         await shakaPlayerRef.load(finalUrl);
                         if (sessionId !== loadSessionId) return;
                         shakaStatus.textContent = "Playing";
@@ -1407,14 +1439,25 @@
                     const btn = document.createElement('div');
                     btn.className = 'ch-btn';
 
-                    let img = document.createElement('img');
-                    img.src = ch.logo;
-                    img.onerror = () => { img.src = "https://i.postimg.cc/W1z5BGPZ/20240823_024712.png"; };
+                    const logoVal = String(ch.logo || '').trim();
+                    if (/^(https?:\/\/|data:|\/|\.\.?\/)/i.test(logoVal)) {
+                        let img = document.createElement('img');
+                        img.src = logoVal;
+                        img.onerror = () => { img.src = "https://i.postimg.cc/W1z5BGPZ/20240823_024712.png"; };
+                        btn.appendChild(img);
+                    } else {
+                        let iconSpan = document.createElement('span');
+                        iconSpan.style.fontSize = '34px';
+                        iconSpan.style.lineHeight = '50px';
+                        iconSpan.style.height = '50px';
+                        iconSpan.style.pointerEvents = 'none';
+                        iconSpan.innerText = logoVal || '▶️';
+                        btn.appendChild(iconSpan);
+                    }
 
                     let strong = document.createElement('strong');
                     strong.innerText = ch.name;
 
-                    btn.appendChild(img);
                     btn.appendChild(strong);
 
                     btn.onclick = () => loadChannel(ch);
@@ -1440,13 +1483,32 @@
             if (playlistLoaded) return;
             playlistLoaded = true;
 
-            const playlistUrl = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/main/playlist.m3u?t=' + new Date().getTime();
+            const cacheBust = '?t=' + new Date().getTime();
+            const sportUrl = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/main/sport.json' + cacheBust;
+            const playlistUrl = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/main/playlist.m3u' + cacheBust;
 
-            fetch(playlistUrl, { cache: 'no-store' })
+            const sportPromise = fetch(sportUrl, { cache: 'no-store' })
+                .then(res => res.ok ? res.json() : [])
+                .then(raw => {
+                    const list = Array.isArray(raw) ? raw : (raw.channels || raw.sports || raw.data || []);
+                    return list
+                        .filter(item => item && item.name && item.url)
+                        .map(item => ({
+                            name: item.name,
+                            logo: item.logo || '▶️',
+                            url: item.url,
+                            group: 'sports',
+                            drm: item.drm || null,
+                            tone: item.tone || 'blue'
+                        }));
+                })
+                .catch(() => []);
+
+            const m3uPromise = fetch(playlistUrl, { cache: 'no-store' })
                 .then(response => response.text())
                 .then(data => {
                     const lines = data.split(/\r?\n/);
-                    allChannels = [];
+                    const m3uChannels = [];
 
                     let currentTitle = '';
                     let currentLogo = 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
@@ -1516,7 +1578,7 @@
                                     rawUrls = [line];
                                 }
 
-                                allChannels.push({
+                                m3uChannels.push({
                                     name: currentTitle,
                                     logo: currentLogo,
                                     url: rawUrls.length === 1 ? rawUrls[0] : rawUrls,
@@ -1527,6 +1589,13 @@
                             }
                         }
                     }
+                    return m3uChannels;
+                })
+                .catch(() => []);
+
+            Promise.all([sportPromise, m3uPromise])
+                .then(([sportChannels, m3uChannels]) => {
+                    allChannels = [...sportChannels, ...m3uChannels];
                     renderChannels();
                 })
                 .catch(err => {
