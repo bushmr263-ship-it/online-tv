@@ -792,6 +792,8 @@
     <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/shaka-player.ui.min.js"></script>
 
     <script>
+        let liveSessionInterval = null;
+
         function updateDeviceIdDisplay() {
             const devId = getOrCreateDeviceId();
             const box = document.getElementById("pbLoginDeviceBox");
@@ -799,6 +801,77 @@
                 box.textContent = "Device ID: " + devId;
             }
             return devId;
+        }
+
+        function forceLogoutToLogin(messageText) {
+            if (liveSessionInterval) {
+                clearInterval(liveSessionInterval);
+                liveSessionInterval = null;
+            }
+            if (typeof cleanupPreviousPlayers === "function") {
+                cleanupPreviousPlayers();
+            }
+            localStorage.removeItem("pb_logged_username");
+            localStorage.removeItem("pb_device_id");
+            updateDeviceIdDisplay();
+
+            const mainEl = document.querySelector(".main-container");
+            const customBoxEl = document.querySelector(".input-box");
+            if (mainEl) mainEl.style.display = "none";
+            if (customBoxEl) customBoxEl.style.display = "none";
+
+            const overlay = document.getElementById("pbLoginOverlay");
+            const msgEl = document.getElementById("pbLoginMsg");
+            if (msgEl) msgEl.textContent = messageText || "";
+            if (overlay) overlay.style.display = "flex";
+            if (messageText) alert(messageText);
+        }
+
+        async function verifyActiveDeviceSession() {
+            if (!IS_PAID_DOMAIN) return true;
+
+            const user = localStorage.getItem("pb_logged_username");
+            const device = localStorage.getItem("pb_device_id");
+
+            if (!user || !device) {
+                forceLogoutToLogin("");
+                return false;
+            }
+
+            try {
+                const users = await fetchUsersList();
+                const entry = users && users[user];
+
+                if (!entry || !entry.active) {
+                    forceLogoutToLogin("আপনার অ্যাকাউন্টটি ব্লক বা বাতিল করা হয়েছে!");
+                    return false;
+                }
+
+                if (entry.deviceId && entry.deviceId !== device) {
+                    forceLogoutToLogin("অন্য ডিভাইস থেকে লগইন করা হয়েছে! এই সেশনটি লগআউট করা হয়েছে।");
+                    return false;
+                }
+
+                return true;
+            } catch (err) {
+                console.error("Live session check failed:", err);
+                return true;
+            }
+        }
+
+        function startLiveSessionCheck() {
+            if (!IS_PAID_DOMAIN) return;
+            if (liveSessionInterval) clearInterval(liveSessionInterval);
+
+            liveSessionInterval = setInterval(() => {
+                verifyActiveDeviceSession();
+            }, 5000);
+
+            document.addEventListener("visibilitychange", () => {
+                if (!document.hidden) {
+                    verifyActiveDeviceSession();
+                }
+            });
         }
 
         async function handlePbLogin() {
@@ -845,7 +918,14 @@
                 localStorage.setItem("pb_logged_username", username);
                 localStorage.setItem("pb_device_id", deviceId);
 
+                const mainEl = document.querySelector(".main-container");
+                const customBoxEl = document.querySelector(".input-box");
+                if (mainEl) mainEl.style.display = "flex";
+                if (customBoxEl) customBoxEl.style.display = "flex";
+
                 document.getElementById("pbLoginOverlay").style.display = "none";
+                submitBtn.disabled = false;
+                submitBtn.textContent = "লগইন করুন";
                 startAppAfterAuth();
             } catch (err) {
                 console.error("Login failed:", err);
@@ -1048,7 +1128,7 @@
             }
             let urls = Array.isArray(currentChannelObj.url) ? currentChannelObj.url : [currentChannelObj.url];
             
-            // বর্তমান চ্যানেলে থাকা সার্ভারগুলোর (যেমন Server 1, 2, 3 বা 1, 2) ভেতরে চেঞ্জ হবে
+            // বর্তমান চ্যানেলে থাকা সার্ভারগুলোর ভেতরে চেঞ্জ হবে
             if (currentServerIndex < urls.length - 1) {
                 currentServerIndex++;
                 
@@ -1161,7 +1241,7 @@
             cleanupPreviousPlayers();
             shakaStatus.textContent = "Loading...";
 
-            // ৭ সেকেন্ডে ভিডিও চালু না হলে বর্তমান চ্যানেলের পরের সার্ভারে চেঞ্জ হবে, কিন্তু পরের চ্যানেলে যাবে না
+            // ৭ সেকেন্ডে ভিডিও চালু না হলে বর্তমান চ্যানেলের পরের সার্ভারে চেঞ্জ হবে
             loadTimeoutTimer = setTimeout(() => {
                 if (sessionId === loadSessionId) {
                     shakaStatus.textContent = "Switching...";
@@ -1480,6 +1560,7 @@
         }
 
         function startAppAfterAuth() {
+            startLiveSessionCheck();
             initPlayer();
             loadPlaylistData();
         }
@@ -1488,6 +1569,10 @@
             updateDeviceIdDisplay();
             const allowed = await window.__PB_AUTH_READY__;
             if (!allowed && IS_PAID_DOMAIN) {
+                const mainEl = document.querySelector(".main-container");
+                const customBoxEl = document.querySelector(".input-box");
+                if (mainEl) mainEl.style.display = "none";
+                if (customBoxEl) customBoxEl.style.display = "none";
                 document.getElementById("pbLoginOverlay").style.display = "flex";
                 return;
             }
