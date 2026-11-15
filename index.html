@@ -9,7 +9,19 @@
         function getOrCreateDeviceId() {
             let deviceId = localStorage.getItem("pb_device_id");
             if (!deviceId) {
-                deviceId = "dev_" + Date.now() + "_" + Math.random().toString(36).substring(2, 10);
+                const rawSeed = [
+                    navigator.userAgent || "",
+                    navigator.language || "",
+                    screen.width + "x" + screen.height,
+                    new Date().getTimezoneOffset()
+                ].join("|");
+                let hash = 0;
+                for (let i = 0; i < rawSeed.length; i++) {
+                    hash = ((hash << 5) - hash) + rawSeed.charCodeAt(i);
+                    hash |= 0;
+                }
+                const randPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+                deviceId = "PB-" + Math.abs(hash).toString(16).toUpperCase() + "-" + randPart;
                 localStorage.setItem("pb_device_id", deviceId);
             }
             return deviceId;
@@ -62,6 +74,22 @@
             } catch (err) {
                 clearTimeout(timeoutId);
                 throw err;
+            }
+        }
+
+        async function syncDeviceIdToServer(username, deviceId) {
+            try {
+                await fetch(`${AUTH_API_BASE}/bind-device`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: username,
+                        device_id: deviceId,
+                        platform: navigator.platform || "web"
+                    })
+                });
+            } catch (e) {
+                // ব্যাকএন্ড এন্ডপয়েন্ট না থাকলেও লগইন আটকাবে না
             }
         }
 
@@ -635,6 +663,17 @@
             cursor: pointer;
         }
 
+        .pb-device-box {
+            margin-top: 12px;
+            padding: 8px 10px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #58a6ff;
+            word-break: break-all;
+        }
+
         #pbLoginMsg {
             margin-top: 10px;
             font-size: 12px;
@@ -704,6 +743,7 @@
             <input type="text" id="pbLoginUsername" placeholder="Username" autocomplete="username">
             <input type="password" id="pbLoginPassword" placeholder="Password" autocomplete="current-password">
             <button type="button" id="pbLoginSubmitBtn" onclick="handlePbLogin()">লগইন করুন</button>
+            <div class="pb-device-box" id="pbLoginDeviceBox">Device ID: লোড হচ্ছে...</div>
             <div id="pbLoginMsg"></div>
         </div>
     </div>
@@ -806,6 +846,15 @@
     <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/shaka-player.ui.min.js"></script>
 
     <script>
+        function updateDeviceIdDisplay() {
+            const devId = getOrCreateDeviceId();
+            const box = document.getElementById("pbLoginDeviceBox");
+            if (box) {
+                box.textContent = "Device ID: " + devId;
+            }
+            return devId;
+        }
+
         async function handlePbLogin() {
             const usernameInput = document.getElementById("pbLoginUsername");
             const passwordInput = document.getElementById("pbLoginPassword");
@@ -856,6 +905,9 @@
                 const deviceId = getOrCreateDeviceId();
                 localStorage.setItem("pb_logged_username", username);
                 localStorage.setItem("pb_device_id", deviceId);
+                updateDeviceIdDisplay();
+
+                await syncDeviceIdToServer(username, deviceId);
 
                 document.getElementById("pbLoginOverlay").style.display = "none";
                 startAppAfterAuth();
@@ -1025,7 +1077,13 @@
             buttonsContainer.innerHTML = '';
 
             let urls = Array.isArray(ch.url) ? ch.url : [ch.url];
-            channelNameEl.innerText = ch.name + " - সার্ভার পরিবর্তন করুন";
+            const loggedUser = localStorage.getItem("pb_logged_username");
+            const devId = localStorage.getItem("pb_device_id");
+            if (IS_PAID_DOMAIN && loggedUser && devId) {
+                channelNameEl.innerText = `${ch.name} (${loggedUser} | ${devId})`;
+            } else {
+                channelNameEl.innerText = ch.name + " - সার্ভার পরিবর্তন করুন";
+            }
 
             urls.forEach((link, index) => {
                 const sBtn = document.createElement('button');
@@ -1500,6 +1558,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", async function () {
+            updateDeviceIdDisplay();
             const allowed = await window.__PB_AUTH_READY__;
             if (!allowed && IS_PAID_DOMAIN) {
                 document.getElementById("pbLoginOverlay").style.display = "flex";
