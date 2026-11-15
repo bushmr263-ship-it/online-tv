@@ -9,52 +9,10 @@
         function getOrCreateDeviceId() {
             let deviceId = localStorage.getItem("pb_device_id");
             if (!deviceId) {
-                const rawSeed = [
-                    navigator.userAgent || "",
-                    navigator.language || "",
-                    screen.width + "x" + screen.height,
-                    new Date().getTimezoneOffset()
-                ].join("|");
-                let hash = 0;
-                for (let i = 0; i < rawSeed.length; i++) {
-                    hash = ((hash << 5) - hash) + rawSeed.charCodeAt(i);
-                    hash |= 0;
-                }
-                const randPart = Math.random().toString(36).substring(2, 8).toUpperCase();
-                deviceId = "PB-" + Math.abs(hash).toString(16).toUpperCase() + "-" + randPart;
+                deviceId = "Device-" + Math.random().toString(36).substring(2, 9);
                 localStorage.setItem("pb_device_id", deviceId);
             }
             return deviceId;
-        }
-
-        function normalizeUsersData(data) {
-            if (!data) return {};
-            if (Array.isArray(data)) {
-                const map = {};
-                data.forEach(item => {
-                    if (item && item.username) {
-                        map[item.username] = item;
-                    }
-                });
-                return map;
-            }
-            if (data.users && typeof data.users === "object") {
-                return normalizeUsersData(data.users);
-            }
-            return data;
-        }
-
-        function isUserActive(userEntry) {
-            if (!userEntry) return false;
-            if (typeof userEntry === "boolean") return userEntry;
-            if (typeof userEntry === "object") {
-                if (typeof userEntry.active === "boolean") return userEntry.active;
-                if (typeof userEntry.status === "string") {
-                    return userEntry.status.toLowerCase() === "active";
-                }
-                return true;
-            }
-            return Boolean(userEntry);
         }
 
         async function fetchUsersList() {
@@ -69,31 +27,14 @@
                 if (!res.ok) {
                     throw new Error("HTTP " + res.status);
                 }
-                const raw = await res.json();
-                return normalizeUsersData(raw);
+                return await res.json();
             } catch (err) {
                 clearTimeout(timeoutId);
                 throw err;
             }
         }
 
-        async function syncDeviceIdToServer(username, deviceId) {
-            try {
-                await fetch(`${AUTH_API_BASE}/bind-device`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        username: username,
-                        device_id: deviceId,
-                        platform: navigator.platform || "web"
-                    })
-                });
-            } catch (e) {
-                // ব্যাকএন্ড এন্ডপয়েন্ট না থাকলেও লগইন আটকাবে না
-            }
-        }
-
-        // শুধুমাত্র online-tv-5je.pages.dev ডোমেইনে ঢুকলেই ইউজারনেম ও পাসওয়ার্ড লগইন চেক করবে
+        // শুধুমাত্র online-tv-5je.pages.dev ডোমেইনে ঢুকলেই লগইন ও স্ট্যাটাস চেক করবে
         // palashbari-plex.pages.dev সম্পূর্ণ ফ্রি থাকবে
         window.__PB_AUTH_READY__ = (async function checkDomainAccess() {
             if (!IS_PAID_DOMAIN) {
@@ -109,9 +50,14 @@
 
             try {
                 const users = await fetchUsersList();
-                const entry = users[user];
-                if (!entry || !isUserActive(entry)) {
+                const entry = users && users[user];
+                if (!entry || !entry.active) {
                     alert("আপনার অ্যাকাউন্টটি ব্লক বা বাতিল করা হয়েছে!");
+                    localStorage.removeItem("pb_logged_username");
+                    localStorage.removeItem("pb_device_id");
+                    return false;
+                }
+                if (entry.deviceId && entry.deviceId !== device) {
                     localStorage.removeItem("pb_logged_username");
                     localStorage.removeItem("pb_device_id");
                     return false;
@@ -873,41 +819,31 @@
             submitBtn.textContent = "যাচাই হচ্ছে...";
             msgEl.textContent = "";
 
+            const deviceId = getOrCreateDeviceId();
+            updateDeviceIdDisplay();
+
             try {
-                const users = await fetchUsersList();
-                const userRecord = users[username];
+                const res = await fetch(`${AUTH_API_BASE}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        deviceId: deviceId
+                    })
+                });
 
-                if (!userRecord) {
-                    msgEl.textContent = "ইউজারনেম খুঁজে পাওয়া যায়নি।";
+                const result = await res.json();
+
+                if (!result || !result.success) {
+                    msgEl.textContent = (result && result.message) ? result.message : "ভুল username ba password!";
                     submitBtn.disabled = false;
                     submitBtn.textContent = "লগইন করুন";
                     return;
                 }
 
-                if (!isUserActive(userRecord)) {
-                    msgEl.textContent = "আপনার অ্যাকাউন্টটি ব্লক বা বাতিল করা হয়েছে!";
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "লগইন করুন";
-                    return;
-                }
-
-                if (
-                    typeof userRecord === "object" &&
-                    userRecord.password !== undefined &&
-                    String(userRecord.password) !== password
-                ) {
-                    msgEl.textContent = "ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।";
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "লগইন করুন";
-                    return;
-                }
-
-                const deviceId = getOrCreateDeviceId();
                 localStorage.setItem("pb_logged_username", username);
                 localStorage.setItem("pb_device_id", deviceId);
-                updateDeviceIdDisplay();
-
-                await syncDeviceIdToServer(username, deviceId);
 
                 document.getElementById("pbLoginOverlay").style.display = "none";
                 startAppAfterAuth();
@@ -1077,13 +1013,7 @@
             buttonsContainer.innerHTML = '';
 
             let urls = Array.isArray(ch.url) ? ch.url : [ch.url];
-            const loggedUser = localStorage.getItem("pb_logged_username");
-            const devId = localStorage.getItem("pb_device_id");
-            if (IS_PAID_DOMAIN && loggedUser && devId) {
-                channelNameEl.innerText = `${ch.name} (${loggedUser} | ${devId})`;
-            } else {
-                channelNameEl.innerText = ch.name + " - সার্ভার পরিবর্তন করুন";
-            }
+            channelNameEl.innerText = ch.name + " - সার্ভার পরিবর্তন করুন";
 
             urls.forEach((link, index) => {
                 const sBtn = document.createElement('button');
@@ -1118,6 +1048,7 @@
             }
             let urls = Array.isArray(currentChannelObj.url) ? currentChannelObj.url : [currentChannelObj.url];
             
+            // বর্তমান চ্যানেলে থাকা সার্ভারগুলোর (যেমন Server 1, 2, 3 বা 1, 2) ভেতরে চেঞ্জ হবে
             if (currentServerIndex < urls.length - 1) {
                 currentServerIndex++;
                 
@@ -1132,12 +1063,8 @@
 
                 loadChannelUrl(urls[currentServerIndex], currentMode);
             } else {
-                const idx = allChannels.indexOf(currentChannelObj);
-                if (idx !== -1 && idx + 1 < allChannels.length) {
-                    playNextChannel();
-                } else {
-                    document.getElementById("status").textContent = "Stream Unavailable";
-                }
+                // সব সার্ভার শেষ হলে পরের চ্যানেলে অটোমেটিক যাবে না
+                document.getElementById("status").textContent = "Stream Unavailable";
             }
         }
 
@@ -1234,7 +1161,7 @@
             cleanupPreviousPlayers();
             shakaStatus.textContent = "Loading...";
 
-            // ৭ সেকেন্ডে ভিডিও চালু না হলে দ্রুত পরের সার্ভার বা চ্যানেলে চলে যাবে
+            // ৭ সেকেন্ডে ভিডিও চালু না হলে বর্তমান চ্যানেলের পরের সার্ভারে চেঞ্জ হবে, কিন্তু পরের চ্যানেলে যাবে না
             loadTimeoutTimer = setTimeout(() => {
                 if (sessionId === loadSessionId) {
                     shakaStatus.textContent = "Switching...";
