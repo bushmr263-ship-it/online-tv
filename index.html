@@ -1595,7 +1595,7 @@
 
             Promise.all([sportPromise, m3uPromise])
                 .then(([sportChannels, m3uChannels]) => {
-                    allChannels = [...sportChannels, ...m3uChannels];
+                    allChannels = [...m3uChannels, ...sportChannels];
                     renderChannels();
                 })
                 .catch(err => {
