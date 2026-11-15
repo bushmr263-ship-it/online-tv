@@ -702,6 +702,8 @@
         let currentChannelObj = null;
         let currentServerIndex = 0;
         let stallCheckInterval = null;
+        let loadTimeoutTimer = null;
+        let loadSessionId = 0;
         let shakaPlayerRef = null;
         let shakaUiRef = null;
 
@@ -721,6 +723,27 @@
             const player = new shaka.Player();
             shakaPlayerRef = player;
             await player.attach(video);
+
+            player.configure({
+              streaming: {
+                retryParameters: {
+                  timeout: 6000,
+                  maxAttempts: 1,
+                  baseDelay: 300,
+                  backoffFactor: 1.5,
+                  fuzzFactor: 0.2
+                }
+              },
+              manifest: {
+                retryParameters: {
+                  timeout: 6000,
+                  maxAttempts: 1,
+                  baseDelay: 300,
+                  backoffFactor: 1.5,
+                  fuzzFactor: 0.2
+                }
+              }
+            });
 
             const ui = new shaka.ui.Overlay(
               player,
@@ -742,23 +765,14 @@
               ]
             });
 
-            // নিজের অনুমোদিত ভিডিও স্ট্রিম URL এখানে দিন
-            const streamUrl = "YOUR_AUTHORIZED_STREAM_URL";
-
-            status.textContent = "Loading...";
-
-            await player.load(streamUrl);
-
-            status.textContent = "Ready";
-            video.play().catch(() => {});
-
             video.addEventListener("playing", () => {
+              if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
               status.textContent = "Playing";
             });
 
             player.addEventListener("error", (event) => {
-              status.textContent =
-                "Playback Error: " + event.detail.code;
+              status.textContent = "Skipping...";
+              handleFallback();
             });
 
           } catch (error) {
@@ -826,8 +840,19 @@
             loadChannelUrl(urls[0], currentMode);
         }
 
+        function playNextChannel() {
+            if (!currentChannelObj || allChannels.length === 0) return;
+            const idx = allChannels.indexOf(currentChannelObj);
+            if (idx !== -1 && idx + 1 < allChannels.length) {
+                loadChannel(allChannels[idx + 1]);
+            }
+        }
+
         function handleFallback() {
-            if (!currentChannelObj) return;
+            if (!currentChannelObj) {
+                playNextChannel();
+                return;
+            }
             let urls = Array.isArray(currentChannelObj.url) ? currentChannelObj.url : [currentChannelObj.url];
             
             if (currentServerIndex < urls.length - 1) {
@@ -843,6 +868,8 @@
                 });
 
                 loadChannelUrl(urls[currentServerIndex], currentMode);
+            } else {
+                playNextChannel();
             }
         }
 
@@ -877,7 +904,47 @@
             }
         }
 
+        function cleanupPreviousPlayers() {
+            if (stallCheckInterval) {
+                clearInterval(stallCheckInterval);
+                stallCheckInterval = null;
+            }
+            if (loadTimeoutTimer) {
+                clearTimeout(loadTimeoutTimer);
+                loadTimeoutTimer = null;
+            }
+            if (hls) {
+                try { hls.stopLoad(); hls.destroy(); } catch (e) {}
+                hls = null;
+            }
+            if (dashPlayer) {
+                try { dashPlayer.reset(); } catch (e) {}
+                dashPlayer = null;
+            }
+            if (clapprInstance) {
+                try { clapprInstance.destroy(); } catch (e) {}
+                clapprInstance = null;
+            }
+            if (shakaPlayerRef) {
+                shakaPlayerRef.unload().catch(() => {});
+            }
+
+            const vjsTarget = getVjsTargetVideo();
+            if (playerInstance) {
+                try { playerInstance.pause(); } catch (e) {}
+            }
+            if (vjsTarget) {
+                vjsTarget.pause();
+                vjsTarget.removeAttribute("src");
+                vjsTarget.load();
+            }
+            html5El.pause();
+            html5El.removeAttribute("src");
+            html5El.load();
+        }
+
         async function loadChannelUrl(url, mode = 'shaka') {
+            const sessionId = ++loadSessionId;
             let finalUrl = url;
 
             currentUrl = url; 
@@ -895,22 +962,17 @@
             clapprEl.style.display = 'none';
             html5El.style.display = 'none';
             shakaContainer.style.display = 'none';
-            
-            if (stallCheckInterval) clearInterval(stallCheckInterval);
-            if (hls) { hls.destroy(); hls = null; }
-            if (dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
-            if (clapprInstance) { clapprInstance.destroy(); clapprInstance = null; }
-            
-            if (playerInstance) {
-                playerInstance.pause();
-            }
-            if (vjsTarget) {
-                vjsTarget.pause();
-                vjsTarget.removeAttribute("src");
-                vjsTarget.load();
-            }
-            html5El.pause();
-            html5El.src = "";
+
+            cleanupPreviousPlayers();
+            shakaStatus.textContent = "Loading...";
+
+            // ৭ সেকেন্ডে ভিডিও চালু না হলে দ্রুত পরের সার্ভার বা চ্যানেলে চলে যাবে
+            loadTimeoutTimer = setTimeout(() => {
+                if (sessionId === loadSessionId) {
+                    shakaStatus.textContent = "Switching...";
+                    handleFallback();
+                }
+            }, 7000);
 
             const qBtns = document.querySelectorAll('.q-btn');
             qBtns.forEach((b, i) => {
@@ -919,31 +981,18 @@
             });
 
             const triggerInstantPlay = (mediaObj, isVjs = false) => {
-                if (isVjs) {
-                    mediaObj.muted = false;
-                    mediaObj.volume = 1.0;
-                    let promise = mediaObj.play();
-                    if (promise !== undefined) {
-                        promise.catch(() => {
-                            mediaObj.muted = true;
-                            mediaObj.play().catch(() => {});
-                        });
-                    }
-                } else {
-                    mediaObj.muted = false;
-                    mediaObj.volume = 1.0;
-                    let playPromise = mediaObj.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(() => {
-                            mediaObj.muted = true;
-                            mediaObj.play().catch(() => {});
-                        });
-                    }
+                mediaObj.muted = false;
+                mediaObj.volume = 1.0;
+                let playPromise = mediaObj.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(() => {
+                        mediaObj.muted = true;
+                        mediaObj.play().catch(() => {});
+                    });
                 }
             };
 
             if (mode === 'clappr') {
-                if (shakaPlayerRef) await shakaPlayerRef.unload().catch(() => {});
                 clapprEl.style.display = 'block';
                 clapprInstance = new Clappr.Player({
                     source: finalUrl, 
@@ -954,13 +1003,17 @@
                     mute: false
                 });
             } else if (mode === 'html5') {
-                if (shakaPlayerRef) await shakaPlayerRef.unload().catch(() => {});
                 html5El.style.display = 'block';
                 html5El.src = finalUrl;
                 triggerInstantPlay(html5El, false);
-                html5El.onerror = () => handleFallback();
+                html5El.onplaying = () => {
+                    if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
+                    shakaStatus.textContent = "Playing";
+                };
+                html5El.onerror = () => {
+                    if (sessionId === loadSessionId) handleFallback();
+                };
             } else if (mode === 'videojs') {
-                if (shakaPlayerRef) await shakaPlayerRef.unload().catch(() => {});
                 videoEl.style.display = 'block';
                 if (playerInstance && playerInstance.el) {
                     playerInstance.el().style.display = 'block';
@@ -973,6 +1026,10 @@
                     vjsTarget.style.height = '100%';
                     vjsTarget.style.visibility = 'visible';
                     vjsTarget.style.opacity = '1';
+                    vjsTarget.onplaying = () => {
+                        if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
+                        shakaStatus.textContent = "Playing";
+                    };
                 }
                 
                 if (finalUrl.includes('.mpd') || finalUrl.includes('dash')) {
@@ -994,11 +1051,13 @@
                         backBufferLength: 30,
                         liveSyncDurationCount: 6,
                         liveMaxLatencyDurationCount: 15,
-                        fragLoadingTimeOut: 20000,
-                        fragLoadingMaxRetry: 4,
-                        fragLoadingRetryDelay: 1000,
-                        manifestLoadingMaxRetry: 4,
-                        levelLoadingMaxRetry: 4
+                        fragLoadingTimeOut: 5000,
+                        fragLoadingMaxRetry: 1,
+                        fragLoadingRetryDelay: 300,
+                        manifestLoadingTimeOut: 5000,
+                        manifestLoadingMaxRetry: 1,
+                        levelLoadingTimeOut: 5000,
+                        levelLoadingMaxRetry: 1
                     });
 
                     hls.loadSource(finalUrl);
@@ -1008,19 +1067,23 @@
                         triggerInstantPlay(vjsTarget, true);
                     });
 
-                    hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
                         triggerInstantPlay(vjsTarget, true);
                     });
 
                     let lastTime = 0;
                     let stallCount = 0;
                     stallCheckInterval = setInterval(() => {
+                        if (sessionId !== loadSessionId) {
+                            clearInterval(stallCheckInterval);
+                            return;
+                        }
                         if (vjsTarget && !vjsTarget.paused) {
                             if (vjsTarget.currentTime === lastTime) {
                                 stallCount++;
                                 if (stallCount >= 3) {
-                                    if (hls) hls.startLoad();
-                                    stallCount = 0;
+                                    clearInterval(stallCheckInterval);
+                                    handleFallback();
                                 }
                             } else {
                                 stallCount = 0;
@@ -1030,25 +1093,8 @@
                     }, 2000);
 
                     hls.on(Hls.Events.ERROR, function (event, data) {
-                        if (data.fatal) {
-                            switch (data.type) {
-                                case Hls.ErrorTypes.NETWORK_ERROR:
-                                    hls.startLoad();
-                                    break;
-                                case Hls.ErrorTypes.MEDIA_ERROR:
-                                    hls.recoverMediaError();
-                                    break;
-                                default:
-                                    if (vjsTarget.canPlayType('application/vnd.apple.mpegurl') || finalUrl.includes('.m3u8')) {
-                                        hls.destroy();
-                                        hls = null;
-                                        vjsTarget.src = finalUrl;
-                                        triggerInstantPlay(vjsTarget, true);
-                                    } else {
-                                        handleFallback();
-                                    }
-                                    break;
-                            }
+                        if (data.fatal && sessionId === loadSessionId) {
+                            handleFallback();
                         }
                     });
                 } else if (vjsTarget.canPlayType('application/vnd.apple.mpegurl')) {
@@ -1063,15 +1109,18 @@
                 if (!shakaPlayerRef) {
                     await initPlayer();
                 }
-                if (shakaPlayerRef && finalUrl) {
+                if (shakaPlayerRef && finalUrl && sessionId === loadSessionId) {
                     try {
                         shakaStatus.textContent = "Loading...";
                         await shakaPlayerRef.load(finalUrl);
+                        if (sessionId !== loadSessionId) return;
                         shakaStatus.textContent = "Ready";
-                        shakaVideo.play().catch(() => {});
+                        triggerInstantPlay(shakaVideo, false);
                     } catch (error) {
-                        shakaStatus.textContent = "Unable to Play Video";
-                        console.error(error);
+                        if (sessionId === loadSessionId) {
+                            shakaStatus.textContent = "Switching...";
+                            handleFallback();
+                        }
                     }
                 }
             }
@@ -1102,7 +1151,7 @@
             });
 
             if (filteredChannels.length > 0) {
-                filteredChannels.forEach((ch, idx) => {
+                filteredChannels.forEach((ch) => {
                     const btn = document.createElement('div');
                     btn.className = 'ch-btn';
                     
@@ -1145,12 +1194,11 @@
                 
                 let currentTitle = '';
                 let currentLogo = 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
-                let currentGroup = 'bangla'; // ডিফল্ট গ্রুপ
+                let currentGroup = 'bangla';
 
                 for (let i = 0; i < lines.length; i++) {
                     let line = lines[i].trim();
 
-                    // ১. প্লেলিস্টের কমেন্ট বা হেডার থেকে ক্যাটাগরি ডিটেক্ট করা
                     if (line.startsWith('#') && !line.startsWith('#EXTINF')) {
                         let upperLine = line.toUpperCase();
                         
@@ -1174,7 +1222,6 @@
                         continue;
                     }
 
-                    // ২. চ্যানেল ইনফো ও ইন্ডিভিজুয়াল group-title চেক করা
                     if (line.startsWith('#EXTINF')) {
                         let logoMatch = line.match(/tvg-logo="([^"]+)"/);
                         currentLogo = logoMatch ? logoMatch[1] : 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
