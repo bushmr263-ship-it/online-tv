@@ -385,10 +385,9 @@ https://a-cdn.klowdtv.com/live1/smc_720p/chunks.m3u8
 #EXTINF:-1 tvg-id="" tvg-name="Sony PIX HD Movies" tvg-logo="https://assets-prod.services.toffeelive.com/Ly6C-JQBv9knK3AHOjXt/posters/252e64ca-8d99-46e7-a951-e10c1703c11d.webp" group-title="English",Movie Sony PIX HD 
 https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_pix_hd.m3u8
 
-#EXTINF:-1 tvg-id="ch_150" tvg-name="Comet" tvg-logo="https://pub-dbd59bcc344f405ab5a1f9697b81831f.r2.dev/comet.webp" group-title="English",Comet
-https://fast-channels.sinclairstoryline.com/COMET/index.m3u8
 
-
+#EXTINF:-1 tvg-logo="" group-title="Sports",Premier sports 1
+https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/m6sqanvm2m/out/v1/f6beb46c6e9a4132ad739f3ca27df6aa/cenc.mpd|drmScheme=clearkey&drmLicense=1444f4235529f183f0a5a486befe9cdb:e5e3fec67a1bb3472a2089c8a0a2557f
 
 #------------------------------------------------------------------------------
 # CATEGORY: SPORTS
