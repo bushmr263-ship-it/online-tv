@@ -978,6 +978,7 @@
         let stallCheckInterval = null;
         let loadTimeoutTimer = null;
         let loadSessionId = 0;
+        let sessionFallbackState = {};
         let shakaPlayerRef = null;
         let shakaUiRef = null;
         let playlistLoaded = false;
@@ -1101,6 +1102,10 @@
                     ]
                 });
 
+                video.addEventListener("waiting", () => {
+                    status.textContent = "Buffering...";
+                });
+
                 video.addEventListener("playing", () => {
                     if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
                     status.textContent = "Playing";
@@ -1110,7 +1115,7 @@
                     }
                 });
 
-                // .mpd ফাইল শুধু Shaka Player-এ চলবে; এরর হলেও অন্য প্লেয়ারে যাবে না
+                // .mpd ফাইল শুধু Shaka Player-এ চলবে; এরর হলেও অন্য প্লেয়ারে বা অন্য চ্যানেলে যাবে না
                 player.addEventListener("error", () => {
                     if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
                     status.textContent = "Playback Error";
@@ -1149,13 +1154,13 @@
 
             if (isMpdUrl(currentUrl)) {
                 // .mpd ফাইল সবসময় শুধু Shaka Player-এ খুলবে, অন্য কোনো প্লেয়ারে যাবে না
-                loadChannelUrl(currentUrl, 'shaka');
+                loadChannelUrl(currentUrl, 'shaka', true);
                 return;
             }
 
             // .mpd ছাড়া অন্য ফাইল Shaka Player-এ যাবে না; ডিফল্ট HLS (videojs)
             const safeMode = (!mode || mode === 'shaka') ? 'videojs' : mode;
-            loadChannelUrl(currentUrl, safeMode);
+            loadChannelUrl(currentUrl, safeMode, true);
         }
 
         function loadChannel(ch) {
@@ -1181,23 +1186,20 @@
                     currentServerIndex = index;
                     document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
                     sBtn.classList.add('active');
-                    loadChannelUrl(link, currentMode);
+                    loadChannelUrl(link, currentMode, true);
                 };
                 buttonsContainer.appendChild(sBtn);
             });
 
-            loadChannelUrl(urls[0], currentMode);
+            loadChannelUrl(urls[0], currentMode, true);
         }
 
         function playNextChannel() {
-            if (!currentChannelObj || allChannels.length === 0) return;
-            const idx = allChannels.indexOf(currentChannelObj);
-            if (idx !== -1 && idx + 1 < allChannels.length) {
-                loadChannel(allChannels[idx + 1]);
-            }
+            // বাফার বা স্ট্রিমিং এররে চ্যানেল অটোমেটিক চেঞ্জ করা হয় না
+            return;
         }
 
-        // অটো সার্ভার সুইচ সম্পূর্ণ নিষ্ক্রিয় রাখা হয়েছে
+        // অটো সার্ভার সুইচ ও অটো চ্যানেল চেঞ্জ সম্পূর্ণ নিষ্ক্রিয় রাখা হয়েছে
         function handleFallback() {
             if (loadTimeoutTimer) {
                 clearTimeout(loadTimeoutTimer);
@@ -1282,8 +1284,15 @@
             html5El.load();
         }
 
-        async function loadChannelUrl(url, mode = 'videojs') {
-            const sessionId = ++loadSessionId;
+        async function loadChannelUrl(url, mode = 'videojs', isNewLoad = true) {
+            const sessionId = isNewLoad ? ++loadSessionId : loadSessionId;
+            if (isNewLoad) {
+                sessionFallbackState[sessionId] = { hlsAttempts: 0, clapprTried: false };
+            } else if (!sessionFallbackState[sessionId]) {
+                sessionFallbackState[sessionId] = { hlsAttempts: 0, clapprTried: false };
+            }
+            const fbState = sessionFallbackState[sessionId];
+
             const rawUrl = String(url || '').trim();
             const isMpd = isMpdUrl(rawUrl);
 
@@ -1340,16 +1349,35 @@
                 }
             };
 
-            const fallbackToClappr = () => {
+            // HLS (Video.js) ব্যর্থ হলে Clappr -> Clappr ব্যর্থ হলে আবার HLS (Video.js) (চ্যানেল চেঞ্জ হবে না)
+            const handleHlsFailure = () => {
                 if (sessionId !== loadSessionId) return;
                 if (isMpd) {
                     shakaStatus.textContent = "Stream Unavailable";
                     return;
                 }
-                loadChannelUrl(rawUrl, 'clappr');
+                if (!fbState.clapprTried) {
+                    fbState.clapprTried = true;
+                    loadChannelUrl(rawUrl, 'clappr', false);
+                } else {
+                    shakaStatus.textContent = "Stream Unavailable";
+                }
             };
 
-            // 1. .mpd ফাইল: শুধু Shaka Player-এ চলবে; এরর হলেও অন্য প্লেয়ারে যাবে না
+            const handleClapprFailure = () => {
+                if (sessionId !== loadSessionId) return;
+                if (isMpd) {
+                    shakaStatus.textContent = "Stream Unavailable";
+                    return;
+                }
+                if (fbState.hlsAttempts < 2) {
+                    loadChannelUrl(rawUrl, 'videojs', false);
+                } else {
+                    shakaStatus.textContent = "Stream Unavailable";
+                }
+            };
+
+            // 1. .mpd ফাইল: শুধু Shaka Player-এ চলবে; এরর হলেও অন্য প্লেয়ারে বা অন্য চ্যানেলে যাবে না
             if (isMpd) {
                 shakaContainer.style.display = 'block';
                 if (!shakaPlayerRef) {
@@ -1376,9 +1404,17 @@
                 return;
             }
 
-            // 2. Clappr ফলব্যাক প্লেয়ার
+            // 2. Clappr ফলব্যাক প্লেয়ার (না চললে অটো HLS-এ ব্যাক করবে; চ্যানেল চেঞ্জ হবে না)
             if (effectiveMode === 'clappr') {
                 clapprEl.style.display = 'block';
+                let clapprStarted = false;
+
+                loadTimeoutTimer = setTimeout(() => {
+                    if (sessionId === loadSessionId && !clapprStarted) {
+                        handleClapprFailure();
+                    }
+                }, 7000);
+
                 clapprInstance = new Clappr.Player({
                     source: finalUrl,
                     parentId: "#clappr-container",
@@ -1391,12 +1427,24 @@
                     try { clapprInstance.setVolume(100); } catch (e) {}
                 }
 
-                if (typeof Clappr !== 'undefined' && Clappr.Events && Clappr.Events.PLAYER_ERROR) {
-                    clapprInstance.on(Clappr.Events.PLAYER_ERROR, () => {
-                        if (sessionId === loadSessionId) {
-                            shakaStatus.textContent = "Stream Unavailable";
-                        }
-                    });
+                if (typeof Clappr !== 'undefined' && Clappr.Events) {
+                    if (Clappr.Events.PLAY) {
+                        clapprInstance.on(Clappr.Events.PLAY, () => {
+                            clapprStarted = true;
+                            if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
+                            if (sessionId === loadSessionId) {
+                                shakaStatus.textContent = "Playing";
+                            }
+                        });
+                    }
+                    if (Clappr.Events.PLAYER_ERROR) {
+                        clapprInstance.on(Clappr.Events.PLAYER_ERROR, () => {
+                            if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
+                            if (sessionId === loadSessionId) {
+                                handleClapprFailure();
+                            }
+                        });
+                    }
                 }
                 return;
             }
@@ -1406,6 +1454,11 @@
                 html5El.style.display = 'block';
                 html5El.src = finalUrl;
                 triggerInstantPlay(html5El);
+                html5El.onwaiting = () => {
+                    if (sessionId === loadSessionId) {
+                        shakaStatus.textContent = "Buffering...";
+                    }
+                };
                 html5El.onplaying = () => {
                     if (sessionId === loadSessionId) {
                         shakaStatus.textContent = "Playing";
@@ -1416,12 +1469,15 @@
                     }
                 };
                 html5El.onerror = () => {
-                    fallbackToClappr();
+                    if (sessionId === loadSessionId) {
+                        shakaStatus.textContent = "Stream Unavailable";
+                    }
                 };
                 return;
             }
 
-            // 4. .m3u8 ফাইল: প্রথমে HLS (Video.js)-এ প্লে হবে; না চললে বা ১০ সেকেন্ডে প্লে না হলে Clappr-এ যাবে
+            // 4. .m3u8 ফাইল: প্রথমে HLS (Video.js) -> না চললে/১০ সেকেন্ডে প্লে না হলে Clappr -> Clappr না চললে আবার HLS (Video.js)
+            fbState.hlsAttempts += 1;
             videoEl.style.display = 'block';
             if (playerInstance && playerInstance.el) {
                 playerInstance.el().style.display = 'block';
@@ -1432,7 +1488,7 @@
             let hlsStarted = false;
             loadTimeoutTimer = setTimeout(() => {
                 if (sessionId === loadSessionId && !hlsStarted) {
-                    fallbackToClappr();
+                    handleHlsFailure();
                 }
             }, 10000);
 
@@ -1442,6 +1498,11 @@
                 vjsTarget.style.height = '100%';
                 vjsTarget.style.visibility = 'visible';
                 vjsTarget.style.opacity = '1';
+                vjsTarget.onwaiting = () => {
+                    if (sessionId === loadSessionId) {
+                        shakaStatus.textContent = "Buffering...";
+                    }
+                };
                 vjsTarget.onplaying = () => {
                     hlsStarted = true;
                     if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
@@ -1455,7 +1516,7 @@
                 };
                 vjsTarget.onerror = () => {
                     if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
-                    fallbackToClappr();
+                    handleHlsFailure();
                 };
             }
 
@@ -1489,32 +1550,23 @@
                     triggerInstantPlay(vjsTarget);
                 });
 
-                let lastTime = 0;
-                let stallCount = 0;
-                stallCheckInterval = setInterval(() => {
-                    if (sessionId !== loadSessionId) {
-                        clearInterval(stallCheckInterval);
-                        return;
+                // বাফারিং হলে চ্যানেল চেঞ্জ হবে না; শুধু বাফারিং অবস্থা দেখাবে
+                hls.on(Hls.Events.FRAG_BUFFERED, () => {
+                    if (sessionId === loadSessionId && vjsTarget && !vjsTarget.paused && vjsTarget.readyState >= 2) {
+                        shakaStatus.textContent = "Playing";
                     }
-                    if (vjsTarget && !vjsTarget.paused) {
-                        if (vjsTarget.currentTime === lastTime) {
-                            stallCount++;
-                            if (stallCount >= 3) {
-                                clearInterval(stallCheckInterval);
-                                if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
-                                fallbackToClappr();
-                            }
-                        } else {
-                            stallCount = 0;
-                            lastTime = vjsTarget.currentTime;
-                        }
-                    }
-                }, 2000);
+                });
 
                 hls.on(Hls.Events.ERROR, function (event, data) {
+                    if (!data.fatal) {
+                        if (sessionId === loadSessionId) {
+                            shakaStatus.textContent = "Buffering...";
+                        }
+                        return;
+                    }
                     if (data.fatal && sessionId === loadSessionId) {
                         if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
-                        fallbackToClappr();
+                        handleHlsFailure();
                     }
                 });
             } else if (vjsTarget && vjsTarget.canPlayType('application/vnd.apple.mpegurl')) {
@@ -1533,7 +1585,7 @@
                 document.getElementById('serverButtonsContainer').innerHTML = "";
                 document.getElementById('activeChannelName').innerText = "Custom URL - সার্ভার পরিবর্তন করুন";
                 currentChannelObj = null;
-                loadChannelUrl(url, currentMode);
+                loadChannelUrl(url, currentMode, true);
             }
         }
 
