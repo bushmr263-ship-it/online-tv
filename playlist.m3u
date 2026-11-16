@@ -191,13 +191,13 @@ https://live-bangla.akamaized.net/liveabr/playlist.m3u8
 #------------------------------------------------------------------------------
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/6pCXvxyz/20240823_022553.png" group-title="Hindi",Star Gold HD
-https://livetv.shamon-cable.net:8443/StarGold/tracks-v1a1/mono.m3u8
+https://livetv.shamon-cable.net:8443/StarGold/tracks-v1a1/mono.m3u8?token=scn
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/6pCXvxyz/20240823_022553.png" group-title="Hindi",Star Gold select
-https://livetv.shamon-cable.net:8443/StarGoldSelect/tracks-v1a1/mono.m3u8
+https://livetv.shamon-cable.net:8443/StarGoldSelect/tracks-v1a1/mono.m3u8?token=scn
 
 #EXTINF:-1 tvg-logo="https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Ay52-JQBv9knK3AHFDWt/posters/00afb30b-3c19-4c4c-abd8-891db94e4767.webp" group-title="Hindi",Sony Max
-https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_max.m3u8
+https://livetv.shamon-cable.net/proxy/proxy.php?id=34fa8fc55c5cb82e126ae0908ab6589c8fbc
 
 #EXTINF:-1 tvg-logo="https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Ai51-JQBv9knK3AH_jWs/posters/663e52a6-1a9f-4458-b4aa-7c03d84972f1.webp" group-title="Hindi",Sony Max HD
 https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_max_hd.m3u8 
@@ -206,7 +206,7 @@ https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallin
 https://bdtop1.tvhunter.top/max1/index.m3u8 
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/hP59QSrm/20240825_075205.png" group-title="Hindi",Sony Max 2
-https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_max2.m3u8
+https://livetv.shamon-cable.net/proxy/proxy.php?id=93473ef58935b0ba3692c1d99a40d09bea16
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/x8BwX6QW/20240823_022929.png" group-title="Hindi",Zee TV
 https://d47ddb99.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/U2Ftc3VuZy1kZV9aZWVUVkhEVUtHZXJtYW55X0hMUw/playlist.m3u8
@@ -266,7 +266,7 @@ https://tv.chitrabani24.com/proxy.php?url=https%3A%2F%2Flive-bhojpuri.akamaized.
 https://da86m1sqpm3o0.cloudfront.net/28072023/smil:colorstamilhd11.smil/chunklist_b2628000.m3u8
 
 #EXTINF:-1 tvg-logo="https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/ES55-JQBv9knK3AHNDWC/posters/13411be9-62b9-4a99-a062-b6e91dfb1099.webp" group-title="Hindi",Sony Sab
-https://drk6xq0vhn.gpcdn.net/live/sub_hd_abr/index.m3u8
+https://livetv.shamon-cable.net/proxy/proxy.php?id=25d27bbe149476fe2ecb8c45bb2d4ae756e8
 
 #EXTINF:-1 tvg-id="DangalTV Hindi.in" tvg-logo="https://static.wikia.nocookie.net/logopedia/images/3/36/Dangalv2.png" group-title="Hindi",Dangal TV
 https://live-dangal.akamaized.net/liveabr/pub-iodang10p4al/live_720p/chunks.m3u8
@@ -344,10 +344,10 @@ https://436f59579436473e8168284cac5d725f.mediatailor.us-east-1.amazonaws.com/v1/
 https://tvsen3.aynaott.com/Ge23xfY5/index.m3u8
 
 #EXTINF:-1 tvg-id="" tvg-name="Star Movies" tvg-logo="https://i.postimg.cc/yNvkbdL4/1000114150.png" group-title="English",Star Movies HD
-https://livetv.shamon-cable.net:8443/Star-Movies/tracks-v1a1/mono.m3u8
+https://livetv.shamon-cable.net:8443/Star-Movies/tracks-v1a1/mono.m3u8?token=scn
 
 #EXTINF:-1 tvg-id="" tvg-name="Star Movies HD" tvg-logo="https://i.postimg.cc/yNvkbdL4/1000114150.png" group-title="English",Star Movies Select
-https://s3.itcnbd.live/server-10/stream/ODEzNjAzNTIxOA.m3u8
+https://livetv.shamon-cable.net:8443/Star-movies-select/tracks-v1a1/mono.m3u8?token=scn
 
 #EXTINF:-1 tvg-logo="" group-title="English",AXN MOVIES
 https://robiproxi.bushmr263.workers.dev/?url=https://ipbase-proxy.torongoplus.workers.dev/proxy/direct?url=https://xtream.iptv-channels.workers.dev/iptv/XHP4F64V8MXFXTKTQ5VSM88K/7007/index.m3u8
@@ -383,11 +383,8 @@ https://436f59579436473e8168284cac5d725f.mediatailor.us-east-1.amazonaws.com/v1/
 https://a-cdn.klowdtv.com/live1/smc_720p/chunks.m3u8
 
 #EXTINF:-1 tvg-id="" tvg-name="Sony PIX HD Movies" tvg-logo="https://assets-prod.services.toffeelive.com/Ly6C-JQBv9knK3AHOjXt/posters/252e64ca-8d99-46e7-a951-e10c1703c11d.webp" group-title="English",Movie Sony PIX HD 
-https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_pix_hd.m3u8
+https://livetv.shamon-cable.net/proxy/proxy.php?id=e71046eec45f34656698d0a6f590b86ef843
 
-
-#EXTINF:-1 tvg-logo="" group-title="Sports",Premier sports 1
-https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/m6sqanvm2m/out/v1/f6beb46c6e9a4132ad739f3ca27df6aa/cenc.mpd|drmScheme=clearkey&drmLicense=1444f4235529f183f0a5a486befe9cdb:e5e3fec67a1bb3472a2089c8a0a2557f
 
 #------------------------------------------------------------------------------
 # CATEGORY: SPORTS
