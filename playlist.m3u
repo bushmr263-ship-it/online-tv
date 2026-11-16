@@ -87,7 +87,7 @@ https://tvsen6.aynaott.com/39ee93nUbCCmm5LsyD4t/tracks-v1a1/mono.ts.m3u8
 https://nkafmbewiff.gpcdn.net/tile_6/master.m3u8 https://byphdgllyk.gpcdn.net/hls/deeptotv/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/0QRKCsfQ/20240823_020937.png" group-title="Bangla",Duronto TV
-https://livetv.shamon-cable.net:8443/Duronto/tracks-v1a1/mono.m3u8
+https://livetv.shamon-cable.net:8443/Duronto/tracks-v1a1/mono.m3u8?token=scn
 
 #EXTINF:-1 tvg-logo="https://asset.bioscopelive.com/uploads/images/2025/08/11/thumbnails_58ebcef1efcc65837557de15952d2643_goplay_srk_tv_landscape.jpg" group-title="Bangla",SRK TV
 https://srktv.net/srktvhls/cdnlive_srktv.m3u8
@@ -402,6 +402,10 @@ https://tvsen5.aynaott.com/willowhd/tracks-v1a1/mono.ts.m3u8     https://tvsen7.
 
 #EXTINF:-1 tvg-logo="https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/ra2x_pQBrjBfS2_RWG9l/posters/795170c2-ec78-457e-9fa0-54a23d23361c.webp" group-title="Sports",Ten cricket
 https://drk6xq0vhn.gpcdn.net/hls/ten_cricket_hd_720/index.m3u8
+
+#EXTINF:-1 tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/10-by-xfireflix.png",TEN SPORTS
+https://livetv.shamon-cable.net:8443/TEN-SPORTS/tracks-v1a1/mono.m3u8?token=scn
+
 
 #EXTINF:-1 tvg-logo="https://asset.brandfetch.io/iduZqK3Qk-/id9YVz4W_W.png" group-title="Sports",Tapmad Live 
 https://seriealeague.akamaized.net/hls/live/2107107/A1@25853-tapmad/master.m3u8
