@@ -1105,11 +1105,16 @@
         }
 
         function switchMode(mode) {
-            if (currentUrl) {
-                // .mpd ফাইল শুধু Shaka Player দিয়ে লোড হবে
-                const targetMode = isMpdUrl(currentUrl) ? 'shaka' : mode;
-                loadChannelUrl(currentUrl, targetMode);
+            if (!currentUrl) return;
+
+            if (isMpdUrl(currentUrl)) {
+                // .mpd ফাইল সবসময় শুধু Shaka Player-এ খুলবে
+                loadChannelUrl(currentUrl, 'shaka');
+                return;
             }
+
+            // .m3u8 বা অন্য লিংকের ক্ষেত্রে ম্যানুয়াল বাটন ক্লিক করলে সেই মোডেই যাবে
+            loadChannelUrl(currentUrl, mode || 'shaka');
         }
 
         function loadChannel(ch) {
@@ -1237,12 +1242,15 @@
 
         async function loadChannelUrl(url, mode = 'shaka') {
             const sessionId = ++loadSessionId;
-            // .mpd ফাইল হলে শুধুমাত্র Shaka Player দিয়ে লোড হবে
-            const effectiveMode = isMpdUrl(url) ? 'shaka' : mode;
-            const clearKeys = extractClearKeys(url, currentChannelObj ? currentChannelObj.drm : null);
-            let finalUrl = String(url || '').split('|')[0].trim();
+            const rawUrl = String(url || '').trim();
+            const isMpd = isMpdUrl(rawUrl);
 
-            currentUrl = url;
+            // .mpd ফাইল শুধু Shaka-তে; .m3u8 ফাইল আগে Shaka-তে ট্রাই হবে, না চললে Video.js -> Clappr
+            const effectiveMode = isMpd ? 'shaka' : (mode || 'shaka');
+            const clearKeys = extractClearKeys(rawUrl, currentChannelObj ? currentChannelObj.drm : null);
+            const finalUrl = rawUrl.split('|')[0].trim();
+
+            currentUrl = rawUrl;
             currentMode = effectiveMode;
 
             const shakaContainer = document.getElementById("player-container");
@@ -1270,6 +1278,7 @@
             });
 
             const triggerInstantPlay = (mediaObj) => {
+                if (!mediaObj) return;
                 mediaObj.muted = false;
                 mediaObj.volume = 1.0;
                 let playPromise = mediaObj.play();
@@ -1281,115 +1290,51 @@
                 }
             };
 
-            if (effectiveMode === 'clappr') {
-                clapprEl.style.display = 'block';
-                clapprInstance = new Clappr.Player({
-                    source: finalUrl,
-                    parentId: "#clappr-container",
-                    width: '100%',
-                    height: '100%',
-                    autoPlay: true,
-                    mute: false
-                });
-            } else if (effectiveMode === 'html5') {
-                html5El.style.display = 'block';
-                html5El.src = finalUrl;
-                triggerInstantPlay(html5El);
-                html5El.onplaying = () => {
-                    shakaStatus.textContent = "Playing";
-                };
-                html5El.onerror = () => {
-                    if (sessionId === loadSessionId) {
-                        shakaStatus.textContent = "Stream Unavailable";
-                    }
-                };
-            } else if (effectiveMode === 'videojs') {
-                videoEl.style.display = 'block';
-                if (playerInstance && playerInstance.el) {
-                    playerInstance.el().style.display = 'block';
-                    playerInstance.el().style.width = '100%';
-                    playerInstance.el().style.height = '100%';
+            // Shaka-তে .m3u8 না চললে HLS (Video.js)-এ যাবে
+            const fallbackFromShaka = () => {
+                if (sessionId !== loadSessionId) return;
+                if (isMpd) {
+                    shakaStatus.textContent = "Stream Unavailable";
+                    return;
                 }
-                if (vjsTarget) {
-                    vjsTarget.style.display = 'block';
-                    vjsTarget.style.width = '100%';
-                    vjsTarget.style.height = '100%';
-                    vjsTarget.style.visibility = 'visible';
-                    vjsTarget.style.opacity = '1';
-                    vjsTarget.onplaying = () => {
-                        shakaStatus.textContent = "Playing";
-                    };
+                loadChannelUrl(rawUrl, 'videojs');
+            };
+
+            // HLS (Video.js)-এ না চললে Clappr-এ যাবে
+            const fallbackFromVideoJs = () => {
+                if (sessionId !== loadSessionId) return;
+                if (isMpd) {
+                    shakaStatus.textContent = "Stream Unavailable";
+                    return;
                 }
+                loadChannelUrl(rawUrl, 'clappr');
+            };
 
-                if (Hls.isSupported() && !isMpdUrl(finalUrl)) {
-                    hls = new Hls({
-                        enableWorker: true,
-                        lowLatencyMode: false,
-                        maxBufferLength: 60,
-                        maxMaxBufferLength: 120,
-                        maxBufferSize: 60 * 1024 * 1024,
-                        backBufferLength: 30,
-                        liveSyncDurationCount: 6,
-                        liveMaxLatencyDurationCount: 15,
-                        fragLoadingTimeOut: 5000,
-                        fragLoadingMaxRetry: 1,
-                        fragLoadingRetryDelay: 300,
-                        manifestLoadingTimeOut: 5000,
-                        manifestLoadingMaxRetry: 1,
-                        levelLoadingTimeOut: 5000,
-                        levelLoadingMaxRetry: 1
-                    });
-
-                    hls.loadSource(finalUrl);
-                    hls.attachMedia(vjsTarget);
-
-                    hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-                        triggerInstantPlay(vjsTarget);
-                    });
-
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                        triggerInstantPlay(vjsTarget);
-                    });
-
-                    let lastTime = 0;
-                    let stallCount = 0;
-                    stallCheckInterval = setInterval(() => {
-                        if (sessionId !== loadSessionId) {
-                            clearInterval(stallCheckInterval);
-                            return;
-                        }
-                        if (vjsTarget && !vjsTarget.paused) {
-                            if (vjsTarget.currentTime === lastTime) {
-                                stallCount++;
-                                if (stallCount >= 3) {
-                                    clearInterval(stallCheckInterval);
-                                    shakaStatus.textContent = "Stalled";
-                                }
-                            } else {
-                                stallCount = 0;
-                                lastTime = vjsTarget.currentTime;
-                            }
-                        }
-                    }, 2000);
-
-                    hls.on(Hls.Events.ERROR, function (event, data) {
-                        if (data.fatal && sessionId === loadSessionId) {
-                            shakaStatus.textContent = "Stream Unavailable";
-                        }
-                    });
-                } else if (vjsTarget.canPlayType('application/vnd.apple.mpegurl')) {
-                    vjsTarget.src = finalUrl;
-                    triggerInstantPlay(vjsTarget);
-                } else {
-                    playerInstance.src({ src: finalUrl, type: 'application/x-mpegURL' });
-                    triggerInstantPlay(vjsTarget);
-                }
-            } else {
+            // 1. Shaka Player (.mpd এর জন্য একমাত্র প্লেয়ার, আর .m3u8 এর প্রথম চেষ্টার প্লেয়ার)
+            if (effectiveMode === 'shaka') {
                 shakaContainer.style.display = 'block';
                 if (!shakaPlayerRef) {
                     await initPlayer();
                 }
                 if (shakaPlayerRef && finalUrl && sessionId === loadSessionId) {
+                    let shakaStarted = false;
+
+                    const onShakaPlaying = () => {
+                        shakaStarted = true;
+                        if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
+                        shakaStatus.textContent = "Playing";
+                    };
+                    shakaVideo.addEventListener("playing", onShakaPlaying, { once: true });
+
+                    // .m3u8 যদি Shaka-তে ৬ সেকেন্ডে প্লে না হয় তবে অটো Video.js-এ যাবে
+                    if (!isMpd) {
+                        loadTimeoutTimer = setTimeout(() => {
+                            if (sessionId === loadSessionId && !shakaStarted) {
+                                fallbackFromShaka();
+                            }
+                        }, 6000);
+                    }
+
                     try {
                         shakaStatus.textContent = "Loading...";
                         if (clearKeys) {
@@ -1402,11 +1347,138 @@
                         shakaStatus.textContent = "Playing";
                         triggerInstantPlay(shakaVideo);
                     } catch (error) {
+                        if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
                         if (sessionId === loadSessionId) {
-                            shakaStatus.textContent = "Stream Unavailable";
+                            fallbackFromShaka();
                         }
                     }
                 }
+                return;
+            }
+
+            // 2. Clappr (HLS/Video.js ব্যর্থ হলে অটো ফলব্যাক)
+            if (effectiveMode === 'clappr') {
+                clapprEl.style.display = 'block';
+                clapprInstance = new Clappr.Player({
+                    source: finalUrl,
+                    parentId: "#clappr-container",
+                    width: '100%',
+                    height: '100%',
+                    autoPlay: true,
+                    mute: false
+                });
+
+                if (typeof Clappr !== 'undefined' && Clappr.Events && Clappr.Events.PLAYER_ERROR) {
+                    clapprInstance.on(Clappr.Events.PLAYER_ERROR, () => {
+                        if (sessionId === loadSessionId) {
+                            shakaStatus.textContent = "Stream Unavailable";
+                        }
+                    });
+                }
+                return;
+            }
+
+            // 3. HTML5 মোড
+            if (effectiveMode === 'html5') {
+                html5El.style.display = 'block';
+                html5El.src = finalUrl;
+                triggerInstantPlay(html5El);
+                html5El.onplaying = () => {
+                    if (sessionId === loadSessionId) {
+                        shakaStatus.textContent = "Playing";
+                    }
+                };
+                html5El.onerror = () => {
+                    fallbackFromVideoJs();
+                };
+                return;
+            }
+
+            // 4. HLS (Video.js) মোড (Shaka-তে .m3u8 না চললে অটো আসবে; না চললে Clappr-এ যাবে)
+            videoEl.style.display = 'block';
+            if (playerInstance && playerInstance.el) {
+                playerInstance.el().style.display = 'block';
+                playerInstance.el().style.width = '100%';
+                playerInstance.el().style.height = '100%';
+            }
+            if (vjsTarget) {
+                vjsTarget.style.display = 'block';
+                vjsTarget.style.width = '100%';
+                vjsTarget.style.height = '100%';
+                vjsTarget.style.visibility = 'visible';
+                vjsTarget.style.opacity = '1';
+                vjsTarget.onplaying = () => {
+                    if (sessionId === loadSessionId) {
+                        shakaStatus.textContent = "Playing";
+                    }
+                };
+                vjsTarget.onerror = () => {
+                    fallbackFromVideoJs();
+                };
+            }
+
+            if (Hls.isSupported() && !isMpdUrl(finalUrl)) {
+                hls = new Hls({
+                    enableWorker: true,
+                    lowLatencyMode: false,
+                    maxBufferLength: 60,
+                    maxMaxBufferLength: 120,
+                    maxBufferSize: 60 * 1024 * 1024,
+                    backBufferLength: 30,
+                    liveSyncDurationCount: 6,
+                    liveMaxLatencyDurationCount: 15,
+                    fragLoadingTimeOut: 5000,
+                    fragLoadingMaxRetry: 1,
+                    fragLoadingRetryDelay: 300,
+                    manifestLoadingTimeOut: 5000,
+                    manifestLoadingMaxRetry: 1,
+                    levelLoadingTimeOut: 5000,
+                    levelLoadingMaxRetry: 1
+                });
+
+                hls.loadSource(finalUrl);
+                hls.attachMedia(vjsTarget);
+
+                hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+                    triggerInstantPlay(vjsTarget);
+                });
+
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    triggerInstantPlay(vjsTarget);
+                });
+
+                let lastTime = 0;
+                let stallCount = 0;
+                stallCheckInterval = setInterval(() => {
+                    if (sessionId !== loadSessionId) {
+                        clearInterval(stallCheckInterval);
+                        return;
+                    }
+                    if (vjsTarget && !vjsTarget.paused) {
+                        if (vjsTarget.currentTime === lastTime) {
+                            stallCount++;
+                            if (stallCount >= 3) {
+                                clearInterval(stallCheckInterval);
+                                fallbackFromVideoJs();
+                            }
+                        } else {
+                            stallCount = 0;
+                            lastTime = vjsTarget.currentTime;
+                        }
+                    }
+                }, 2000);
+
+                hls.on(Hls.Events.ERROR, function (event, data) {
+                    if (data.fatal && sessionId === loadSessionId) {
+                        fallbackFromVideoJs();
+                    }
+                });
+            } else if (vjsTarget && vjsTarget.canPlayType('application/vnd.apple.mpegurl')) {
+                vjsTarget.src = finalUrl;
+                triggerInstantPlay(vjsTarget);
+            } else if (playerInstance) {
+                playerInstance.src({ src: finalUrl, type: 'application/x-mpegURL' });
+                triggerInstantPlay(vjsTarget);
             }
         }
 
