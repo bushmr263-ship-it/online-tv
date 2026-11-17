@@ -3,8 +3,7 @@
 #------------------------------------------------------------------------------
 
 #EXTINF:-1 tvg-logo="https://static.wikia.nocookie.net/etv-gspn-bangla/images/6/6e/T_Sports_HD_logo_2021.png" group-title="Bangla",T Sports
-https://aged-band-2c4e.samiulislamabhi.workers.dev/hls/eyJ1IjoiaHR0cHM6Ly9hbGxpbm9uZXJlYm9ybjIub25saW5lL2xpdnRlc3QzL3N0cmVhbV9wcm94eS5waHA_dXJsPWh0dHAlM0ElMkYlMkYxMTYuMjA0LjE0OS4xNiUyRlRfU3BvcnRzRkhEJTJGdHJhY2tzLXYxYTElMkZtb25vLm0zdTgiLCJjIjoiemVlQmFuZ2xhL3RyYWNrcy12MWExL21vbm8udHMubTN1OCJ9.m3u8 https://tvsen5.aynaott.com/TnMn5kZz8aLmjklkk/index.m3u8  https://m3u8-proxy-v1.jahinalamshamim.workers.dev/proxy?url=https://live2.jorvakstreamcache.com/live/channel19.m3u8
-
+https://aged-band-2c4e.samiulislamabhi.workers.dev/hls/eyJ1IjoiaHR0cHM6Ly9hbGxpbm9uZXJlYm9ybjIub25saW5lL2xpdnRlc3QzL3N0cmVhbV9wcm94eS5waHA_dXJsPWh0dHAlM0ElMkYlMkYxMTYuMjA0LjE0OS4xNiUyRlRfU3BvcnRzRkhEJTJGdHJhY2tzLXYxYTElMkZtb25vLm0zdTgiLCJjIjoiemVlQmFuZ2xhL3RyYWNrcy12MWExL21vbm8udHMubTN1OCJ9.m3u8 https://tvsen5.aynaott.com/TnMn5kZz8aLmjklkk/index.m3u8 
 #EXTINF:-1 tvg-logo="https://tstatic.akash-go.com/cms-ui/images/custom-content/1778082545894.png" group-title="Bangla",BTV National
 https://nkafmbewiff.gpcdn.net/tile_2/master.m3u8   
 
@@ -458,14 +457,14 @@ https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/i
 #EXTINF:-1 group-title="Sports", M4T4 Football 2
 https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/530/index.m3u8
 
-#EXTINF:-1 tvg-id="01a11291-2c1a-72fb-bf2d-bf03de6e974d" tvg-name="Sportv" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-10-06/images_6b43965cf8ff9e05973fde793d1ba4d2_playmist_sportv_logo_png_seeklogo_424355.png" group-title="Sports",xoilacz.io footbll
-https://tv.kbhub.online/Live-Event-Sports/xxxInter-Miami-vs-Atalanta.m3u8
+#EXTINF:-1 tvg-id="01a11291-2c1a-72fb-bf2d-bf03de6e974d" tvg-name="Sportv" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-10-06/images_6b43965cf8ff9e05973fde793d1ba4d2_playmist_sportv_logo_png_seeklogo_424355.png" group-title="Sports",football
+https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/w8kwdfmlgs/out/v1/3aa321e477504937a439b602e078eb18/cenc.mpd|drmScheme=clearkey&drmLicense=51c0ef23b17297e5c01cd7f36dd0a6ce:8823f713ba6fdb9bbe0a2ad82d309a4b
 
 #EXTINF:-1 tvg-id="01a11291-2c1a-72fb-bf2d-bf03de6e974d" tvg-name="Sportv" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-10-06/images_6b43965cf8ff9e05973fde793d1ba4d2_playmist_sportv_logo_png_seeklogo_424355.png" group-title="Sports",GE SPORTS
 https://playztv-apps.pages.dev/ptv-sports/index.m3u8
 
-#EXTINF:-1 group-title="Sports", Sport tv 3
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/6530/index.m3u8
+##EXTINF:-1 tvg-id="01a11291-2c1a-72fb-bf2d-bf03de6e974d" tvg-name="Sportv" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-10-06/images_6b43965cf8ff9e05973fde793d1ba4d2_playmist_sportv_logo_png_seeklogo_424355.png" group-title="Sports",Xoilacz.ca football
+https://m3u8-proxy-v1.jahinalamshamim.workers.dev/proxy?url=https://live2.jorvakstreamcache.com/live/channel19.m3u8
 
 #EXTINF:-1 tvg-url="https://raw.githubusercontent.com/personaliptv/paid-link-1/main/482243292_642826978446244_6712273032991625548_n.jpg" group-title="Sports",M4 Sport
 https://tv.kbhub.online/Live-Event-Sports/x2.m3u8
@@ -559,7 +558,7 @@ https://tvsen7.aynaott.com/tsn3/index.m3u8
 https://tvsen6.aynaott.com/TntSports1HD/index.m3u8
 
 
-#EXTINF:-1 tvg-id="01a11291-2c1a-72fb-bf2d-bf03de6e974d" tvg-name="Sportv" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-10-06/images_6b43965cf8ff9e05973fde793d1ba4d2_playmist_sportv_logo_png_seeklogo_424355.png" group-title="Sports",Sportv
+#EXTINF:-1 tvg-id="01a11291-2c1a-72fb-bf2d-bf03de6e974d" tvg-name="Realmadrid" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-10-06/images_6b43965cf8ff9e05973fde793d1ba4d2_playmist_sportv_logo_png_seeklogo_424355.png" group-title="Sports",Sportv
 https://rmtv.akamaized.net/hls/live/2043153/rmtv-es-web/bitrate_3.m3u8
 
 #EXTINF:-1 tvg-id="019de785-39ff-7db1-94c6-e17acf6a6da4" tvg-name="SkySportsF1" tvg-logo="https://s3.aynaott.com/storage/75d182d517bbae0af248c5ee1a67f4d4" group-title="Sports",SkySportsF1
@@ -584,8 +583,6 @@ https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/dev1hjwzh9/out/v1
 https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/tdijwiga2k/out/v1/f5fde318678f4f7583bf27b7231bde1f/cenc.mpd|drmScheme=clearkey&drmLicense=fa34fa8c90336dd528c7a23871cad1fe:552a78d1aeb74f1650d68255c5749408
 
 
-#EXTINF:-1 group-title="𝐒𝐩𝐨𝐫𝐭𝐬",Singapore vs Brazil - SporTV BR FHD
-https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/w8kwdfmlgs/out/v1/3aa321e477504937a439b602e078eb18/cenc.mpd|drmScheme=clearkey&drmLicense=51c0ef23b17297e5c01cd7f36dd0a6ce:8823f713ba6fdb9bbe0a2ad82d309a4b
 
 
 #------------------------------------------------------------------------------
