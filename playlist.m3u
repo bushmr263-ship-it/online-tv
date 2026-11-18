@@ -402,6 +402,11 @@ https://tvsen5.aynaott.com/willowhd/tracks-v1a1/mono.ts.m3u8
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/HntSg3xw/20240823_024624.png" group-title="Sports",Willow Cricbuzz 2
 https://tvsen7.aynaott.com/Sports1/index.m3u8
 
+#EXTM3U
+#EXTINF:-1 tvg-id="SkySportsCricket" tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/9-by-xfireflix.png" group-title="Sports",SKY SPORTS CRICKET
+#EXTVLCOPT:http-user-agent=Mozilla
+https://bl.rutube.ru/livestream/7c13a51576b9ff2601f08f5d57dd5169/index.m3u8?s=uiXES2ePt7xTpQnbJxn7Dg&e=2074684474&scheme=https
+
 #EXTINF:-1 tvg-logo="https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/ra2x_pQBrjBfS2_RWG9l/posters/795170c2-ec78-457e-9fa0-54a23d23361c.webp" group-title="Sports",Ten cricket
 https://drk6xq0vhn.gpcdn.net/hls/ten_cricket_hd_720/index.m3u8
 
