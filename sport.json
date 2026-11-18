@@ -104,10 +104,15 @@
     "fallbackLogo": "▶️"
   },
   {
-          "channel_name": "SKY SPORTS CRICKET",
-          "stream_url": "https://bl.rutube.ru/livestream/7c13a51576b9ff2601f08f5d57dd5169/index.m3u8?s=uiXES2ePt7xTpQnbJxn7Dg&e=2074684474&scheme=https",
-          "user_agent": "Mozilla"
-   },
+    "name": "SKY SPORTS CRICKET",
+    "category": "Sports",
+    "logo": "▶️",
+    "tone": "blue",
+    "url": "https://bl.rutube.ru/livestream/7c13a51576b9ff2601f08f5d57dd5169/index.m3u8?s=uiXES2ePt7xTpQnbJxn7Dg&e=2074684474&scheme=https",
+    "user_agent": "Mozilla",
+    "logoUrl": "",
+    "fallbackLogo": "▶️"
+  },
   {
     "name": "Premier sports 1",
     "category": "Sports",
