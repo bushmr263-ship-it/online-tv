@@ -411,9 +411,6 @@ https://livetv.shamon-cable.net:8443/TEN-SPORTS/tracks-v1a1/mono.m3u8?token=scn
 #EXTINF:-1 tvg-logo="https://asset.brandfetch.io/iduZqK3Qk-/id9YVz4W_W.png" group-title="Sports",Tapmad Live 
 https://seriealeague.akamaized.net/hls/live/2107107/A1@25853-tapmad/master.m3u8
 
-#EXTINF:-1 tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/9-by-xfireflix.png" group-title="Sports",Fox Criket
-https://online-tv-rho.vercel.app/api/proxy?url=http://ftcxowga.zyntras.top/iptv/XM896GLGDHY76Q/19146/index.m3u8
-
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/DzDHjCJm/20240823_024249.png" group-title="Sports",Star Sports 1 HD
 https://livetv.shamon-cable.net:8443/Star-sports-1/tracks-v1a1/mono.m3u8?token=scn   https://s3.itcnbd.live/server-12/stream/Mg.m3u8 
 
