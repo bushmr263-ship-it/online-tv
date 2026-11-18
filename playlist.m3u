@@ -402,7 +402,6 @@ https://tvsen5.aynaott.com/willowhd/tracks-v1a1/mono.ts.m3u8
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/HntSg3xw/20240823_024624.png" group-title="Sports",Willow Cricbuzz 2
 https://tvsen7.aynaott.com/Sports1/index.m3u8
 
-#EXTM3U
 #EXTINF:-1 tvg-id="SkySportsCricket" tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/9-by-xfireflix.png" group-title="Sports",SKY SPORTS CRICKET
 #EXTVLCOPT:http-user-agent=Mozilla
 https://bl.rutube.ru/livestream/7c13a51576b9ff2601f08f5d57dd5169/index.m3u8?s=uiXES2ePt7xTpQnbJxn7Dg&e=2074684474&scheme=https
@@ -422,9 +421,14 @@ https://livetv.shamon-cable.net:8443/Star-sports-1/tracks-v1a1/mono.m3u8?token=s
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/zBgM9nK7/20240823_024306.png" group-title="Sports",Star Sports HD2
 https://tvsen7.aynaott.com/ssport2hd/index.m3u8
 
-
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/zBgM9nK7/20240823_024306.png" group-title="Sports",Star Sports HD3
 https://livetv.shamon-cable.net:8443/Star-sports-3/tracks-v1a1/mono.m3u8?token=scn
+
+#EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/ZnzgZCLS/20240823_024321.png",Star Sports SL 1
+ https://livetv.shamon-cable.net:8443/Star-select-1/tracks-v1a1/mono.m3u8?token=scn https://s3.itcnbd.live/server-12/stream/Mjg.m3u8       
+
+#EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/rmczbb8g/20240825_060019.png",Star Sports SL 2
+https://livetv.shamon-cable.net:8443/Star-select-2/tracks-v1a1/mono.m3u8?token=scn  https://s3.itcnbd.live/server-12/stream/MTY.m3u8  
 
 #EXTINF:-1 tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/20-by-xfireflix.png" group-title="Sports",PTV Sports
 https://live.msnetworks.net/ptv-sports/master.m3u8    https://nowzyproxy.foysalahmedsagor2362.workers.dev/stream.m3u8?url=https%3A%2F%2Fsm-monirul.top%2F%40sm_iptv_bd%2Flive.php%3Fid%3Dptv_sports_hd%26file%3Dtracks-v1a1%252Fmono.m3u8
@@ -434,9 +438,6 @@ https://amg26268-amg26268c14-freelivesports-emea-10267.playouts.now.amagi.tv/ts-
 
 #EXTINF:-1 tvg-name="Laliga HD" tvg-logo="https://i.postimg.cc/v8JPQjFK/laliga.png" group-title="Sports",Laliga HD
 https://rmtv.akamaized.net/hls/live/2043154/rmtv-en-web/bitrate_3.m3u8
-
-#EXTINF:-1 group-title="Sports",M Spotrs
-https://cdn.rabta.stream/M-Sports/index.m3u8
 
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/65fsWLS1/20240823_024136.png",Sony Ten 1
 https://s3.itcnbd.live/server-12/stream/NzQ.m3u8  https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_ten1_hd.m3u8
@@ -453,13 +454,6 @@ https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallin
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/W4tx7R4Q/20240823_024232.png",Sony Ten 5
 https://s3.itcnbd.live/server-12/stream/MTAx.m3u8  https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_ten5_hd.m3u8  
 
-#EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/ZnzgZCLS/20240823_024321.png",Star Sports SL 1
-https://s3.itcnbd.live/server-12/stream/Mjg.m3u8         https://livetv.shamon-cable.net:8443/Star-select-1/tracks-v1a1/mono.m3u8
-
-#EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/rmczbb8g/20240825_060019.png",Star Sports SL 2
-https://s3.itcnbd.live/server-12/stream/MTY.m3u8  https://livetv.shamon-cable.net:8443/Star-select-2/tracks-v1a1/mono.m3u8
-
-
 #EXTINF:-1 tvg-id="01a11291-2c1a-72fb-bf2d-bf03de6e974d" tvg-name="Sportv" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-10-06/images_6b43965cf8ff9e05973fde793d1ba4d2_playmist_sportv_logo_png_seeklogo_424355.png" group-title="Sports",football
 https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/w8kwdfmlgs/out/v1/3aa321e477504937a439b602e078eb18/cenc.mpd|drmScheme=clearkey&drmLicense=51c0ef23b17297e5c01cd7f36dd0a6ce:8823f713ba6fdb9bbe0a2ad82d309a4b
 
@@ -475,32 +469,11 @@ https://live2.jorvakstreamcache.com/live/channel15.m3u8
 #EXTINF:-1 tvg-id="01a11291-2c1a-72fb-bf2d-bf03de6e974d" tvg-name="Realmadrid" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-10-06/images_6b43965cf8ff9e05973fde793d1ba4d2_playmist_sportv_logo_png_seeklogo_424355.png" group-title="Sports",Realmadrid
 https://rmtv.akamaized.net/hls/live/2043153/rmtv-es-web/bitrate_3.m3u8
 
-#EXTINF:-1 tvg-url="https://raw.githubusercontent.com/personaliptv/paid-link-1/main/482243292_642826978446244_6712273032991625548_n.jpg" group-title="Sports",M4 Sport
-https://tv.kbhub.online/Live-Event-Sports/x2.m3u8
-
-#EXTINF:-1 tvg-url="https://raw.githubusercontent.com/personaliptv/paid-link-1/main/482243292_642826978446244_6712273032991625548_n.jpg" group-title="Sports",FB TV
-https://robiproxi.bushmr263.workers.dev/?url=http://1hskrdto.rocketcdn.com/fenerbahcetv.smil/playlist.m3u8
-
-#EXTINF:-1 tvg-id="019de785-39cc-73df-9b76-41868981948e" tvg-name="Fox Deportes" tvg-logo="https://s3.aynaott.com/storage/75d182d517bbae0af248c5ee1a67f4d4" group-title="Sports",Fox Deportes
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://23.237.104.106:8080/USA_FOX_DEPORTES/index.m3u8
-
-#EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg",Go 3 Sports 1
-https://robiproxi.bushmr263.workers.dev/?url=http://stream.mcquack.net/416/index.m3u8
-
-#EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg",Unite 8 Sports 1 HD
-https://livetv.shamon-cable.net:8443/Unite8-sports-1/tracks-v1a1/mono.m3u8?token=scn
-
-#EXTINF:-1 tvg-url="https://raw.githubusercontent.com/personaliptv/paid-link-1/main/482243292_642826978446244_6712273032991625548_n.jpg" group-title="Sports",A Sport
-https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor_480p.m3u8#skym3u.dev
-
 #EXTINF:-1 group-title="Sports",Setanta Sports 1 Eurasia
 https://robiproxi.bushmr263.workers.dev/?url=http://stream.mcquack.net/234/index.m3u8
 
 #EXTINF:-1 group-title="Sports",Setanta Sports 2 Eurasia
 https://robiproxi.bushmr263.workers.dev/?url=http://stream.mcquack.net/235/index.m3u8
-
-#EXTINF:-1 group-title="Sports",USA
-https://tvsen6.aynaott.com/usa/tracks-v1a1/mono.ts.m3u8
 
 #EXTINF:-1 tvg-id="019de785-39ff-7db1-94c6-e17acf6a6da4" tvg-name="Oman Sports TV HD" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-04-09/images_db7e2ba86e75cc789ccffacd59521127_playmist_oman_sports_tv_hd400x400.jpg" group-title="Sports",Oman Sports TV HD
 https://partneta.cdn.mgmlcdn.com/omsport/smil:omsport.stream.smil/chunklist.m3u8
@@ -520,9 +493,6 @@ https://d4ddgdmj1cvnm.cloudfront.net/scheduler/scheduleMaster/409/variant/221000
 #EXTINF:-1 tvg-id="019de785-39ce-70e7-948d-101e8a97fbd5" tvg-name="Fox Sports 2" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-02/images_1798e8f27d0dcf7ecfdbea8390ff4366_playmist_fox_sports_2400x400.jpg" group-title="Sports",Fox Sports 2
 https://tvsen7.aynaott.com/foxsports2/tracks-v1a1/mono.ts.m3u8
 
-#EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg",D Sports
-https://s2.bufaloweb.com/bufalo9/tracks-v4a1/mono.ts.m3u8
-
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/441hHtgZ/20250120_193746.png",BeIn Sports
 https://bein-esp-xumo.amagi.tv/playlistR1080p.m3u8
 
@@ -541,25 +511,37 @@ https://allinonereborn2.online/livtest3/stream_proxy.php?url=http://2756d46c.akc
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/B6TPgPPT/20250120_193903.png",Bein Sports 5
 https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/6126/index.m3u8
 
+#EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg",Unite 8 Sports 1 HD
+https://livetv.shamon-cable.net:8443/Unite8-sports-1/tracks-v1a1/mono.m3u8?token=scn
 
-#EXTINF:-1 group-title="Sports" tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/9-by-xfireflix.png",Sky sports football
+#EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg",,A Spor
+https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor_480p.m3u8#skym3u.dev
+
+#EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg",M Spotrs
+https://cdn.rabta.stream/M-Sports/index.m3u8
+#EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg",Go 3 Sports 1
+https://robiproxi.bushmr263.workers.dev/?url=http://stream.mcquack.net/416/index.m3u8
+
+#EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg",D Sports
+https://s2.bufaloweb.com/bufalo9/tracks-v4a1/mono.ts.m3u8
+
+#EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg",Tahora sports 
 https://tda-nnaa-drct-pa6dy.fast.nbcuni.com/live/master_2.m3u8
+
+#EXTINF:-1 group-title="Sports" tvg-logo="https://imglink.cc/cdn/RY7jBwPKAr.jpg",USA Sports
+https://tvsen6.aynaott.com/usa/tracks-v1a1/mono.ts.m3u8
 
 #EXTINF:-1 group-title="Sports" tvg-logo="https://s3.aynaott.com/storage/7d20b575edc4e4b5276faa8c246e72a4",Cricket Gold
 https://streams2.sofast.tv/ptnr-yupptv/title-cricketgold/v1/manifest/611d79b11b77e2f571934fd80ca1413453772ac7/b2048bb8-1686-4432-aa50-647245383e0c/bfc6a36e-c250-4afe-b6c9-2bc57855bb7d/4.m3u8
 
-
-#EXTINF:-1 group-title="Sports", M4T4 Football 3
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/522/index.m3u8
-
-#EXTINF:-1 group-title="Sports", M4T4 Football 2
-https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://2756d46c.akciatv.ru/iptv/7FRNF6CY9A9TG3/530/index.m3u8
-
-#EXTINF:-1 tvg-id="019efa45-d8f0-7732-8263-6030073a34fe" tvg-name="FIFA+" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-06-24/bcc9699c8a3c8faf509c92e9280e576f.jpg" group-title="Sports",FIFA+
-https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1_FJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8
-
 #EXTINF:-1 tvg-id="019de785-39fd-7973-b24f-0a07344fa15f" tvg-name="Bahrain Sports 1" tvg-logo="https://s3.aynaott.com/storage/0ec8d8b83b191cf915316a1751c8787e" group-title="Sports",Bahrain Sports 1
 https://5c7b683162943.streamlock.net/live/ngrp:sportsone_all/playlist.m3u8
+
+#EXTINF:-1 tvg-url="https://raw.githubusercontent.com/personaliptv/paid-link-1/main/482243292_642826978446244_6712273032991625548_n.jpg" group-title="Sports",FB TV
+https://robiproxi.bushmr263.workers.dev/?url=http://1hskrdto.rocketcdn.com/fenerbahcetv.smil/playlist.m3u8
+
+#EXTINF:-1 tvg-id="019de785-39cc-73df-9b76-41868981948e" tvg-name="Fox Deportes" tvg-logo="https://s3.aynaott.com/storage/75d182d517bbae0af248c5ee1a67f4d4" group-title="Sports",Fox Deportes
+https://online-tv-3-jvhn.onrender.com/api/proxy?url=http://23.237.104.106:8080/USA_FOX_DEPORTES/index.m3u8
 
 #EXTINF:-1 tvg-id="019de785-39e0-76f0-9bff-68df0dc12665" tvg-name="TSN 1" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-20/images_d165c628a0db9286da3914ca916a4971_playmist_tsn_1400x400.jpg" group-title="Sports",TSN 1
 https://tvsen7.aynaott.com/tsn1/index.m3u8
@@ -572,9 +554,6 @@ https://tvsen7.aynaott.com/tsn3/index.m3u8
 
 #EXTINF:-1 tvg-id="019de785-3a0f-7a8d-aa40-1bc1d60c9817" tvg-name="TNT Sport 1" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-09/images_4af9a282522f487a6ed41692f99baad6_playmist_tnt_sports_1400x400.jpg" group-title="Sports",TNT Sport 1
 https://tvsen6.aynaott.com/TntSports1HD/index.m3u8
-
-#EXTINF:-1 tvg-id="019de785-39ff-7db1-94c6-e17acf6a6da4" tvg-name="SkySportsF1" tvg-logo="https://s3.aynaott.com/storage/75d182d517bbae0af248c5ee1a67f4d4" group-title="Sports",SkySportsF1
-https://livetv.shamon-cable.net:8443/SkySportsF1/index.m3u8
 
 #EXTINF:-1 group-title="𝐒𝐩𝐨𝐫𝐭𝐬" tvg-logo="https://i.postimg.cc/ZRV7W8cV/fancode.png",FANCODE 1
 https://otte.cache.aiv-cdn.net/iad-nitro/live/clients/dash/enc/b3b3fkmrbl/out/v1/1084d5c9a97a4c5b9f9554c88f486646/cenc.mpd|drmScheme=clearkey&drmLicense=82dfca238e8c4b430a3269db71965db9:a00b28caf4ac628e77a553d440c0ddca
@@ -594,6 +573,8 @@ https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/dev1hjwzh9/out/v1
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/59p62VB2/20250120_193532.png" group-title="𝐒𝐩𝐨𝐫𝐭𝐬",TNT 4
 https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/tdijwiga2k/out/v1/f5fde318678f4f7583bf27b7231bde1f/cenc.mpd|drmScheme=clearkey&drmLicense=fa34fa8c90336dd528c7a23871cad1fe:552a78d1aeb74f1650d68255c5749408
 
+#EXTINF:-1 tvg-id="019efa45-d8f0-7732-8263-6030073a34fe" tvg-name="FIFA+" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-06-24/bcc9699c8a3c8faf509c92e9280e576f.jpg" group-title="Sports",FIFA+
+https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1_FJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8
 
 
 
