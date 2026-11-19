@@ -175,7 +175,7 @@
             flex-grow: 1;
             min-width: 250px;
             background: #0d1117;
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 8px;
             border: 1px solid #30363d;
             text-align: center;
@@ -188,18 +188,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
-            align-items: center;
-        }
-
-        /* নোটিস বারের ওপরে বড় ও স্পষ্ট লেখা */
-        .top-notice-heading {
-            font-size: 18px;
-            line-height: 1.35;
-            color: var(--accent-color);
-            font-weight: 700;
-            text-align: center;
-            width: 100%;
-            letter-spacing: 0.2px;
+            align-items: stretch;
         }
 
         .server-title {
@@ -208,6 +197,32 @@
             font-weight: bold;
             text-align: center;
             width: 100%;
+            margin-bottom: 2px;
+        }
+
+        .server-stacked-notices {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .server-inline-notice {
+            overflow: hidden;
+            white-space: nowrap;
+            background: rgba(229, 184, 96, 0.1);
+            border-radius: 4px;
+            padding: 2px 6px;
+            border: 1px solid rgba(229, 184, 96, 0.2);
+            text-align: left;
+        }
+
+        /* নোটিস দুটি একটু বড় সাইজে */
+        .server-inline-notice marquee {
+            font-size: 14.5px;
+            line-height: 1.25;
+            color: #58a6ff;
+            font-weight: bold;
+            display: block;
         }
 
         .server-buttons-wrap {
@@ -215,7 +230,6 @@
             gap: 8px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 2px;
         }
 
         .server-btn {
@@ -587,9 +601,10 @@
             }
             .header-wrapper { margin-bottom: 10px; gap: 8px; }
             .logo-header { font-size: 22px; }
-            .header-server-switcher { padding: 8px; gap: 4px; }
-            .top-notice-heading { font-size: 16px; }
+            .header-server-switcher { padding: 6px; gap: 4px; }
             .server-title { font-size: 13px; }
+            .server-inline-notice { padding: 2px 5px; }
+            .server-inline-notice marquee { font-size: 13.5px; line-height: 1.25; }
             .channel-list-container { width: 100%; }
             .channel-list {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -645,10 +660,20 @@
 
                 <div id="serverSwitcherBox" class="header-server-switcher">
                     <div class="server-title-notice-row">
-                        <div class="top-notice-heading" id="topNoticeHeading">
-                            📢 কোনো ভিডিও প্লে না হলে HTML মোডে ট্রাই করুন
-                        </div>
                         <div class="server-title" id="activeChannelName">চ্যানেল সিলেক্ট করুন</div>
+
+                        <div class="server-stacked-notices">
+                            <div class="server-inline-notice">
+                                <marquee behavior="scroll" direction="left" scrollamount="4">
+                                    যেকোনো প্রয়োজনে নিচে টেলিগ্রাম, হোয়াটসঅ্যাপ, ফেসবুক যোগাযোগ করুন।
+                                </marquee>
+                            </div>
+                            <div class="server-inline-notice">
+                                <marquee behavior="scroll" direction="left" scrollamount="4">
+                                    কোনো ভিডিও প্লে না হলে HTML মোডে ট্রাই করে এক মিনিট অপেক্ষা করুন।
+                                </marquee>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="server-buttons-wrap" id="serverButtonsContainer"></div>
