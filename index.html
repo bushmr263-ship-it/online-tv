@@ -373,13 +373,29 @@
             position: relative;
         }
 
+        /* Unified Player Interface: hide internal engine branding/bars so all engines look identical */
         #clappr-container, #html5-video {
             width: 100% !important;
             height: 100% !important;
             border: none;
             position: absolute;
-            top: 0;
-            left: 0;
+            inset: 0;
+            background: #000;
+            object-fit: contain;
+        }
+
+        #clappr-container video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            background: #000 !important;
+        }
+
+        #clappr-container [data-watermark],
+        #clappr-container .clappr-watermark,
+        #clappr-container .media-control-not-playing-state,
+        #clappr-container .spinner-three-bounce {
+            display: none !important;
         }
 
         #player-container {
@@ -423,12 +439,30 @@
             position: absolute;
             top: 15px;
             right: 15px;
-            z-index: 10;
+            z-index: 15;
             color: white;
-            background: #222;
+            background: rgba(34, 34, 34, 0.88);
             border-radius: 20px;
             padding: 8px 12px;
             font-size: 12px;
+            pointer-events: none;
+        }
+
+        #offlineOverlay {
+            display: none;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 25;
+            background: rgba(220, 38, 38, 0.92);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+            pointer-events: none;
         }
 
         .modes {
@@ -626,6 +660,10 @@
             min-height: 18px;
         }
 
+        .player-hidden {
+            display: none !important;
+        }
+
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
 
@@ -775,7 +813,7 @@
                                 </div>
                                 <div class="server-inline-notice">
                                     <marquee behavior="scroll" direction="left" scrollamount="4">
-                                        কোনো ভিডিও প্লে না হলে HTML মোডে ট্রাই করে এক মিনিট অপেক্ষা করুন।
+                                        কিছু ভিডিও প্লে হতে এক মিনিট অপেক্ষা করুন।
                                     </marquee>
                                 </div>
                             </div>
@@ -787,7 +825,9 @@
             </div>
 
             <div class="video-box" id="videoBox">
-                <!-- Unified Main Interface (Shaka UI) -->
+                <div id="offlineOverlay">Offline</div>
+
+                <!-- Unified Player Interface -->
                 <div id="player-container">
                   <video id="video"
                     autoplay
@@ -798,13 +838,13 @@
 
                 <div id="status">Player Ready</div>
 
-                <div id="clappr-container" style="display:none;"></div>
-                <video id="html5-video" controls autoplay playsinline preload="auto" style="display:none;"></video>
+                <div id="clappr-container" class="player-hidden"></div>
+                <video id="html5-video" class="player-hidden" controls autoplay playsinline preload="auto"></video>
             </div>
 
             <div class="modes">
                 <button class="btn" onclick="switchMode('main')">Main</button>
-                <button class="btn" onclick="switchMode('html5')">HTML5</button>
+                <button class="btn" style="display: none !important;" onclick="switchMode('html5')">HTML5</button>
             </div>
         </div>
 
@@ -1020,6 +1060,7 @@
 
         const clapprEl = document.getElementById('clappr-container');
         const html5El = document.getElementById('html5-video');
+        const offlineOverlayEl = document.getElementById('offlineOverlay');
         let clapprInstance;
         let hls;
         let dashPlayer;
@@ -1038,10 +1079,8 @@
         let playlistLoaded = false;
         let hasUserInteracted = false;
 
-        // ১৫ সেকেন্ডে প্লে না হলে Clappr-এ যাবে; Clappr-এও ব্লক হলে তবেই HTML5-এ যাবে
         const HLS_TO_CLAPPR_MS = 15000;
 
-        // Toffee থেকে যে ৫টি চ্যানেল অটো-টোকেনসহ যুক্ত হবে
         const SELECTED_TOFFEE_CHANNELS = [
             "Zee Bollywood",
             "Sony Max",
@@ -1062,6 +1101,25 @@
                 });
             }
         } catch (e) {}
+
+        function setOfflineScreenVisible(isOffline) {
+            if (offlineOverlayEl) {
+                offlineOverlayEl.style.display = isOffline ? "block" : "none";
+            }
+        }
+
+        function setActivePlayerView(activeView) {
+            const mainContainer = document.getElementById("player-container");
+            if (mainContainer) {
+                mainContainer.classList.toggle("player-hidden", activeView !== "shaka");
+            }
+            if (clapprEl) {
+                clapprEl.classList.toggle("player-hidden", activeView !== "clappr");
+            }
+            if (html5El) {
+                html5El.classList.toggle("player-hidden", activeView !== "html5");
+            }
+        }
 
         function getUrlHostLower(rawUrl) {
             try {
@@ -1237,6 +1295,7 @@
 
                 video.addEventListener("playing", () => {
                     if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
+                    setOfflineScreenVisible(false);
                     status.textContent = "Playing";
                     if (hasUserInteracted) {
                         video.muted = false;
@@ -1314,9 +1373,10 @@
                 clearTimeout(loadTimeoutTimer);
                 loadTimeoutTimer = null;
             }
+            setOfflineScreenVisible(true);
             const statusEl = document.getElementById("status");
             if (statusEl) {
-                statusEl.textContent = "Stream Unavailable";
+                statusEl.textContent = "Offline";
             }
         }
 
@@ -1343,7 +1403,6 @@
             }
             if (clapprEl) {
                 clapprEl.innerHTML = '';
-                clapprEl.style.display = 'none';
             }
             if (shakaPlayerRef) {
                 try {
@@ -1351,6 +1410,9 @@
                     shakaPlayerRef.configure({ drm: { clearKeys: {} } });
                 } catch (e) {}
             }
+
+            setOfflineScreenVisible(false);
+            setActivePlayerView(null);
 
             const mainVideo = document.getElementById("video");
             if (mainVideo) {
@@ -1362,7 +1424,6 @@
                 mainVideo.load();
             }
 
-            html5El.style.display = 'none';
             html5El.onwaiting = null;
             html5El.onplaying = null;
             html5El.onerror = null;
@@ -1397,13 +1458,8 @@
             currentUrl = rawUrl;
             currentMode = effectiveMode === 'html5' ? 'html5' : 'main';
 
-            const mainContainer = document.getElementById("player-container");
             const mainVideo = document.getElementById("video");
             const statusEl = document.getElementById("status");
-
-            clapprEl.style.display = 'none';
-            html5El.style.display = 'none';
-            mainContainer.style.display = 'none';
 
             await cleanupPreviousPlayers();
             if (sessionId !== loadSessionId) return;
@@ -1433,10 +1489,21 @@
 
             const markStreamStarted = () => {
                 fbState.hasStartedPlaying = true;
+                setOfflineScreenVisible(false);
                 if (loadTimeoutTimer) {
                     clearTimeout(loadTimeoutTimer);
                     loadTimeoutTimer = null;
                 }
+            };
+
+            const markStreamOffline = () => {
+                if (sessionId !== loadSessionId || fbState.hasStartedPlaying) return;
+                if (loadTimeoutTimer) {
+                    clearTimeout(loadTimeoutTimer);
+                    loadTimeoutTimer = null;
+                }
+                setOfflineScreenVisible(true);
+                statusEl.textContent = "Offline";
             };
 
             const triggerSingleClapprFallback = () => {
@@ -1453,12 +1520,12 @@
                     rememberHtml5ForUrl(rawUrl);
                     loadChannelUrl(rawUrl, 'html5', false);
                 } else {
-                    statusEl.textContent = "Stream Unavailable";
+                    markStreamOffline();
                 }
             };
 
             if (isMpd) {
-                mainContainer.style.display = 'block';
+                setActivePlayerView('shaka');
                 if (!shakaPlayerRef) {
                     await initPlayer();
                 }
@@ -1477,7 +1544,7 @@
                         triggerInstantPlay(mainVideo);
                     } catch (error) {
                         if (sessionId === loadSessionId) {
-                            statusEl.textContent = "Stream Unavailable";
+                            markStreamOffline();
                         }
                     }
                 }
@@ -1485,9 +1552,16 @@
             }
 
             if (effectiveMode === 'html5') {
-                html5El.style.display = 'block';
+                setActivePlayerView('html5');
                 html5El.src = finalUrl;
                 triggerInstantPlay(html5El);
+
+                loadTimeoutTimer = setTimeout(() => {
+                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                        markStreamOffline();
+                    }
+                }, HLS_TO_CLAPPR_MS);
+
                 html5El.onwaiting = () => {
                     if (sessionId === loadSessionId) {
                         statusEl.textContent = "Buffering...";
@@ -1505,14 +1579,20 @@
                 };
                 html5El.onerror = () => {
                     if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                        statusEl.textContent = "Stream Unavailable";
+                        markStreamOffline();
                     }
                 };
                 return;
             }
 
             if (effectiveMode === 'clappr_once') {
-                clapprEl.style.display = 'block';
+                setActivePlayerView('clappr');
+
+                loadTimeoutTimer = setTimeout(() => {
+                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                        triggerSingleClapprFallback();
+                    }
+                }, HLS_TO_CLAPPR_MS);
 
                 clapprInstance = new Clappr.Player({
                     source: finalUrl,
@@ -1520,7 +1600,8 @@
                     width: '100%',
                     height: '100%',
                     autoPlay: true,
-                    mute: false
+                    mute: false,
+                    hideMediaControl: true
                 });
                 if (typeof clapprInstance.setVolume === 'function') {
                     try { clapprInstance.setVolume(100); } catch (e) {}
@@ -1547,7 +1628,7 @@
             }
 
             // Main Mode (HLS.js / Native HLS)
-            mainContainer.style.display = 'block';
+            setActivePlayerView('shaka');
             if (!shakaPlayerRef) {
                 await initPlayer();
             }
