@@ -216,7 +216,6 @@
             text-align: left;
         }
 
-        /* নোটিস দুটি একটু বড় সাইজে */
         .server-inline-notice marquee {
             font-size: 14.5px;
             line-height: 1.25;
@@ -305,34 +304,24 @@
             background: var(--bg-color);
             padding: 15px;
             padding-right: 10px;
-            border-radius: 12px 12px 0 0;
+            border-radius: 12px;
             align-content: start;
             gap: 10px;
         }
 
-        .social-footer {
-            display: flex;
-            gap: 10px;
-            background: var(--bg-color);
-            padding: 12px 15px;
-            border-radius: 0 0 12px 12px;
-            border-top: 1px solid #30363d;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .social-btn {
-            display: flex;
+        .mode-social-btn {
+            display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
+            gap: 6px;
+            padding: 8px 13px;
             border-radius: 6px;
             text-decoration: none;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12.5px;
             color: #fff;
-            transition: 0.3s;
+            transition: 0.25s;
             border: 1px solid #30363d;
+            line-height: 1.2;
         }
 
         .telegram-btn { background: #0088cc; }
@@ -369,7 +358,6 @@
             box-sizing: border-box;
         }
 
-        /* Pause / Play বাটন ছোট করার স্টাইল (ভলিউম স্লাইডার ঠিক রেখে) */
         #player-container .shaka-small-play-button {
             width: 34px !important;
             height: 34px !important;
@@ -380,7 +368,6 @@
             border-radius: 50% !important;
         }
 
-        /* Shaka ভলিউম স্লাইডার দেখানো ও ঠিকমতো কাজ করার জন্য */
         #player-container .shaka-volume-bar-container {
             width: 70px !important;
             min-width: 55px !important;
@@ -416,7 +403,7 @@
         .modes {
             display: flex;
             gap: 8px;
-            margin-top: 15px;
+            margin-top: 14px;
             justify-content: center;
             flex-wrap: wrap;
             align-items: center;
@@ -431,16 +418,12 @@
             cursor: pointer;
             font-weight: bold;
             font-size: 13px;
+            line-height: 1.2;
         }
 
         .btn:hover {
             background: var(--accent-color);
             color: #000;
-        }
-
-        .pip-btn {
-            background: #ff4757 !important;
-            color: #fff !important;
         }
 
         .ch-btn {
@@ -596,30 +579,53 @@
                 position: sticky !important;
                 top: 0; left: 0; width: 100%;
                 z-index: 999; box-sizing: border-box;
-                padding: 10px; border-radius: 10px;
+                padding: 8px; border-radius: 10px;
                 box-shadow: 0 4px 18px rgba(0, 0, 0, 0.85);
             }
-            .header-wrapper { margin-bottom: 10px; gap: 8px; }
-            .logo-header { font-size: 22px; }
+            .header-wrapper { margin-bottom: 8px; gap: 6px; }
+            .logo-header { font-size: 20px; }
             .header-server-switcher { padding: 6px; gap: 4px; }
             .server-title { font-size: 13px; }
             .server-inline-notice { padding: 2px 5px; }
-            .server-inline-notice marquee { font-size: 13.5px; line-height: 1.25; }
+            .server-inline-notice marquee { font-size: 13px; line-height: 1.25; }
             .channel-list-container { width: 100%; }
             .channel-list {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
                 height: 56vh; padding: 8px; gap: 8px;
-                border-radius: 10px 10px 0 0;
+                border-radius: 10px;
             }
             .ch-btn { height: 82px; padding: 6px 4px; gap: 4px; border-radius: 8px; background: #1c2128; }
             .ch-btn img { width: 38px; height: 38px; }
             .ch-btn strong { font-size: 11px; }
             .category-bar { margin-bottom: 8px; gap: 6px; }
             .cat-btn { padding: 6px 12px; font-size: 11px; }
-            .modes { gap: 5px; margin-top: 10px; }
-            .btn { padding: 6px 9px; font-size: 11px; border-radius: 5px; }
-            .social-footer { padding: 8px 10px; gap: 6px; }
-            .social-btn { padding: 6px 10px; font-size: 11.5px; }
+            .modes {
+                display: flex;
+                flex-wrap: nowrap;
+                justify-content: space-between;
+                gap: 4px;
+                margin-top: 8px;
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+            .modes::-webkit-scrollbar { display: none; }
+            .btn {
+                padding: 6px 7px;
+                font-size: 10.5px;
+                border-radius: 6px;
+                white-space: nowrap;
+                flex: 1 1 auto;
+                text-align: center;
+            }
+            .mode-social-btn {
+                padding: 6px 6px;
+                font-size: 10.5px;
+                border-radius: 6px;
+                gap: 3px;
+                white-space: nowrap;
+                flex: 1 1 auto;
+                justify-content: center;
+            }
             .input-box { flex-direction: row; margin: 10px auto; gap: 6px; }
             #customUrlInput { padding: 10px; font-size: 12px; }
             .play-btn { padding: 10px 16px; font-size: 12px; white-space: nowrap; }
@@ -697,9 +703,11 @@
             </div>
 
             <div class="modes">
+                <a href="https://www.facebook.com/aribashawon6672" target="_blank" class="mode-social-btn facebook-btn">🌐 Facebook</a>
                 <button class="btn" onclick="switchMode('main')">Main</button>
                 <button class="btn" onclick="switchMode('html5')">HTML5</button>
-                <button class="btn pip-btn" onclick="togglePIP()">PIP Mode</button>
+                <a href="https://t.me/+VqDOF_-beaQyMWY1" target="_blank" class="mode-social-btn telegram-btn">📱 Telegram</a>
+                <a href="https://wa.me/8801812895985" target="_blank" class="mode-social-btn whatsapp-btn">💬 WhatsApp</a>
             </div>
         </div>
 
@@ -719,12 +727,6 @@
             <div class="channel-list" id="channelContainer">
                 <p style="text-align: center; color: #888; grid-column: span 4;">চ্যানেল লোড হচ্ছে...</p>
             </div>
-
-            <div class="social-footer">
-                <a href="https://t.me/+VqDOF_-beaQyMWY1" target="_blank" class="social-btn telegram-btn">📱 Telegram</a>
-                <a href="https://www.facebook.com/aribashawon6672" target="_blank" class="social-btn facebook-btn">🌐 Facebook</a>
-                <a href="https://wa.me/8801812895985" target="_blank" class="social-btn whatsapp-btn">💬 WhatsApp</a>
-            </div>
         </div>
     </div>
 
@@ -732,7 +734,6 @@
         <input type="text" id="customUrlInput" placeholder="লিঙ্ক এখানে দিন (M3U8, MPD বা URL)...">
         <button class="play-btn" onclick="playCustom()">প্লে করুন</button>
     </div>
-
     <script>
         let liveSessionInterval = null;
 
@@ -905,7 +906,6 @@
         }
         setInterval(checkDevTools, 1000);
 
-        // Player Logic: .m3u8 runs via HLS in Main UI, 15s timeout -> once Clappr fallback (no loops, no switch on buffer after play)
         const clapprEl = document.getElementById('clappr-container');
         const html5El = document.getElementById('html5-video');
         let clapprInstance;
@@ -926,7 +926,7 @@
         let playlistLoaded = false;
         let hasUserInteracted = false;
 
-        const HLS_TO_CLAPPR_MS = 15000; // ১৫ সেকেন্ডে HLS প্লে না হলে একবার Clappr-এ যাবে
+        const HLS_TO_CLAPPR_MS = 15000;
 
         function unmuteActivePlayers() {
             const mainVideo = document.getElementById("video");
@@ -1066,16 +1066,6 @@
             } catch (error) {
                 status.textContent = "Unable to Play Video";
                 console.error(error);
-            }
-        }
-
-        function togglePIP() {
-            const mainContainer = document.getElementById("player-container");
-            const mainVideo = document.getElementById("video");
-            if (mainContainer && mainContainer.style.display !== 'none' && document.pictureInPictureEnabled) {
-                mainVideo.requestPictureInPicture().catch(() => {});
-            } else if (html5El.style.display !== 'none' && document.pictureInPictureEnabled) {
-                html5El.requestPictureInPicture().catch(() => {});
             }
         }
 
