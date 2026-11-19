@@ -373,6 +373,81 @@
             position: relative;
         }
 
+        .video-overlay-drawer {
+            display: none;
+            position: absolute;
+            inset: 0;
+            z-index: 30;
+            background: rgba(11, 14, 20, 0.88);
+            backdrop-filter: blur(6px);
+            padding: 10px;
+            box-sizing: border-box;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .video-overlay-drawer.open {
+            display: flex;
+        }
+
+        .video-overlay-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .video-overlay-servers {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .video-overlay-close {
+            background: #21262d;
+            color: var(--accent-color);
+            border: 1px solid #30363d;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .video-overlay-channels {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 6px;
+            overflow-y: auto;
+            padding-right: 4px;
+            flex: 1;
+            align-content: start;
+        }
+
+        .video-overlay-ch-btn {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 6px 4px;
+            color: var(--accent-color);
+            font-size: 10.5px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .video-overlay-ch-btn.active-channel {
+            background: #25302b;
+            border-color: #2ea043;
+            color: #2ecc71;
+        }
+
         #clappr-container, #html5-video {
             width: 100% !important;
             height: 100% !important;
@@ -737,8 +812,8 @@
 
         @media screen and (max-width: 1024px) and (orientation: landscape) {
             body {
-                padding: 10px !important;
-                padding-bottom: 10px !important;
+                padding: 8px !important;
+                padding-bottom: 8px !important;
                 overflow-x: hidden;
             }
 
@@ -747,7 +822,8 @@
                 flex-direction: row !important;
                 flex-wrap: nowrap !important;
                 align-items: flex-start !important;
-                gap: 14px !important;
+                justify-content: space-between !important;
+                gap: 12px !important;
                 max-width: 100% !important;
                 height: auto !important;
                 overflow: visible !important;
@@ -757,101 +833,122 @@
                 position: relative !important;
                 top: auto !important;
                 left: auto !important;
-                flex: 1.65 1 0 !important;
+                flex: 1.55 1 0 !important;
                 min-width: 0 !important;
                 width: auto !important;
                 z-index: 1 !important;
-                padding: 12px !important;
+                padding: 10px !important;
                 border-radius: 12px !important;
                 box-shadow: none !important;
-                transition: flex 0.25s ease, width 0.25s ease;
+                transition: all 0.25s ease;
             }
 
             .header-wrapper {
                 flex-wrap: nowrap !important;
                 align-items: stretch !important;
                 gap: 8px !important;
-                margin-bottom: 10px !important;
+                margin-bottom: 8px !important;
             }
 
             .header-left-socials {
-                min-width: 84px !important;
+                min-width: 80px !important;
                 gap: 3px !important;
             }
 
             .header-social-btn {
-                padding: 4px 6px !important;
-                font-size: 10px !important;
-                gap: 3px !important;
+                padding: 3px 6px !important;
+                font-size: 9.5px !important;
+                gap: 2px !important;
+                border-radius: 4px !important;
             }
 
             .server-box-with-brand {
                 min-width: 0 !important;
-                padding: 6px 10px !important;
-                gap: 10px !important;
+                padding: 6px 8px !important;
+                gap: 8px !important;
             }
 
             .server-brand-left {
-                font-size: 17px !important;
-                padding-right: 9px !important;
+                font-size: 16px !important;
+                padding-right: 8px !important;
             }
 
             .server-title {
-                font-size: 12.5px !important;
+                font-size: 12px !important;
             }
 
             .server-inline-notice marquee {
-                font-size: 12.5px !important;
+                font-size: 12px !important;
+            }
+
+            .modes {
+                gap: 6px !important;
+                margin-top: 8px !important;
             }
 
             .channel-list-container {
+                display: flex !important;
+                flex-direction: column !important;
                 flex: 1 1 0 !important;
                 min-width: 0 !important;
                 width: auto !important;
                 height: auto !important;
                 overflow: visible !important;
-                transition: opacity 0.2s ease;
+            }
+
+            .category-bar {
+                margin-bottom: 6px !important;
+                gap: 6px !important;
+            }
+
+            .cat-btn {
+                padding: 5px 10px !important;
+                font-size: 11px !important;
             }
 
             .channel-list {
                 grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-                height: 76vh !important;
-                max-height: 76vh !important;
+                height: 72vh !important;
+                max-height: 72vh !important;
                 overflow-y: auto !important;
-                padding: 10px !important;
-                padding-bottom: 12px !important;
+                padding: 8px !important;
                 gap: 8px !important;
+                border-radius: 10px !important;
             }
 
             .ch-btn {
-                height: 82px !important;
+                height: 78px !important;
                 padding: 6px 4px !important;
                 gap: 4px !important;
             }
 
             .ch-btn .live-led {
-                top: 6px;
-                right: 6px;
-                width: 7px;
-                height: 7px;
+                top: 6px !important;
+                right: 6px !important;
+                width: 7px !important;
+                height: 7px !important;
             }
 
             .ch-btn img {
-                width: 38px !important;
-                height: 38px !important;
+                width: 36px !important;
+                height: 36px !important;
             }
 
             .ch-btn strong {
-                font-size: 11px !important;
+                font-size: 10.5px !important;
             }
 
             .input-box {
                 position: static !important;
-                margin: 12px auto 6px auto !important;
+                margin: 10px auto 6px auto !important;
                 padding: 0 !important;
                 background: transparent !important;
                 border-top: none !important;
                 z-index: 1 !important;
+            }
+
+            .video-overlay-channels {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
             }
 
             body.landscape-player-expanded .channel-list-container {
@@ -865,8 +962,8 @@
             }
 
             body.landscape-player-expanded .video-box {
-                max-height: 74vh;
-                width: 100%;
+                width: 100% !important;
+                max-height: 72vh !important;
             }
         }
     </style>
@@ -921,7 +1018,15 @@
                 </div>
             </div>
 
-            <div class="video-box">
+            <div class="video-box" id="videoBox">
+                <div class="video-overlay-drawer" id="videoOverlayDrawer">
+                    <div class="video-overlay-top">
+                        <div class="video-overlay-servers" id="videoOverlayServers"></div>
+                        <button type="button" class="video-overlay-close" id="videoOverlayCloseBtn">✕ বন্ধ করুন</button>
+                    </div>
+                    <div class="video-overlay-channels" id="videoOverlayChannels"></div>
+                </div>
+
                 <!-- Unified Main Interface (Shaka UI) -->
                 <div id="player-container">
                   <video id="video"
@@ -1186,28 +1291,112 @@
                 const isMatch = activeKey && btn.dataset.chKey === activeKey;
                 btn.classList.toggle('active-channel', Boolean(isMatch));
             });
+            document.querySelectorAll('#videoOverlayChannels .video-overlay-ch-btn').forEach(item => {
+                const isMatch = activeKey && item.dataset.chKey === activeKey;
+                item.classList.toggle('active-channel', Boolean(isMatch));
+            });
         }
 
         function isLandscapeMode() {
             return window.innerWidth <= 1024 && window.innerWidth > window.innerHeight;
         }
 
-        function syncLandscapeExpandedClass() {
-            if (!isLandscapeMode()) {
-                document.body.classList.remove('landscape-player-expanded');
+        function isMobileLargeOrLandscapeView() {
+            const isMobileWidth = window.innerWidth <= 1024;
+            const isLandscape = window.innerWidth > window.innerHeight;
+            return isMobileWidth && (document.body.classList.contains('landscape-player-expanded') || isLandscape);
+        }
+
+        function toggleVideoOverlayDrawer(forceState = null) {
+            const drawer = document.getElementById('videoOverlayDrawer');
+            if (!drawer) return;
+            const shouldOpen = forceState !== null ? Boolean(forceState) : !drawer.classList.contains('open');
+            if (shouldOpen) {
+                syncOverlayServersAndChannels();
+                drawer.classList.add('open');
+            } else {
+                drawer.classList.remove('open');
             }
         }
 
-        function initLandscapeVideoToggle() {
-            const videoBox = document.querySelector('.video-box');
+        function syncOverlayServersAndChannels() {
+            const topServers = document.getElementById('serverButtonsContainer');
+            const overlayServers = document.getElementById('videoOverlayServers');
+            const overlayChannels = document.getElementById('videoOverlayChannels');
+
+            if (overlayServers) {
+                overlayServers.innerHTML = '';
+                if (topServers && topServers.children.length) {
+                    Array.from(topServers.children).forEach((btn) => {
+                        const clone = document.createElement('button');
+                        clone.className = btn.className;
+                        clone.innerText = btn.innerText;
+                        clone.onclick = (e) => {
+                            e.stopPropagation();
+                            btn.click();
+                            toggleVideoOverlayDrawer(false);
+                        };
+                        overlayServers.appendChild(clone);
+                    });
+                }
+            }
+
+            if (overlayChannels) {
+                overlayChannels.innerHTML = '';
+                const activeKey = getChannelKey(currentChannelObj);
+                const list = allChannels.filter(ch => {
+                    if (currentFilter === 'all') return true;
+                    if (!ch.group) return false;
+                    return ch.group.toLowerCase().replace(/[\s_]+/g, '') === currentFilter.toLowerCase().replace(/[\s_]+/g, '');
+                });
+
+                list.forEach((ch) => {
+                    const chKey = getChannelKey(ch);
+                    const item = document.createElement('div');
+                    item.className = 'video-overlay-ch-btn';
+                    item.dataset.chKey = chKey;
+                    if (activeKey && chKey === activeKey) {
+                        item.classList.add('active-channel');
+                    }
+                    item.innerText = ch.name;
+                    item.onclick = (e) => {
+                        e.stopPropagation();
+                        hasUserInteracted = true;
+                        loadChannel(ch);
+                        toggleVideoOverlayDrawer(false);
+                    };
+                    overlayChannels.appendChild(item);
+                });
+            }
+        }
+
+        function syncLandscapeExpandedClass() {
+            if (!isLandscapeMode()) {
+                document.body.classList.remove('landscape-player-expanded');
+                toggleVideoOverlayDrawer(false);
+            }
+        }
+
+        function initVideoDrawerTrigger() {
+            const videoBox = document.getElementById('videoBox') || document.querySelector('.video-box');
+            const closeBtn = document.getElementById('videoOverlayCloseBtn');
             if (!videoBox) return;
 
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleVideoOverlayDrawer(false);
+                });
+            }
+
             videoBox.addEventListener('click', (e) => {
-                if (!isLandscapeMode()) return;
+                if (e.target.closest('#videoOverlayDrawer')) return;
                 if (e.target.closest('button, a, input, .shaka-controls-button, .shaka-overflow-menu, .shaka-settings-menu')) {
                     return;
                 }
-                document.body.classList.toggle('landscape-player-expanded');
+                if (isMobileLargeOrLandscapeView()) {
+                    toggleVideoOverlayDrawer();
+                }
             });
 
             window.addEventListener('resize', syncLandscapeExpandedClass);
@@ -1402,6 +1591,7 @@
                 buttonsContainer.appendChild(sBtn);
             });
 
+            syncOverlayServersAndChannels();
             loadChannelUrl(urls[0], 'main', true);
         }
 
@@ -1732,6 +1922,7 @@
                 document.getElementById('activeChannelName').innerText = "Custom URL - সার্ভার পরিবর্তন করুন";
                 currentChannelObj = null;
                 updateActiveChannelIndicator(null);
+                syncOverlayServersAndChannels();
                 loadChannelUrl(url, 'main', true);
             }
         }
@@ -1796,6 +1987,8 @@
             } else {
                 container.innerHTML = '<p style="text-align: center; color: #888; grid-column: span 4; padding: 20px;">এই ক্যাটাগরিতে কোনো চ্যানেল পাওয়া যায়নি।</p>';
             }
+
+            syncOverlayServersAndChannels();
         }
 
         function filterCategory(category, btnElement) {
@@ -1935,7 +2128,7 @@
             setupFirstInteractionSoundUnlock();
             startLiveSessionCheck();
             initPlayer();
-            initLandscapeVideoToggle();
+            initVideoDrawerTrigger();
             loadPlaylistData();
         }
 
