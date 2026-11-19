@@ -373,61 +373,57 @@
             position: relative;
         }
 
-        .video-overlay-drawer {
+        .mobile-bigscreen-panel {
             display: none;
             position: absolute;
             inset: 0;
-            z-index: 30;
+            z-index: 35;
             background: rgba(11, 14, 20, 0.88);
             backdrop-filter: blur(6px);
             padding: 10px;
             box-sizing: border-box;
-            flex-direction: column;
-            gap: 8px;
+            flex-direction: row;
+            gap: 10px;
             overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
         }
 
-        .video-overlay-drawer.open {
-            display: flex;
+        .mobile-bigscreen-panel.show-panel {
+            opacity: 1;
+            pointer-events: auto;
         }
 
-        .video-overlay-top {
+        .mobile-bigscreen-server-col {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .video-overlay-servers {
-            display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 6px;
-            flex-wrap: wrap;
+            min-width: 82px;
+            max-width: 105px;
+            flex-shrink: 0;
+            overflow-y: auto;
         }
 
-        .video-overlay-close {
-            background: #21262d;
-            color: var(--accent-color);
-            border: 1px solid #30363d;
-            padding: 4px 10px;
-            border-radius: 6px;
+        .mobile-bigscreen-server-col .server-btn {
+            padding: 5px 8px;
             font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        .video-overlay-channels {
+        .mobile-bigscreen-channel-col {
+            flex: 1;
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 6px;
             overflow-y: auto;
-            padding-right: 4px;
-            flex: 1;
             align-content: start;
+            padding-right: 4px;
         }
 
-        .video-overlay-ch-btn {
+        .mobile-bigscreen-ch-item {
             background: #21262d;
             border: 1px solid #30363d;
             border-radius: 6px;
@@ -442,10 +438,25 @@
             text-overflow: ellipsis;
         }
 
-        .video-overlay-ch-btn.active-channel {
+        .mobile-bigscreen-ch-item.active-channel {
             background: #25302b;
             border-color: #2ea043;
             color: #2ecc71;
+        }
+
+        .mobile-bigscreen-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 40;
+            background: #21262d;
+            color: var(--accent-color);
+            border: 1px solid #30363d;
+            border-radius: 5px;
+            padding: 3px 8px;
+            font-size: 10.5px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         #clappr-container, #html5-video {
@@ -704,7 +715,7 @@
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
 
-        @media screen and (max-width: 768px) and (orientation: portrait) {
+        @media screen and (max-width: 768px) {
             body { padding: 6px; padding-bottom: 72px; }
             .main-container,
             .channel-list-container {
@@ -810,160 +821,13 @@
             }
         }
 
-        @media screen and (max-width: 1024px) and (orientation: landscape) {
-            body {
-                padding: 8px !important;
-                padding-bottom: 8px !important;
-                overflow-x: hidden;
-            }
-
-            .main-container {
-                display: flex !important;
-                flex-direction: row !important;
-                flex-wrap: nowrap !important;
-                align-items: flex-start !important;
-                justify-content: space-between !important;
-                gap: 12px !important;
-                max-width: 100% !important;
-                height: auto !important;
-                overflow: visible !important;
-            }
-
-            .player-section {
-                position: relative !important;
-                top: auto !important;
-                left: auto !important;
-                flex: 1.55 1 0 !important;
-                min-width: 0 !important;
-                width: auto !important;
-                z-index: 1 !important;
-                padding: 10px !important;
-                border-radius: 12px !important;
-                box-shadow: none !important;
-                transition: all 0.25s ease;
-            }
-
-            .header-wrapper {
-                flex-wrap: nowrap !important;
-                align-items: stretch !important;
-                gap: 8px !important;
-                margin-bottom: 8px !important;
-            }
-
-            .header-left-socials {
-                min-width: 80px !important;
-                gap: 3px !important;
-            }
-
-            .header-social-btn {
-                padding: 3px 6px !important;
-                font-size: 9.5px !important;
-                gap: 2px !important;
-                border-radius: 4px !important;
-            }
-
-            .server-box-with-brand {
-                min-width: 0 !important;
-                padding: 6px 8px !important;
-                gap: 8px !important;
-            }
-
-            .server-brand-left {
-                font-size: 16px !important;
-                padding-right: 8px !important;
-            }
-
-            .server-title {
-                font-size: 12px !important;
-            }
-
-            .server-inline-notice marquee {
-                font-size: 12px !important;
-            }
-
-            .modes {
-                gap: 6px !important;
-                margin-top: 8px !important;
-            }
-
-            .channel-list-container {
-                display: flex !important;
-                flex-direction: column !important;
-                flex: 1 1 0 !important;
-                min-width: 0 !important;
-                width: auto !important;
-                height: auto !important;
-                overflow: visible !important;
-            }
-
-            .category-bar {
-                margin-bottom: 6px !important;
-                gap: 6px !important;
-            }
-
-            .cat-btn {
-                padding: 5px 10px !important;
-                font-size: 11px !important;
-            }
-
-            .channel-list {
-                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-                height: 72vh !important;
-                max-height: 72vh !important;
-                overflow-y: auto !important;
-                padding: 8px !important;
-                gap: 8px !important;
-                border-radius: 10px !important;
-            }
-
-            .ch-btn {
-                height: 78px !important;
-                padding: 6px 4px !important;
-                gap: 4px !important;
-            }
-
-            .ch-btn .live-led {
-                top: 6px !important;
-                right: 6px !important;
-                width: 7px !important;
-                height: 7px !important;
-            }
-
-            .ch-btn img {
-                width: 36px !important;
-                height: 36px !important;
-            }
-
-            .ch-btn strong {
-                font-size: 10.5px !important;
-            }
-
-            .input-box {
-                position: static !important;
-                margin: 10px auto 6px auto !important;
-                padding: 0 !important;
-                background: transparent !important;
-                border-top: none !important;
-                z-index: 1 !important;
-            }
-
-            .video-overlay-channels {
-                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-            }
-
-            body.landscape-player-expanded .channel-list-container {
-                display: none !important;
-            }
-
-            body.landscape-player-expanded .player-section {
-                flex: 1 1 100% !important;
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-
-            body.landscape-player-expanded .video-box {
-                width: 100% !important;
-                max-height: 72vh !important;
+        @media screen and (max-width: 1024px) {
+            body.mobile-big-player .mobile-bigscreen-panel,
+            .video-box:fullscreen .mobile-bigscreen-panel,
+            .video-box:-webkit-full-screen .mobile-bigscreen-panel,
+            #player-container:fullscreen .mobile-bigscreen-panel,
+            #player-container:-webkit-full-screen .mobile-bigscreen-panel {
+                display: flex;
             }
         }
     </style>
@@ -1019,12 +883,10 @@
             </div>
 
             <div class="video-box" id="videoBox">
-                <div class="video-overlay-drawer" id="videoOverlayDrawer">
-                    <div class="video-overlay-top">
-                        <div class="video-overlay-servers" id="videoOverlayServers"></div>
-                        <button type="button" class="video-overlay-close" id="videoOverlayCloseBtn">✕ বন্ধ করুন</button>
-                    </div>
-                    <div class="video-overlay-channels" id="videoOverlayChannels"></div>
+                <div class="mobile-bigscreen-panel" id="mobileBigscreenPanel">
+                    <button type="button" class="mobile-bigscreen-close" id="mobileBigscreenCloseBtn">✕</button>
+                    <div class="mobile-bigscreen-server-col" id="mobileBigscreenServers"></div>
+                    <div class="mobile-bigscreen-channel-col" id="mobileBigscreenChannels"></div>
                 </div>
 
                 <!-- Unified Main Interface (Shaka UI) -->
@@ -1276,6 +1138,7 @@
         let shakaUiRef = null;
         let playlistLoaded = false;
         let hasUserInteracted = false;
+        let bigscreenPanelTimer = null;
 
         const HLS_TO_CLAPPR_MS = 15000;
 
@@ -1291,58 +1154,91 @@
                 const isMatch = activeKey && btn.dataset.chKey === activeKey;
                 btn.classList.toggle('active-channel', Boolean(isMatch));
             });
-            document.querySelectorAll('#videoOverlayChannels .video-overlay-ch-btn').forEach(item => {
+            document.querySelectorAll('#mobileBigscreenChannels .mobile-bigscreen-ch-item').forEach(item => {
                 const isMatch = activeKey && item.dataset.chKey === activeKey;
                 item.classList.toggle('active-channel', Boolean(isMatch));
             });
         }
 
-        function isLandscapeMode() {
-            return window.innerWidth <= 1024 && window.innerWidth > window.innerHeight;
+        function isMobileBigScreenActive() {
+            if (window.innerWidth > 1024) return false;
+            const videoBox = document.getElementById('videoBox') || document.querySelector('.video-box');
+            const isFullscreen = Boolean(
+                document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                (videoBox && (videoBox.matches(':fullscreen') || videoBox.matches(':-webkit-full-screen')))
+            );
+            const rect = videoBox ? videoBox.getBoundingClientRect() : null;
+            const isLargeBox = rect ? (rect.height >= window.innerHeight * 0.45 || rect.width >= window.innerWidth * 0.85) : false;
+            return isFullscreen || isLargeBox || document.body.classList.contains('mobile-big-player');
         }
 
-        function isMobileLargeOrLandscapeView() {
-            const isMobileWidth = window.innerWidth <= 1024;
-            const isLandscape = window.innerWidth > window.innerHeight;
-            return isMobileWidth && (document.body.classList.contains('landscape-player-expanded') || isLandscape);
-        }
-
-        function toggleVideoOverlayDrawer(forceState = null) {
-            const drawer = document.getElementById('videoOverlayDrawer');
-            if (!drawer) return;
-            const shouldOpen = forceState !== null ? Boolean(forceState) : !drawer.classList.contains('open');
-            if (shouldOpen) {
-                syncOverlayServersAndChannels();
-                drawer.classList.add('open');
+        function setMobileBigscreenPanelState(open) {
+            const panel = document.getElementById('mobileBigscreenPanel');
+            if (!panel) return;
+            if (open) {
+                syncMobileBigscreenPanel();
+                document.body.classList.add('mobile-big-player');
+                panel.classList.add('show-panel');
+                if (bigscreenPanelTimer) clearTimeout(bigscreenPanelTimer);
+                bigscreenPanelTimer = setTimeout(() => {
+                    panel.classList.remove('show-panel');
+                }, 6000);
             } else {
-                drawer.classList.remove('open');
+                panel.classList.remove('show-panel');
+                if (bigscreenPanelTimer) {
+                    clearTimeout(bigscreenPanelTimer);
+                    bigscreenPanelTimer = null;
+                }
             }
         }
 
-        function syncOverlayServersAndChannels() {
-            const topServers = document.getElementById('serverButtonsContainer');
-            const overlayServers = document.getElementById('videoOverlayServers');
-            const overlayChannels = document.getElementById('videoOverlayChannels');
+        function syncMobileBigscreenPanel(urls = null, activeIdx = 0) {
+            const serverCol = document.getElementById('mobileBigscreenServers');
+            const channelCol = document.getElementById('mobileBigscreenChannels');
 
-            if (overlayServers) {
-                overlayServers.innerHTML = '';
-                if (topServers && topServers.children.length) {
-                    Array.from(topServers.children).forEach((btn) => {
-                        const clone = document.createElement('button');
-                        clone.className = btn.className;
-                        clone.innerText = btn.innerText;
-                        clone.onclick = (e) => {
+            if (serverCol) {
+                serverCol.innerHTML = '';
+                const topServers = document.getElementById('serverButtonsContainer');
+                if (Array.isArray(urls) && urls.length) {
+                    urls.forEach((link, index) => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'server-btn';
+                        btn.dataset.serverIdx = index;
+                        btn.innerText = `Server ${index + 1}`;
+                        if (index === activeIdx) btn.classList.add('active');
+                        btn.onclick = (e) => {
                             e.stopPropagation();
-                            btn.click();
-                            toggleVideoOverlayDrawer(false);
+                            hasUserInteracted = true;
+                            currentServerIndex = index;
+                            document.querySelectorAll('.server-btn').forEach(b => {
+                                b.classList.toggle('active', Number(b.dataset.serverIdx) === index);
+                            });
+                            loadChannelUrl(link, 'main', true);
+                            setMobileBigscreenPanelState(false);
                         };
-                        overlayServers.appendChild(clone);
+                        serverCol.appendChild(btn);
+                    });
+                } else if (topServers && topServers.children.length) {
+                    Array.from(topServers.children).forEach((sBtn, index) => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = sBtn.className;
+                        btn.dataset.serverIdx = index;
+                        btn.innerText = sBtn.innerText;
+                        btn.onclick = (e) => {
+                            e.stopPropagation();
+                            sBtn.click();
+                            setMobileBigscreenPanelState(false);
+                        };
+                        serverCol.appendChild(btn);
                     });
                 }
             }
 
-            if (overlayChannels) {
-                overlayChannels.innerHTML = '';
+            if (channelCol) {
+                channelCol.innerHTML = '';
                 const activeKey = getChannelKey(currentChannelObj);
                 const list = allChannels.filter(ch => {
                     if (currentFilter === 'all') return true;
@@ -1353,7 +1249,7 @@
                 list.forEach((ch) => {
                     const chKey = getChannelKey(ch);
                     const item = document.createElement('div');
-                    item.className = 'video-overlay-ch-btn';
+                    item.className = 'mobile-bigscreen-ch-item';
                     item.dataset.chKey = chKey;
                     if (activeKey && chKey === activeKey) {
                         item.classList.add('active-channel');
@@ -1363,46 +1259,51 @@
                         e.stopPropagation();
                         hasUserInteracted = true;
                         loadChannel(ch);
-                        toggleVideoOverlayDrawer(false);
+                        setMobileBigscreenPanelState(false);
                     };
-                    overlayChannels.appendChild(item);
+                    channelCol.appendChild(item);
                 });
             }
         }
 
-        function syncLandscapeExpandedClass() {
-            if (!isLandscapeMode()) {
-                document.body.classList.remove('landscape-player-expanded');
-                toggleVideoOverlayDrawer(false);
-            }
-        }
-
-        function initVideoDrawerTrigger() {
+        function initMobileBigscreenPanel() {
             const videoBox = document.getElementById('videoBox') || document.querySelector('.video-box');
-            const closeBtn = document.getElementById('videoOverlayCloseBtn');
+            const closeBtn = document.getElementById('mobileBigscreenCloseBtn');
             if (!videoBox) return;
 
             if (closeBtn) {
                 closeBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    toggleVideoOverlayDrawer(false);
+                    setMobileBigscreenPanelState(false);
                 });
             }
 
             videoBox.addEventListener('click', (e) => {
-                if (e.target.closest('#videoOverlayDrawer')) return;
+                if (window.innerWidth > 1024) return;
+                if (e.target.closest('#mobileBigscreenPanel')) return;
                 if (e.target.closest('button, a, input, .shaka-controls-button, .shaka-overflow-menu, .shaka-settings-menu')) {
                     return;
                 }
-                if (isMobileLargeOrLandscapeView()) {
-                    toggleVideoOverlayDrawer();
+                if (isMobileBigScreenActive()) {
+                    const panel = document.getElementById('mobileBigscreenPanel');
+                    const isOpen = panel && panel.classList.contains('show-panel');
+                    setMobileBigscreenPanelState(!isOpen);
                 }
             });
 
-            window.addEventListener('resize', syncLandscapeExpandedClass);
-            window.addEventListener('orientationchange', () => {
-                setTimeout(syncLandscapeExpandedClass, 150);
-            });
+            const onFsChange = () => {
+                const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+                if (fsEl && window.innerWidth <= 1024) {
+                    document.body.classList.add('mobile-big-player');
+                    syncMobileBigscreenPanel();
+                } else {
+                    document.body.classList.remove('mobile-big-player');
+                    setMobileBigscreenPanelState(false);
+                }
+            };
+
+            document.addEventListener('fullscreenchange', onFsChange);
+            document.addEventListener('webkitfullscreenchange', onFsChange);
         }
 
         function unmuteActivePlayers() {
@@ -1578,20 +1479,22 @@
             urls.forEach((link, index) => {
                 const sBtn = document.createElement('button');
                 sBtn.className = 'server-btn';
+                sBtn.dataset.serverIdx = index;
                 sBtn.innerText = `Server ${index + 1}`;
                 if (index === 0) sBtn.classList.add('active');
 
                 sBtn.onclick = () => {
                     hasUserInteracted = true;
                     currentServerIndex = index;
-                    document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
-                    sBtn.classList.add('active');
+                    document.querySelectorAll('.server-btn').forEach(b => {
+                        b.classList.toggle('active', Number(b.dataset.serverIdx) === index);
+                    });
                     loadChannelUrl(link, 'main', true);
                 };
                 buttonsContainer.appendChild(sBtn);
             });
 
-            syncOverlayServersAndChannels();
+            syncMobileBigscreenPanel(urls, 0);
             loadChannelUrl(urls[0], 'main', true);
         }
 
@@ -1922,7 +1825,7 @@
                 document.getElementById('activeChannelName').innerText = "Custom URL - সার্ভার পরিবর্তন করুন";
                 currentChannelObj = null;
                 updateActiveChannelIndicator(null);
-                syncOverlayServersAndChannels();
+                syncMobileBigscreenPanel([], 0);
                 loadChannelUrl(url, 'main', true);
             }
         }
@@ -1988,7 +1891,7 @@
                 container.innerHTML = '<p style="text-align: center; color: #888; grid-column: span 4; padding: 20px;">এই ক্যাটাগরিতে কোনো চ্যানেল পাওয়া যায়নি।</p>';
             }
 
-            syncOverlayServersAndChannels();
+            syncMobileBigscreenPanel();
         }
 
         function filterCategory(category, btnElement) {
@@ -2128,7 +2031,7 @@
             setupFirstInteractionSoundUnlock();
             startLiveSessionCheck();
             initPlayer();
-            initVideoDrawerTrigger();
+            initMobileBigscreenPanel();
             loadPlaylistData();
         }
 
