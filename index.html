@@ -1041,13 +1041,13 @@
         // ১৫ সেকেন্ডে প্লে না হলে Clappr-এ যাবে; Clappr-এও ব্লক হলে তবেই HTML5-এ যাবে
         const HLS_TO_CLAPPR_MS = 15000;
 
-        // এখানে যেকোনো নতুন M3U লিঙ্ক যুক্ত করতে পারবেন (filterNames খালি [] রাখলে সব চ্যানেল আসবে)
-        const EXTERNAL_M3U_SOURCES = [
-            {
-                url: "https://raw.githubusercontent.com/sm-monirulislam/Toffee-Auto-Update/refs/heads/main/toffee_playlist.m3u",
-                filterNames: ["Zee Bollywood", "Sony Max", "Toffee TV", "Toffee Movies", "Somoy TV"],
-                defaultGroup: "bangla"
-            }
+        // Toffee থেকে যে ৫টি চ্যানেল অটো-টোকেনসহ যুক্ত হবে
+        const SELECTED_TOFFEE_CHANNELS = [
+            "Zee Bollywood",
+            "Sony Max",
+            "Toffee TV",
+            "Toffee Movies",
+            "Somoy TV"
         ];
 
         const STORAGE_HTML5_HOSTS_KEY = "pb_auto_html5_hosts_v1";
@@ -1362,7 +1362,6 @@
                 mainVideo.load();
             }
 
-            // HTML5 প্লেয়ার সবসময় হাইড রাখা (শুধু HTML5 মোডে গেলে দৃশ্যমান হবে)
             html5El.style.display = 'none';
             html5El.onwaiting = null;
             html5El.onplaying = null;
@@ -1440,7 +1439,6 @@
                 }
             };
 
-            // ১৫ সেকেন্ডে প্লে না হলে Clappr-এ যাবে; Clappr-এও ব্লক হলে তবেই HTML5-এ যাবে
             const triggerSingleClapprFallback = () => {
                 if (sessionId !== loadSessionId || isMpd) return;
                 if (fbState.hasStartedPlaying) {
@@ -1696,90 +1694,77 @@
             renderChannels();
         }
 
-        function detectGroupFromText(text, fallbackGroup = "bangla") {
-            const val = String(text || "").toLowerCase();
-            if (val.includes("indian") || val.includes("jalsha") || val.includes("zee bangla")) return "indian_bangla";
-            if (val.includes("sport") || val.includes("cricket")) return "sports";
-            if (val.includes("hindi") || val.includes("bollywood") || val.includes("sony max") || val.includes("zee bollywood")) return "hindi";
-            if (val.includes("cartoon") || val.includes("kids")) return "cartoon";
-            if (val.includes("english") || val.includes("movie")) return "english";
-            if (val.includes("music")) return "music";
-            if (val.includes("docu")) return "documentary";
-            if (val.includes("bangla")) return "bangla";
-            return fallbackGroup;
-        }
+        function parseSelectedToffeeFromM3u(m3uText, selectedNames) {
+            const targetNames = (selectedNames || [])
+                .slice(0, 5)
+                .map(n => String(n || '').trim().toLowerCase())
+                .filter(Boolean);
+            const targetSet = new Set(targetNames);
+            const lines = String(m3uText || '').split(/\r?\n/);
+            const foundByKey = new Map();
 
-        function parseChannelsFromM3u(m3uText, sourceConfig = {}) {
-            const filterNames = Array.isArray(sourceConfig.filterNames)
-                ? sourceConfig.filterNames.map(n => String(n || "").trim().toLowerCase()).filter(Boolean)
-                : [];
-            const hasFilter = filterNames.length > 0;
-            const filterSet = new Set(filterNames);
-            const fallbackGroup = sourceConfig.defaultGroup || "bangla";
-
-            const lines = String(m3uText || "").split(/\r?\n/);
-            const result = [];
-            const seenMatched = new Set();
-
-            let currentTitle = "";
-            let currentLogo = "https://i.postimg.cc/W1z5BGPZ/20240823_024712.png";
-            let currentGroup = fallbackGroup;
+            let currentTitle = '';
+            let currentLogo = 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
+            let currentGroup = 'bangla';
 
             for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
+                let line = lines[i].trim();
                 if (!line) continue;
 
-                if (line.startsWith("#") && !line.startsWith("#EXTINF")) {
-                    currentGroup = detectGroupFromText(line, currentGroup);
-                    continue;
-                }
+                if (line.startsWith('#EXTINF')) {
+                    let logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                    currentLogo = logoMatch && logoMatch[1] ? logoMatch[1].trim() : 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
 
-                if (line.startsWith("#EXTINF")) {
-                    const logoMatch = line.match(/tvg-logo="([^"]+)"/i);
-                    currentLogo = logoMatch && logoMatch[1] ? logoMatch[1].trim() : "https://i.postimg.cc/W1z5BGPZ/20240823_024712.png";
-
-                    const groupMatch = line.match(/group-title="([^"]+)"/i);
-                    const nameParts = line.split(",");
+                    let groupMatch = line.match(/group-title="([^"]+)"/);
+                    let nameParts = line.split(',');
                     currentTitle = nameParts[nameParts.length - 1].trim();
 
-                    const grpSource = groupMatch && groupMatch[1] ? `${groupMatch[1]} ${currentTitle}` : currentTitle;
-                    currentGroup = detectGroupFromText(grpSource, fallbackGroup);
-                } else if (!line.startsWith("#")) {
+                    const lowerTitle = currentTitle.toLowerCase();
+                    if (lowerTitle.includes('zee bollywood') || lowerTitle.includes('sony max') || lowerTitle.includes('bollywood') || lowerTitle.includes('hindi')) {
+                        currentGroup = 'hindi';
+                    } else if (groupMatch && groupMatch[1]) {
+                        let gTitle = groupMatch[1].trim().toLowerCase();
+                        if (gTitle.includes('sport')) currentGroup = 'sports';
+                        else if (gTitle.includes('movie') || gTitle.includes('family')) currentGroup = 'indian_bangla';
+                        else if (gTitle.includes('docu')) currentGroup = 'documentary';
+                        else currentGroup = 'bangla';
+                    } else {
+                        currentGroup = 'bangla';
+                    }
+                } else if (!line.startsWith('#')) {
                     if (currentTitle) {
                         const lowerTitle = currentTitle.toLowerCase();
                         const lowerUrl = line.toLowerCase();
 
-                        let matchedKey = lowerTitle;
-                        let shouldInclude = !hasFilter;
-
-                        if (hasFilter) {
-                            if (filterSet.has(lowerTitle)) {
-                                shouldInclude = true;
-                                matchedKey = lowerTitle;
-                            } else if (lowerUrl.includes("/zee_bollywood/") && filterSet.has("zee bollywood")) {
-                                shouldInclude = true;
-                                matchedKey = "zee bollywood";
-                            } else if (lowerUrl.includes("/sony_max/") && filterSet.has("sony max")) {
-                                shouldInclude = true;
-                                matchedKey = "sony max";
-                            }
+                        let matchedTarget = null;
+                        if (targetSet.has(lowerTitle)) {
+                            matchedTarget = lowerTitle;
+                        } else if (lowerUrl.includes('/zee_bollywood/') && targetSet.has('zee bollywood')) {
+                            matchedTarget = 'zee bollywood';
+                        } else if (lowerUrl.includes('/sony_max/') && targetSet.has('sony max')) {
+                            matchedTarget = 'sony max';
                         }
 
-                        if (shouldInclude && !seenMatched.has(matchedKey)) {
-                            seenMatched.add(matchedKey);
-                            result.push({
+                        if (matchedTarget && !foundByKey.has(matchedTarget)) {
+                            foundByKey.set(matchedTarget, {
                                 name: currentTitle,
                                 logo: currentLogo,
                                 url: line,
                                 group: currentGroup
                             });
                         }
-                        currentTitle = "";
+                        currentTitle = '';
                     }
                 }
             }
 
-            return result;
+            const orderedList = [];
+            targetNames.forEach(nameKey => {
+                if (foundByKey.has(nameKey)) {
+                    orderedList.push(foundByKey.get(nameKey));
+                }
+            });
+            return orderedList;
         }
 
         function loadPlaylistData() {
@@ -1789,6 +1774,7 @@
             const cacheBust = '?t=' + new Date().getTime();
             const sportUrl = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/main/sport.json' + cacheBust;
             const playlistUrl = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/main/playlist.m3u' + cacheBust;
+            const toffeeRawUrl = 'https://raw.githubusercontent.com/sm-monirulislam/Toffee-Auto-Update/refs/heads/main/toffee_playlist.m3u' + cacheBust;
 
             const sportPromise = fetch(sportUrl, { cache: 'no-store' })
                 .then(res => res.ok ? res.json() : [])
@@ -1821,7 +1807,25 @@
                         let line = lines[i].trim();
 
                         if (line.startsWith('#') && !line.startsWith('#EXTINF')) {
-                            currentGroup = detectGroupFromText(line, currentGroup);
+                            let upperLine = line.toUpperCase();
+
+                            if (upperLine.includes('INDIAN BANGLA') || upperLine.includes('JALSHA') || upperLine.includes('ZEE BANGLA')) {
+                                currentGroup = 'indian_bangla';
+                            } else if (upperLine.includes('SPORT') || upperLine.includes('CRICKET')) {
+                                currentGroup = 'sports';
+                            } else if (upperLine.includes('BANGLA') && !upperLine.includes('HINDI') && !upperLine.includes('INDIAN')) {
+                                currentGroup = 'bangla';
+                            } else if (upperLine.includes('HINDI') || upperLine.includes('REGIONAL') || upperLine.includes('BOLLYWOOD')) {
+                                currentGroup = 'hindi';
+                            } else if (upperLine.includes('CARTOON') || upperLine.includes('KIDS')) {
+                                currentGroup = 'cartoon';
+                            } else if (upperLine.includes('ENGLISH') || upperLine.includes('MOVIES')) {
+                                currentGroup = 'english';
+                            } else if (upperLine.includes('MUSIC')) {
+                                currentGroup = 'music';
+                            } else if (upperLine.includes('DOCUMENTARY') || upperLine.includes('DOCU')) {
+                                currentGroup = 'documentary';
+                            }
                             continue;
                         }
 
@@ -1830,11 +1834,29 @@
                             currentLogo = logoMatch ? logoMatch[1] : 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
 
                             let groupMatch = line.match(/group-title="([^"]+)"/);
+                            if (groupMatch) {
+                                let gTitle = groupMatch[1].trim().toLowerCase();
+                                if (gTitle.includes('indian')) {
+                                    currentGroup = 'indian_bangla';
+                                } else if (gTitle.includes('sport') || gTitle.includes('cricket')) {
+                                    currentGroup = 'sports';
+                                } else if (gTitle.includes('hindi')) {
+                                    currentGroup = 'hindi';
+                                } else if (gTitle.includes('cartoon') || gTitle.includes('kids')) {
+                                    currentGroup = 'cartoon';
+                                } else if (gTitle.includes('english')) {
+                                    currentGroup = 'english';
+                                } else if (gTitle.includes('music')) {
+                                    currentGroup = 'music';
+                                } else if (gTitle.includes('docu')) {
+                                    currentGroup = 'documentary';
+                                } else if (gTitle.includes('bangla')) {
+                                    currentGroup = 'bangla';
+                                }
+                            }
+
                             let nameParts = line.split(',');
                             currentTitle = nameParts[nameParts.length - 1].trim();
-
-                            const grpSource = groupMatch && groupMatch[1] ? `${groupMatch[1]} ${currentTitle}` : currentTitle;
-                            currentGroup = detectGroupFromText(grpSource, currentGroup);
                         } else if (line && !line.startsWith('#')) {
                             if (currentTitle) {
                                 let rawUrls = [];
@@ -1860,75 +1882,14 @@
                 })
                 .catch(() => []);
 
-            const externalPromises = (EXTERNAL_M3U_SOURCES || []).map(src => {
-                if (!src || !src.url) return Promise.resolve([]);
-                const sep = src.url.includes('?') ? '&' : '?';
-                return fetch(src.url + sep + 't=' + new Date().getTime(), { cache: 'no-store' })
-                    .then(res => res.ok ? res.text() : '')
-                    .then(text => parseChannelsFromM3u(text, src))
-                    .catch(() => []);
-            });
+            const toffeePromise = fetch(toffeeRawUrl, { cache: 'no-store' })
+                .then(response => response.ok ? response.text() : '')
+                .then(text => parseSelectedToffeeFromM3u(text, SELECTED_TOFFEE_CHANNELS))
+                .catch(() => []);
 
-            Promise.all([sportPromise, m3uPromise, ...externalPromises])
-                .then(([sportChannels, m3uChannels, ...externalLists]) => {
-                    const extraChannels = externalLists.flat();
-
-                    const normalizeName = (str) =>
-                        String(str || '')
-                            .toLowerCase()
-                            .replace(/\b(hd|fhd|sd|4k)\b/gi, '')
-                            .replace(/[^a-z0-9]/g, '')
-                            .trim();
-
-                    const seenNormalizedNames = new Set(
-                        [...m3uChannels, ...sportChannels]
-                            .map(c => normalizeName(c.name))
-                            .filter(Boolean)
-                    );
-
-                    const uniqueExtra = extraChannels.filter(c => {
-                        const norm = normalizeName(c.name);
-                        if (!norm || seenNormalizedNames.has(norm)) return false;
-                        seenNormalizedNames.add(norm);
-                        return true;
-                    });
-
-                    // প্রতিটি চ্যানেলকে নিজ নিজ গ্রুপ অনুযায়ী সাজানো
-                    const combined = [...m3uChannels, ...sportChannels, ...uniqueExtra];
-                    const groupedOrder = [];
-                    const groupBuckets = new Map();
-
-                    combined.forEach(ch => {
-                        const grp = String(ch.group || 'bangla').toLowerCase().replace(/[\s_]+/g, '');
-                        if (!groupBuckets.has(grp)) {
-                            groupBuckets.set(grp, []);
-                        }
-                        groupBuckets.get(grp).push(ch);
-                    });
-
-                    const categoryPriority = [
-                        'sports',
-                        'bangla',
-                        'indianbangla',
-                        'hindi',
-                        'cartoon',
-                        'english',
-                        'music',
-                        'documentary'
-                    ];
-
-                    categoryPriority.forEach(grp => {
-                        if (groupBuckets.has(grp)) {
-                            groupedOrder.push(...groupBuckets.get(grp));
-                            groupBuckets.delete(grp);
-                        }
-                    });
-
-                    groupBuckets.forEach(list => {
-                        groupedOrder.push(...list);
-                    });
-
-                    allChannels = groupedOrder;
+            Promise.all([sportPromise, m3uPromise, toffeePromise])
+                .then(([sportChannels, m3uChannels, toffeeChannels]) => {
+                    allChannels = [...m3uChannels, ...sportChannels, ...toffeeChannels];
                     renderChannels();
                 })
                 .catch(err => {
