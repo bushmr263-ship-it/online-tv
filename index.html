@@ -1040,6 +1040,15 @@
 
         const HLS_TO_CLAPPR_MS = 22000;
 
+        // এখানে যে ৫টি চ্যানেল যুক্ত করতে চান তাদের নাম দিন (সোর্স আপডেট হলে অটো নতুন টোকেন নেবে)
+        const SELECTED_TOFFEE_CHANNELS = [
+            "Zee Bollywood",
+            "Sony Max",
+            "Toffee TV",
+            "Toffee Movies",
+            "Somoy TV"
+        ];
+
         function isMobileView() {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
         }
@@ -1500,12 +1509,14 @@
                     ? new Hls({
                         enableWorker: true,
                         lowLatencyMode: false,
-                        maxBufferLength: 30,
-                        maxMaxBufferLength: 60,
-                        maxBufferSize: 30 * 1000 * 1000,
+                        capLevelToPlayerSize: true,
+                        maxBufferLength: 40,
+                        maxMaxBufferLength: 75,
+                        maxBufferSize: 35 * 1000 * 1000,
+                        maxFragLookUpTolerance: 0.25,
                         startLevel: 0,
-                        abrEwmaDefaultEstimate: 500000,
-                        fragLoadingTimeOut: 20000,
+                        abrEwmaDefaultEstimate: 450000,
+                        fragLoadingTimeOut: 25000,
                         manifestLoadingTimeOut: 15000
                     })
                     : new Hls({
@@ -1621,6 +1632,78 @@
             renderChannels();
         }
 
+        function parseSelectedToffeeFromM3u(m3uText, selectedNames) {
+            const targetNames = (selectedNames || [])
+                .map(n => String(n || '').trim().toLowerCase())
+                .filter(Boolean);
+            const targetSet = new Set(targetNames);
+            const lines = String(m3uText || '').split(/\r?\n/);
+            const foundByKey = new Map();
+
+            let currentTitle = '';
+            let currentLogo = 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
+            let currentGroup = 'hindi';
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (!line) continue;
+
+                if (line.startsWith('#EXTINF')) {
+                    let logoMatch = line.match(/tvg-logo="([^"]+)"/);
+                    currentLogo = logoMatch && logoMatch[1] ? logoMatch[1].trim() : 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
+
+                    let groupMatch = line.match(/group-title="([^"]+)"/);
+                    let nameParts = line.split(',');
+                    currentTitle = nameParts[nameParts.length - 1].trim();
+
+                    const lowerTitle = currentTitle.toLowerCase();
+                    if (lowerTitle.includes('zee bollywood') || lowerTitle.includes('sony max') || lowerTitle.includes('bollywood') || lowerTitle.includes('hindi')) {
+                        currentGroup = 'hindi';
+                    } else if (groupMatch && groupMatch[1]) {
+                        let gTitle = groupMatch[1].trim().toLowerCase();
+                        if (gTitle.includes('sport')) currentGroup = 'sports';
+                        else if (gTitle.includes('movie') || gTitle.includes('family')) currentGroup = 'indian_bangla';
+                        else if (gTitle.includes('docu')) currentGroup = 'documentary';
+                        else currentGroup = 'bangla';
+                    } else {
+                        currentGroup = 'bangla';
+                    }
+                } else if (!line.startsWith('#')) {
+                    if (currentTitle) {
+                        const lowerTitle = currentTitle.toLowerCase();
+                        const lowerUrl = line.toLowerCase();
+
+                        let matchedTarget = null;
+                        if (targetSet.has(lowerTitle)) {
+                            matchedTarget = lowerTitle;
+                        } else if (lowerUrl.includes('/zee_bollywood/') && targetSet.has('zee bollywood')) {
+                            matchedTarget = 'zee bollywood';
+                        } else if (lowerUrl.includes('/sony_max/') && targetSet.has('sony max')) {
+                            matchedTarget = 'sony max';
+                        }
+
+                        if (matchedTarget && !foundByKey.has(matchedTarget)) {
+                            foundByKey.set(matchedTarget, {
+                                name: currentTitle,
+                                logo: currentLogo,
+                                url: line,
+                                group: currentGroup
+                            });
+                        }
+                        currentTitle = '';
+                    }
+                }
+            }
+
+            const orderedList = [];
+            targetNames.forEach(nameKey => {
+                if (foundByKey.has(nameKey)) {
+                    orderedList.push(foundByKey.get(nameKey));
+                }
+            });
+            return orderedList;
+        }
+
         function loadPlaylistData() {
             if (playlistLoaded) return;
             playlistLoaded = true;
@@ -1628,6 +1711,7 @@
             const cacheBust = '?t=' + new Date().getTime();
             const sportUrl = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/main/sport.json' + cacheBust;
             const playlistUrl = 'https://raw.githubusercontent.com/bushmr263-ship-it/online-tv/main/playlist.m3u' + cacheBust;
+            const toffeeRawUrl = 'https://raw.githubusercontent.com/sm-monirulislam/Toffee-Auto-Update/refs/heads/main/toffee_playlist.m3u' + cacheBust;
 
             const sportPromise = fetch(sportUrl, { cache: 'no-store' })
                 .then(res => res.ok ? res.json() : [])
@@ -1735,9 +1819,14 @@
                 })
                 .catch(() => []);
 
-            Promise.all([sportPromise, m3uPromise])
-                .then(([sportChannels, m3uChannels]) => {
-                    allChannels = [...m3uChannels, ...sportChannels];
+            const toffeePromise = fetch(toffeeRawUrl, { cache: 'no-store' })
+                .then(response => response.ok ? response.text() : '')
+                .then(text => parseSelectedToffeeFromM3u(text, SELECTED_TOFFEE_CHANNELS))
+                .catch(() => []);
+
+            Promise.all([sportPromise, m3uPromise, toffeePromise])
+                .then(([sportChannels, m3uChannels, toffeeChannels]) => {
+                    allChannels = [...m3uChannels, ...sportChannels, ...toffeeChannels];
                     renderChannels();
                 })
                 .catch(err => {
