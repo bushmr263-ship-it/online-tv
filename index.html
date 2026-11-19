@@ -345,25 +345,13 @@
             position: relative;
         }
 
-        #html5-video {
+        #clappr-container, #html5-video {
             width: 100% !important;
             height: 100% !important;
             border: none;
             position: absolute;
             top: 0;
             left: 0;
-        }
-
-        /* Hidden Clappr engine host so Main interface stays unified */
-        #clappr-hidden-host {
-            position: fixed;
-            width: 1px;
-            height: 1px;
-            opacity: 0;
-            pointer-events: none;
-            overflow: hidden;
-            left: -9999px;
-            top: -9999px;
         }
 
         #player-container {
@@ -694,12 +682,8 @@
 
                 <div id="status">Player Ready</div>
 
+                <div id="clappr-container" style="display:none;"></div>
                 <video id="html5-video" controls autoplay playsinline preload="auto" style="display:none;"></video>
-            </div>
-
-            <!-- Hidden Clappr engine host -->
-            <div id="clappr-hidden-host">
-                <div id="clappr-container"></div>
             </div>
 
             <div class="modes">
@@ -911,7 +895,7 @@
         }
         setInterval(checkDevTools, 1000);
 
-        // Player & Single-Step Clappr -> HLS Failover Logic
+        // Player Logic: .m3u8 runs via HLS in Main UI, 15s timeout -> once Clappr fallback (no loops, no switch on buffer after play)
         const clapprEl = document.getElementById('clappr-container');
         const html5El = document.getElementById('html5-video');
         let clapprInstance;
@@ -932,7 +916,7 @@
         let playlistLoaded = false;
         let hasUserInteracted = false;
 
-        const CLAPPR_TO_HLS_MS = 15000; // Clappr-এ প্লে না হলে ১৫ সেকেন্ড পর একবার HLS-এ যাবে
+        const HLS_TO_CLAPPR_MS = 15000; // ১৫ সেকেন্ডে HLS প্লে না হলে একবার Clappr-এ যাবে
 
         function unmuteActivePlayers() {
             const mainVideo = document.getElementById("video");
@@ -1099,8 +1083,8 @@
                 return;
             }
 
-            // Main মোড: .m3u8 লিংক প্রথমে Clappr দিয়ে শুরু হবে (১৫ সেকেন্ড না চললে HLS-এ যাবে)
-            loadChannelUrl(currentUrl, 'clappr', true);
+            // Main মোড: .m3u8 লিংক ভেতরের HLS ইঞ্জিন দিয়ে শুরু হবে (১৫ সেকেন্ডে না চললে একবার Clappr-এ যাবে)
+            loadChannelUrl(currentUrl, 'main', true);
         }
 
         function loadChannel(ch) {
@@ -1125,12 +1109,12 @@
                     currentServerIndex = index;
                     document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
                     sBtn.classList.add('active');
-                    loadChannelUrl(link, 'auto_clappr', true);
+                    loadChannelUrl(link, 'main', true);
                 };
                 buttonsContainer.appendChild(sBtn);
             });
 
-            loadChannelUrl(urls[0], 'auto_clappr', true);
+            loadChannelUrl(urls[0], 'main', true);
         }
 
         function playNextChannel() {
@@ -1196,49 +1180,12 @@
             html5El.load();
         }
 
-        function syncClapprToMainVideo(statusEl, fbState, sessionId) {
-            const mainVideo = document.getElementById("video");
-            if (!clapprEl || !mainVideo) return;
-
-            const clapprVideo = clapprEl.querySelector('video');
-            if (clapprVideo) {
-                clapprVideo.muted = true;
-                try { clapprVideo.play().catch(() => {}); } catch (e) {}
-
-                const attachSrc = () => {
-                    if (sessionId !== loadSessionId) return;
-                    const srcUrl = clapprVideo.currentSrc || clapprVideo.src;
-                    if (srcUrl && mainVideo.src !== srcUrl) {
-                        mainVideo.src = srcUrl;
-                    }
-                    mainVideo.muted = !hasUserInteracted;
-                    mainVideo.volume = 1.0;
-                    mainVideo.play().then(() => {
-                        if (sessionId !== loadSessionId) return;
-                        fbState.hasStartedPlaying = true;
-                        if (loadTimeoutTimer) {
-                            clearTimeout(loadTimeoutTimer);
-                            loadTimeoutTimer = null;
-                        }
-                        statusEl.textContent = "Playing";
-                    }).catch(() => {});
-                };
-
-                if (clapprVideo.src || clapprVideo.currentSrc) {
-                    attachSrc();
-                } else {
-                    clapprVideo.addEventListener('loadedmetadata', attachSrc, { once: true });
-                    clapprVideo.addEventListener('canplay', attachSrc, { once: true });
-                }
-            }
-        }
-
-        async function loadChannelUrl(url, mode = 'auto_clappr', isNewLoad = true) {
+        async function loadChannelUrl(url, mode = 'main', isNewLoad = true) {
             const sessionId = isNewLoad ? ++loadSessionId : loadSessionId;
             if (isNewLoad || !sessionFallbackState[sessionId]) {
                 sessionFallbackState[sessionId] = {
                     hasStartedPlaying: false,
-                    movedToHlsOnce: false
+                    movedToClapprOnce: false
                 };
             }
             const fbState = sessionFallbackState[sessionId];
@@ -1246,7 +1193,7 @@
             const rawUrl = String(url || '').trim();
             const isMpd = isMpdUrl(rawUrl);
 
-            const effectiveMode = isMpd ? 'shaka' : (mode === 'html5' ? 'html5' : (mode === 'hls_once' ? 'hls_once' : 'clappr'));
+            const effectiveMode = isMpd ? 'shaka' : (mode === 'html5' ? 'html5' : (mode === 'clappr_once' ? 'clappr_once' : 'main'));
             const clearKeys = extractClearKeys(rawUrl, currentChannelObj ? currentChannelObj.drm : null);
             const finalUrl = rawUrl.split('|')[0].trim();
 
@@ -1257,6 +1204,7 @@
             const mainVideo = document.getElementById("video");
             const statusEl = document.getElementById("status");
 
+            clapprEl.style.display = 'none';
             html5El.style.display = 'none';
             mainContainer.style.display = 'none';
 
@@ -1294,16 +1242,16 @@
                 }
             };
 
-            // Clappr প্লে না হলে ১৫ সেকেন্ড পর একবার HLS-এ যাবে; এরপর আর Clappr-এ ফিরবে না এবং প্লে শুরুর পর বাফার হলে সুইচ করবে না
-            const triggerSingleHlsFallback = () => {
+            // ১৫ সেকেন্ডে HLS প্লে না হলে একবার Clappr-এ যাবে; লুপ হবে না এবং প্লে শুরুর পর বাফার হলে সুইচ করবে না
+            const triggerSingleClapprFallback = () => {
                 if (sessionId !== loadSessionId || isMpd) return;
                 if (fbState.hasStartedPlaying) {
                     statusEl.textContent = "Buffering...";
                     return;
                 }
-                if (!fbState.movedToHlsOnce) {
-                    fbState.movedToHlsOnce = true;
-                    loadChannelUrl(rawUrl, 'hls_once', false);
+                if (!fbState.movedToClapprOnce) {
+                    fbState.movedToClapprOnce = true;
+                    loadChannelUrl(rawUrl, 'clappr_once', false);
                 } else {
                     statusEl.textContent = "Stream Unavailable";
                 }
@@ -1365,36 +1313,9 @@
                 return;
             }
 
-            // 3. প্রথমে Clappr (হাইড ইঞ্জিন, Main ইন্টারফেসে প্রদর্শিত): ১৫ সেকেন্ডে প্লে না হলে একবার HLS-এ যাবে
-            if (effectiveMode === 'clappr') {
-                mainContainer.style.display = 'block';
-                if (!shakaUiRef && typeof shaka !== 'undefined') {
-                    await initPlayer();
-                }
-
-                if (mainVideo) {
-                    mainVideo.onwaiting = () => {
-                        if (sessionId === loadSessionId) {
-                            statusEl.textContent = "Buffering...";
-                        }
-                    };
-                    mainVideo.onplaying = () => {
-                        if (sessionId === loadSessionId) {
-                            markStreamStarted();
-                            statusEl.textContent = "Playing";
-                            if (hasUserInteracted) {
-                                mainVideo.muted = false;
-                                mainVideo.volume = 1.0;
-                            }
-                        }
-                    };
-                }
-
-                loadTimeoutTimer = setTimeout(() => {
-                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                        triggerSingleHlsFallback();
-                    }
-                }, CLAPPR_TO_HLS_MS);
+            // 3. একবারের ফলব্যাক Clappr (১৫ সেকেন্ডে HLS না চললে আসবে; এরপর আর HLS-এ ফিরবে না)
+            if (effectiveMode === 'clappr_once') {
+                clapprEl.style.display = 'block';
 
                 clapprInstance = new Clappr.Player({
                     source: finalUrl,
@@ -1402,29 +1323,25 @@
                     width: '100%',
                     height: '100%',
                     autoPlay: true,
-                    mute: true
+                    mute: false
                 });
+                if (typeof clapprInstance.setVolume === 'function') {
+                    try { clapprInstance.setVolume(100); } catch (e) {}
+                }
 
                 if (typeof Clappr !== 'undefined' && Clappr.Events) {
-                    if (Clappr.Events.READY) {
-                        clapprInstance.on(Clappr.Events.READY, () => {
-                            if (sessionId === loadSessionId) {
-                                syncClapprToMainVideo(statusEl, fbState, sessionId);
-                            }
-                        });
-                    }
                     if (Clappr.Events.PLAY) {
                         clapprInstance.on(Clappr.Events.PLAY, () => {
                             if (sessionId === loadSessionId) {
-                                syncClapprToMainVideo(statusEl, fbState, sessionId);
+                                markStreamStarted();
+                                statusEl.textContent = "Playing";
                             }
                         });
                     }
                     if (Clappr.Events.PLAYER_ERROR) {
                         clapprInstance.on(Clappr.Events.PLAYER_ERROR, () => {
                             if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                                if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
-                                triggerSingleHlsFallback();
+                                statusEl.textContent = "Stream Unavailable";
                             }
                         });
                     }
@@ -1432,11 +1349,17 @@
                 return;
             }
 
-            // 4. ফলব্যাক HLS ইঞ্জিন (হাইড ইঞ্জিন, Main ইন্টারফেসে প্রদর্শিত): আর Clappr-এ যাবে না, প্লে হলে বাফার হলেও সুইচ করবে না
+            // 4. Main ইন্টারফেস: ভেতরে HLS.js দিয়ে .m3u8 চালাবে (১৫ সেকেন্ডে প্লে না হলে একবার Clappr-এ যাবে)
             mainContainer.style.display = 'block';
             if (!shakaUiRef && typeof shaka !== 'undefined') {
                 await initPlayer();
             }
+
+            loadTimeoutTimer = setTimeout(() => {
+                if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                    triggerSingleClapprFallback();
+                }
+            }, HLS_TO_CLAPPR_MS);
 
             if (mainVideo) {
                 mainVideo.onwaiting = () => {
@@ -1455,8 +1378,9 @@
                     }
                 };
                 mainVideo.onerror = () => {
-                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                        statusEl.textContent = "Stream Unavailable";
+                    if (sessionId === loadSessionId) {
+                        if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
+                        triggerSingleClapprFallback();
                     }
                 };
             }
@@ -1506,8 +1430,9 @@
                         }
                         return;
                     }
-                    if (data.fatal && sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                        statusEl.textContent = "Stream Unavailable";
+                    if (data.fatal && sessionId === loadSessionId) {
+                        if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
+                        triggerSingleClapprFallback();
                     }
                 });
             } else if (mainVideo && mainVideo.canPlayType('application/vnd.apple.mpegurl')) {
@@ -1523,7 +1448,7 @@
                 document.getElementById('serverButtonsContainer').innerHTML = "";
                 document.getElementById('activeChannelName').innerText = "Custom URL - সার্ভার পরিবর্তন করুন";
                 currentChannelObj = null;
-                loadChannelUrl(url, 'auto_clappr', true);
+                loadChannelUrl(url, 'main', true);
             }
         }
 
