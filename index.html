@@ -373,7 +373,7 @@
             position: relative;
         }
 
-        /* Unified Player Interface: HTML5 & Clappr match the single player look */
+        /* Unified Player Interface: HTML5 & Clappr match the target interface */
         #clappr-container, #html5-video {
             width: 100% !important;
             height: 100% !important;
@@ -435,7 +435,7 @@
             background: #000;
         }
 
-        /* Unified control bar overlay for HTML5 fallback so it matches Shaka UI */
+        /* Matching HTML5 control bar with timeline slider & 0:22 / 0:32 style */
         #unified-html5-bar {
             display: none;
             position: absolute;
@@ -443,15 +443,37 @@
             right: 0;
             bottom: 0;
             z-index: 22;
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
-            padding: 8px 12px;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+            padding: 0 12px 8px 12px;
             box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         #unified-html5-bar.active {
             display: flex;
+        }
+
+        .uh5-seek-wrap {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .uh5-seek {
+            width: 100%;
+            height: 4px;
+            accent-color: #fff;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .uh5-controls-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
         }
 
         .uh5-btn {
@@ -459,8 +481,8 @@
             color: #fff;
             border: none;
             cursor: pointer;
-            font-size: 14px;
-            padding: 4px 6px;
+            font-size: 15px;
+            padding: 2px 6px;
             border-radius: 4px;
             display: inline-flex;
             align-items: center;
@@ -473,14 +495,17 @@
         }
 
         .uh5-vol {
-            width: 68px;
-            accent-color: var(--accent-color);
+            width: 72px;
+            height: 4px;
+            accent-color: #fff;
             cursor: pointer;
         }
 
         .uh5-time {
-            font-size: 11.5px;
-            color: #ddd;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 0.3px;
             white-space: nowrap;
         }
 
@@ -894,15 +919,20 @@
                 <div id="clappr-container" class="player-hidden"></div>
                 <video id="html5-video" class="player-hidden" autoplay playsinline preload="auto"></video>
 
-                <!-- Unified Control Bar for HTML5 so its interface matches the main player -->
+                <!-- Matching HTML5 Control Bar (0:22 / 0:32 + seek bar + controls) -->
                 <div id="unified-html5-bar">
-                    <button type="button" class="uh5-btn" id="uh5PlayBtn" onclick="toggleHtml5Play()">❚❚</button>
-                    <button type="button" class="uh5-btn" id="uh5MuteBtn" onclick="toggleHtml5Mute()">🔊</button>
-                    <input type="range" class="uh5-vol" id="uh5VolRange" min="0" max="1" step="0.05" value="1" oninput="setHtml5Volume(this.value)">
-                    <span class="uh5-time" id="uh5TimeLabel">LIVE</span>
-                    <span class="uh5-spacer"></span>
-                    <button type="button" class="uh5-btn" id="uh5PipBtn" onclick="toggleHtml5Pip()">⧉</button>
-                    <button type="button" class="uh5-btn" id="uh5FsBtn" onclick="toggleHtml5Fullscreen()">⛶</button>
+                    <div class="uh5-seek-wrap">
+                        <input type="range" class="uh5-seek" id="uh5SeekRange" min="0" max="100" step="0.1" value="0" oninput="seekHtml5(this.value)">
+                    </div>
+                    <div class="uh5-controls-row">
+                        <button type="button" class="uh5-btn" id="uh5PlayBtn" onclick="toggleHtml5Play()">❚❚</button>
+                        <button type="button" class="uh5-btn" id="uh5MuteBtn" onclick="toggleHtml5Mute()">🔊</button>
+                        <input type="range" class="uh5-vol" id="uh5VolRange" min="0" max="1" step="0.05" value="1" oninput="setHtml5Volume(this.value)">
+                        <span class="uh5-time" id="uh5TimeLabel">0:00 / 0:00</span>
+                        <span class="uh5-spacer"></span>
+                        <button type="button" class="uh5-btn" id="uh5PipBtn" onclick="toggleHtml5Pip()">⧉</button>
+                        <button type="button" class="uh5-btn" id="uh5FsBtn" onclick="toggleHtml5Fullscreen()">⛶</button>
+                    </div>
                 </div>
             </div>
 
@@ -1167,10 +1197,18 @@
             }
         } catch (e) {}
 
+        function formatSecMin(secVal) {
+            const s = Math.max(0, Math.floor(Number(secVal) || 0));
+            const mins = Math.floor(s / 60);
+            const secs = s % 60;
+            return `${mins}:${String(secs).padStart(2, "0")}`;
+        }
+
         function syncHtml5ControlIcons() {
             const playBtn = document.getElementById("uh5PlayBtn");
             const muteBtn = document.getElementById("uh5MuteBtn");
             const volRange = document.getElementById("uh5VolRange");
+            const seekRange = document.getElementById("uh5SeekRange");
             const timeLabel = document.getElementById("uh5TimeLabel");
 
             if (playBtn) {
@@ -1182,16 +1220,36 @@
             if (volRange) {
                 volRange.value = html5El.muted ? 0 : html5El.volume;
             }
-            if (timeLabel) {
-                const cur = Math.floor(html5El.currentTime || 0);
-                const dur = html5El.duration;
-                if (Number.isFinite(dur) && dur > 0 && dur !== Infinity) {
-                    const tot = Math.floor(dur);
-                    const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-                    timeLabel.textContent = `${fmt(cur)} / ${fmt(tot)}`;
-                } else {
+            const cur = html5El.currentTime || 0;
+            const dur = html5El.duration;
+            if (Number.isFinite(dur) && dur > 0 && dur !== Infinity) {
+                if (seekRange) {
+                    seekRange.max = dur;
+                    seekRange.value = cur;
+                    seekRange.disabled = false;
+                }
+                if (timeLabel) {
+                    timeLabel.textContent = `${formatSecMin(cur)} / ${formatSecMin(dur)}`;
+                }
+            } else {
+                if (seekRange) {
+                    seekRange.max = 100;
+                    seekRange.value = 100;
+                    seekRange.disabled = true;
+                }
+                if (timeLabel) {
                     timeLabel.textContent = "LIVE";
                 }
+            }
+        }
+
+        function seekHtml5(val) {
+            hasUserInteracted = true;
+            if (!html5El) return;
+            const dur = html5El.duration;
+            if (Number.isFinite(dur) && dur > 0 && dur !== Infinity) {
+                html5El.currentTime = Math.max(0, Math.min(dur, Number(val)));
+                syncHtml5ControlIcons();
             }
         }
 
@@ -1249,6 +1307,7 @@
         html5El.addEventListener("pause", syncHtml5ControlIcons);
         html5El.addEventListener("volumechange", syncHtml5ControlIcons);
         html5El.addEventListener("timeupdate", syncHtml5ControlIcons);
+        html5El.addEventListener("loadedmetadata", syncHtml5ControlIcons);
 
         function setOfflineScreenVisible(isOffline) {
             if (offlineOverlayEl) {
