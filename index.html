@@ -134,6 +134,13 @@
             user-select: none;
         }
 
+        input, textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
         .main-container {
             display: flex;
             gap: 20px;
@@ -938,14 +945,28 @@
 
         // Security Controls
         ['contextmenu', 'selectstart', 'copy', 'cut', 'dragstart'].forEach(eventType => {
-            document.addEventListener(eventType, e => e.preventDefault());
+            document.addEventListener(eventType, e => {
+                const targetTag = e.target && e.target.tagName ? e.target.tagName.toUpperCase() : '';
+                if (targetTag === 'INPUT' || targetTag === 'TEXTAREA') {
+                    return;
+                }
+                e.preventDefault();
+            });
         });
 
         document.addEventListener('keydown', function(e) {
+            const targetTag = e.target && e.target.tagName ? e.target.tagName.toUpperCase() : '';
+            const isInput = targetTag === 'INPUT' || targetTag === 'TEXTAREA';
+
+            if (e.key === 'F12') {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+
             if (
-                e.key === 'F12' ||
                 (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) ||
-                (e.ctrlKey && ['U', 'u', 'S', 's', 'C', 'c', 'P', 'p'].includes(e.key))
+                (!isInput && e.ctrlKey && ['U', 'u', 'S', 's', 'C', 'c', 'P', 'p'].includes(e.key))
             ) {
                 e.preventDefault();
                 e.stopPropagation();
