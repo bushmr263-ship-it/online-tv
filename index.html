@@ -373,7 +373,7 @@
             position: relative;
         }
 
-        /* Unified Player Interface: hide internal engine branding/bars so all engines look identical */
+        /* Unified Player Interface: HTML5 & Clappr match the single player look */
         #clappr-container, #html5-video {
             width: 100% !important;
             height: 100% !important;
@@ -433,6 +433,59 @@
             height: 100%;
             object-fit: contain;
             background: #000;
+        }
+
+        /* Unified control bar overlay for HTML5 fallback so it matches Shaka UI */
+        #unified-html5-bar {
+            display: none;
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 22;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+            padding: 8px 12px;
+            align-items: center;
+            gap: 10px;
+            box-sizing: border-box;
+        }
+
+        #unified-html5-bar.active {
+            display: flex;
+        }
+
+        .uh5-btn {
+            background: transparent;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .uh5-btn:hover {
+            color: var(--accent-color);
+        }
+
+        .uh5-vol {
+            width: 68px;
+            accent-color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        .uh5-time {
+            font-size: 11.5px;
+            color: #ddd;
+            white-space: nowrap;
+        }
+
+        .uh5-spacer {
+            flex: 1;
         }
 
         #status {
@@ -839,7 +892,18 @@
                 <div id="status">Player Ready</div>
 
                 <div id="clappr-container" class="player-hidden"></div>
-                <video id="html5-video" class="player-hidden" controls autoplay playsinline preload="auto"></video>
+                <video id="html5-video" class="player-hidden" autoplay playsinline preload="auto"></video>
+
+                <!-- Unified Control Bar for HTML5 so its interface matches the main player -->
+                <div id="unified-html5-bar">
+                    <button type="button" class="uh5-btn" id="uh5PlayBtn" onclick="toggleHtml5Play()">❚❚</button>
+                    <button type="button" class="uh5-btn" id="uh5MuteBtn" onclick="toggleHtml5Mute()">🔊</button>
+                    <input type="range" class="uh5-vol" id="uh5VolRange" min="0" max="1" step="0.05" value="1" oninput="setHtml5Volume(this.value)">
+                    <span class="uh5-time" id="uh5TimeLabel">LIVE</span>
+                    <span class="uh5-spacer"></span>
+                    <button type="button" class="uh5-btn" id="uh5PipBtn" onclick="toggleHtml5Pip()">⧉</button>
+                    <button type="button" class="uh5-btn" id="uh5FsBtn" onclick="toggleHtml5Fullscreen()">⛶</button>
+                </div>
             </div>
 
             <div class="modes">
@@ -1061,6 +1125,7 @@
         const clapprEl = document.getElementById('clappr-container');
         const html5El = document.getElementById('html5-video');
         const offlineOverlayEl = document.getElementById('offlineOverlay');
+        const unifiedHtml5BarEl = document.getElementById('unified-html5-bar');
         let clapprInstance;
         let hls;
         let dashPlayer;
@@ -1102,6 +1167,89 @@
             }
         } catch (e) {}
 
+        function syncHtml5ControlIcons() {
+            const playBtn = document.getElementById("uh5PlayBtn");
+            const muteBtn = document.getElementById("uh5MuteBtn");
+            const volRange = document.getElementById("uh5VolRange");
+            const timeLabel = document.getElementById("uh5TimeLabel");
+
+            if (playBtn) {
+                playBtn.textContent = html5El.paused ? "▶" : "❚❚";
+            }
+            if (muteBtn) {
+                muteBtn.textContent = (html5El.muted || html5El.volume === 0) ? "🔇" : "🔊";
+            }
+            if (volRange) {
+                volRange.value = html5El.muted ? 0 : html5El.volume;
+            }
+            if (timeLabel) {
+                const cur = Math.floor(html5El.currentTime || 0);
+                const dur = html5El.duration;
+                if (Number.isFinite(dur) && dur > 0 && dur !== Infinity) {
+                    const tot = Math.floor(dur);
+                    const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+                    timeLabel.textContent = `${fmt(cur)} / ${fmt(tot)}`;
+                } else {
+                    timeLabel.textContent = "LIVE";
+                }
+            }
+        }
+
+        function toggleHtml5Play() {
+            hasUserInteracted = true;
+            if (!html5El) return;
+            if (html5El.paused) {
+                html5El.play().catch(() => {});
+            } else {
+                html5El.pause();
+            }
+            syncHtml5ControlIcons();
+        }
+
+        function toggleHtml5Mute() {
+            hasUserInteracted = true;
+            if (!html5El) return;
+            html5El.muted = !html5El.muted;
+            if (!html5El.muted && html5El.volume === 0) {
+                html5El.volume = 1.0;
+            }
+            syncHtml5ControlIcons();
+        }
+
+        function setHtml5Volume(val) {
+            hasUserInteracted = true;
+            if (!html5El) return;
+            const num = Math.max(0, Math.min(1, Number(val)));
+            html5El.volume = num;
+            html5El.muted = num === 0;
+            syncHtml5ControlIcons();
+        }
+
+        async function toggleHtml5Pip() {
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                } else if (html5El && typeof html5El.requestPictureInPicture === "function") {
+                    await html5El.requestPictureInPicture();
+                }
+            } catch (e) {}
+        }
+
+        function toggleHtml5Fullscreen() {
+            const box = document.getElementById("videoBox");
+            if (!box) return;
+            if (!document.fullscreenElement) {
+                box.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+
+        html5El.addEventListener("play", syncHtml5ControlIcons);
+        html5El.addEventListener("pause", syncHtml5ControlIcons);
+        html5El.addEventListener("volumechange", syncHtml5ControlIcons);
+        html5El.addEventListener("timeupdate", syncHtml5ControlIcons);
+
         function setOfflineScreenVisible(isOffline) {
             if (offlineOverlayEl) {
                 offlineOverlayEl.style.display = isOffline ? "block" : "none";
@@ -1118,6 +1266,9 @@
             }
             if (html5El) {
                 html5El.classList.toggle("player-hidden", activeView !== "html5");
+            }
+            if (unifiedHtml5BarEl) {
+                unifiedHtml5BarEl.classList.toggle("active", activeView === "html5");
             }
         }
 
@@ -1186,6 +1337,7 @@
                     clapprInstance.setVolume(100);
                 } catch (e) {}
             }
+            syncHtml5ControlIcons();
         }
 
         function setupFirstInteractionSoundUnlock() {
@@ -1430,6 +1582,7 @@
             html5El.pause();
             html5El.removeAttribute("src");
             html5El.load();
+            syncHtml5ControlIcons();
         }
 
         async function loadChannelUrl(url, mode = 'main', isNewLoad = true) {
@@ -1475,6 +1628,7 @@
                     playPromise.then(() => {
                         mediaObj.muted = false;
                         mediaObj.volume = 1.0;
+                        syncHtml5ControlIcons();
                     }).catch(() => {
                         mediaObj.muted = true;
                         mediaObj.play().then(() => {
@@ -1482,7 +1636,10 @@
                                 mediaObj.muted = false;
                                 mediaObj.volume = 1.0;
                             }
-                        }).catch(() => {});
+                            syncHtml5ControlIcons();
+                        }).catch(() => {
+                            syncHtml5ControlIcons();
+                        });
                     });
                 }
             };
@@ -1555,6 +1712,7 @@
                 setActivePlayerView('html5');
                 html5El.src = finalUrl;
                 triggerInstantPlay(html5El);
+                syncHtml5ControlIcons();
 
                 loadTimeoutTimer = setTimeout(() => {
                     if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
@@ -1575,6 +1733,7 @@
                             html5El.muted = false;
                             html5El.volume = 1.0;
                         }
+                        syncHtml5ControlIcons();
                     }
                 };
                 html5El.onerror = () => {
