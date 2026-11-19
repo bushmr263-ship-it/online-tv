@@ -394,7 +394,7 @@ https://livetv.shamon-cable.net/proxy/proxy.php?id=e71046eec45f34656698d0a6f590b
 https://tvsen6.aynaott.com/zv68oqPDu7MZZwmHhRxt/tracks-v1a1/mono.ts.m3u8
 
 #EXTINF:-1 tvg-logo="https://play-lh.googleusercontent.com/fmz6L0mlFDCRRudZ01RUk_DOLF6ITxEyRYysb2DRDp-mhle4cnsyi5QGF00tSNjPR_B2" group-title="Sports",Willow Sports TV
-https://warm-caverns-48629-92fab798385f.herokuapp.com/https://d36r8jifhgsk5j.cloudfront.net/Willow_TV540p.m3u8  
+https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/tll6uwepxa/out/v1/a7f67cbb33df46539312956427343886/cenc.mpd?|drmScheme=clearkey&drmLicense=290e09c837da78d5cd961978d390515c:b748836c71e6a4ca68ef5b5652db6247
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/HntSg3xw/20240823_024624.png" group-title="Sports",Willow Cricbuzz
 https://tvsen5.aynaott.com/willowhd/tracks-v1a1/mono.ts.m3u8     
@@ -629,6 +629,9 @@ https://tvsen7.aynaott.com/teennick/index.m3u8
 
 #EXTINF:-1 group-title="AS | IN | Cartoon" tvg-logo="https://go4.pw/India/SONY_yay.png" group-title="Cartoon", SONY YAY
 https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_yay.m3u8
+
+#EXTINF:-1 group-title="Cartoon",Epic kids
+https://cc-t8lqe1o99pszu.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-t8lqe1o99pszu/playlist.m3u8
 
 
 #------------------------------------------------------------------------------
