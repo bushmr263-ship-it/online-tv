@@ -373,92 +373,6 @@
             position: relative;
         }
 
-        .mobile-bigscreen-panel {
-            display: none;
-            position: absolute;
-            inset: 0;
-            z-index: 35;
-            background: rgba(11, 14, 20, 0.88);
-            backdrop-filter: blur(6px);
-            padding: 10px;
-            box-sizing: border-box;
-            flex-direction: row;
-            gap: 10px;
-            overflow: hidden;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-        }
-
-        .mobile-bigscreen-panel.show-panel {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .mobile-bigscreen-server-col {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            min-width: 82px;
-            max-width: 105px;
-            flex-shrink: 0;
-            overflow-y: auto;
-        }
-
-        .mobile-bigscreen-server-col .server-btn {
-            padding: 5px 8px;
-            font-size: 11px;
-            text-align: center;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .mobile-bigscreen-channel-col {
-            flex: 1;
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 6px;
-            overflow-y: auto;
-            align-content: start;
-            padding-right: 4px;
-        }
-
-        .mobile-bigscreen-ch-item {
-            background: #21262d;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 6px 4px;
-            color: var(--accent-color);
-            font-size: 10.5px;
-            font-weight: bold;
-            text-align: center;
-            cursor: pointer;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .mobile-bigscreen-ch-item.active-channel {
-            background: #25302b;
-            border-color: #2ea043;
-            color: #2ecc71;
-        }
-
-        .mobile-bigscreen-close {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            z-index: 40;
-            background: #21262d;
-            color: var(--accent-color);
-            border: 1px solid #30363d;
-            border-radius: 5px;
-            padding: 3px 8px;
-            font-size: 10.5px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
         #clappr-container, #html5-video {
             width: 100% !important;
             height: 100% !important;
@@ -820,16 +734,6 @@
                 min-width: 45px !important;
             }
         }
-
-        @media screen and (max-width: 1024px) {
-            body.mobile-big-player .mobile-bigscreen-panel,
-            .video-box:fullscreen .mobile-bigscreen-panel,
-            .video-box:-webkit-full-screen .mobile-bigscreen-panel,
-            #player-container:fullscreen .mobile-bigscreen-panel,
-            #player-container:-webkit-full-screen .mobile-bigscreen-panel {
-                display: flex;
-            }
-        }
     </style>
 </head>
 <body>
@@ -883,12 +787,6 @@
             </div>
 
             <div class="video-box" id="videoBox">
-                <div class="mobile-bigscreen-panel" id="mobileBigscreenPanel">
-                    <button type="button" class="mobile-bigscreen-close" id="mobileBigscreenCloseBtn">✕</button>
-                    <div class="mobile-bigscreen-server-col" id="mobileBigscreenServers"></div>
-                    <div class="mobile-bigscreen-channel-col" id="mobileBigscreenChannels"></div>
-                </div>
-
                 <!-- Unified Main Interface (Shaka UI) -->
                 <div id="player-container">
                   <video id="video"
@@ -933,6 +831,7 @@
         <input type="text" id="customUrlInput" placeholder="লিঙ্ক এখানে দিন (M3U8, MPD বা URL)...">
         <button class="play-btn" onclick="playCustom()">প্লে করুন</button>
     </div>
+
     <script>
         let liveSessionInterval = null;
 
@@ -1138,7 +1037,6 @@
         let shakaUiRef = null;
         let playlistLoaded = false;
         let hasUserInteracted = false;
-        let bigscreenPanelTimer = null;
 
         const HLS_TO_CLAPPR_MS = 15000;
 
@@ -1154,156 +1052,6 @@
                 const isMatch = activeKey && btn.dataset.chKey === activeKey;
                 btn.classList.toggle('active-channel', Boolean(isMatch));
             });
-            document.querySelectorAll('#mobileBigscreenChannels .mobile-bigscreen-ch-item').forEach(item => {
-                const isMatch = activeKey && item.dataset.chKey === activeKey;
-                item.classList.toggle('active-channel', Boolean(isMatch));
-            });
-        }
-
-        function isMobileBigScreenActive() {
-            if (window.innerWidth > 1024) return false;
-            const videoBox = document.getElementById('videoBox') || document.querySelector('.video-box');
-            const isFullscreen = Boolean(
-                document.fullscreenElement ||
-                document.webkitFullscreenElement ||
-                (videoBox && (videoBox.matches(':fullscreen') || videoBox.matches(':-webkit-full-screen')))
-            );
-            const rect = videoBox ? videoBox.getBoundingClientRect() : null;
-            const isLargeBox = rect ? (rect.height >= window.innerHeight * 0.45 || rect.width >= window.innerWidth * 0.85) : false;
-            return isFullscreen || isLargeBox || document.body.classList.contains('mobile-big-player');
-        }
-
-        function setMobileBigscreenPanelState(open) {
-            const panel = document.getElementById('mobileBigscreenPanel');
-            if (!panel) return;
-            if (open) {
-                syncMobileBigscreenPanel();
-                document.body.classList.add('mobile-big-player');
-                panel.classList.add('show-panel');
-                if (bigscreenPanelTimer) clearTimeout(bigscreenPanelTimer);
-                bigscreenPanelTimer = setTimeout(() => {
-                    panel.classList.remove('show-panel');
-                }, 6000);
-            } else {
-                panel.classList.remove('show-panel');
-                if (bigscreenPanelTimer) {
-                    clearTimeout(bigscreenPanelTimer);
-                    bigscreenPanelTimer = null;
-                }
-            }
-        }
-
-        function syncMobileBigscreenPanel(urls = null, activeIdx = 0) {
-            const serverCol = document.getElementById('mobileBigscreenServers');
-            const channelCol = document.getElementById('mobileBigscreenChannels');
-
-            if (serverCol) {
-                serverCol.innerHTML = '';
-                const topServers = document.getElementById('serverButtonsContainer');
-                if (Array.isArray(urls) && urls.length) {
-                    urls.forEach((link, index) => {
-                        const btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.className = 'server-btn';
-                        btn.dataset.serverIdx = index;
-                        btn.innerText = `Server ${index + 1}`;
-                        if (index === activeIdx) btn.classList.add('active');
-                        btn.onclick = (e) => {
-                            e.stopPropagation();
-                            hasUserInteracted = true;
-                            currentServerIndex = index;
-                            document.querySelectorAll('.server-btn').forEach(b => {
-                                b.classList.toggle('active', Number(b.dataset.serverIdx) === index);
-                            });
-                            loadChannelUrl(link, 'main', true);
-                            setMobileBigscreenPanelState(false);
-                        };
-                        serverCol.appendChild(btn);
-                    });
-                } else if (topServers && topServers.children.length) {
-                    Array.from(topServers.children).forEach((sBtn, index) => {
-                        const btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.className = sBtn.className;
-                        btn.dataset.serverIdx = index;
-                        btn.innerText = sBtn.innerText;
-                        btn.onclick = (e) => {
-                            e.stopPropagation();
-                            sBtn.click();
-                            setMobileBigscreenPanelState(false);
-                        };
-                        serverCol.appendChild(btn);
-                    });
-                }
-            }
-
-            if (channelCol) {
-                channelCol.innerHTML = '';
-                const activeKey = getChannelKey(currentChannelObj);
-                const list = allChannels.filter(ch => {
-                    if (currentFilter === 'all') return true;
-                    if (!ch.group) return false;
-                    return ch.group.toLowerCase().replace(/[\s_]+/g, '') === currentFilter.toLowerCase().replace(/[\s_]+/g, '');
-                });
-
-                list.forEach((ch) => {
-                    const chKey = getChannelKey(ch);
-                    const item = document.createElement('div');
-                    item.className = 'mobile-bigscreen-ch-item';
-                    item.dataset.chKey = chKey;
-                    if (activeKey && chKey === activeKey) {
-                        item.classList.add('active-channel');
-                    }
-                    item.innerText = ch.name;
-                    item.onclick = (e) => {
-                        e.stopPropagation();
-                        hasUserInteracted = true;
-                        loadChannel(ch);
-                        setMobileBigscreenPanelState(false);
-                    };
-                    channelCol.appendChild(item);
-                });
-            }
-        }
-
-        function initMobileBigscreenPanel() {
-            const videoBox = document.getElementById('videoBox') || document.querySelector('.video-box');
-            const closeBtn = document.getElementById('mobileBigscreenCloseBtn');
-            if (!videoBox) return;
-
-            if (closeBtn) {
-                closeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    setMobileBigscreenPanelState(false);
-                });
-            }
-
-            videoBox.addEventListener('click', (e) => {
-                if (window.innerWidth > 1024) return;
-                if (e.target.closest('#mobileBigscreenPanel')) return;
-                if (e.target.closest('button, a, input, .shaka-controls-button, .shaka-overflow-menu, .shaka-settings-menu')) {
-                    return;
-                }
-                if (isMobileBigScreenActive()) {
-                    const panel = document.getElementById('mobileBigscreenPanel');
-                    const isOpen = panel && panel.classList.contains('show-panel');
-                    setMobileBigscreenPanelState(!isOpen);
-                }
-            });
-
-            const onFsChange = () => {
-                const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
-                if (fsEl && window.innerWidth <= 1024) {
-                    document.body.classList.add('mobile-big-player');
-                    syncMobileBigscreenPanel();
-                } else {
-                    document.body.classList.remove('mobile-big-player');
-                    setMobileBigscreenPanelState(false);
-                }
-            };
-
-            document.addEventListener('fullscreenchange', onFsChange);
-            document.addEventListener('webkitfullscreenchange', onFsChange);
         }
 
         function unmuteActivePlayers() {
@@ -1494,7 +1242,6 @@
                 buttonsContainer.appendChild(sBtn);
             });
 
-            syncMobileBigscreenPanel(urls, 0);
             loadChannelUrl(urls[0], 'main', true);
         }
 
@@ -1726,8 +1473,9 @@
                 return;
             }
 
+            // Main Mode (HLS.js / Native HLS)
             mainContainer.style.display = 'block';
-            if (!shakaUiRef && typeof shaka !== 'undefined') {
+            if (!shakaPlayerRef) {
                 await initPlayer();
             }
 
@@ -1737,83 +1485,28 @@
                 }
             }, HLS_TO_CLAPPR_MS);
 
-            if (mainVideo) {
-                mainVideo.onwaiting = () => {
-                    if (sessionId === loadSessionId) {
-                        statusEl.textContent = "Buffering...";
-                    }
-                };
-                mainVideo.onplaying = () => {
-                    if (sessionId === loadSessionId) {
-                        markStreamStarted();
-                        statusEl.textContent = "Playing";
-                        if (hasUserInteracted) {
-                            mainVideo.muted = false;
-                            mainVideo.volume = 1.0;
-                        }
-                    }
-                };
-                mainVideo.onerror = () => {
-                    if (sessionId === loadSessionId) {
-                        if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
-                        triggerSingleClapprFallback();
-                    }
-                };
-            }
-
-            if (Hls.isSupported()) {
+            if (typeof Hls !== 'undefined' && Hls.isSupported()) {
                 hls = new Hls({
                     enableWorker: true,
-                    lowLatencyMode: false,
-                    maxBufferLength: 24,
-                    maxMaxBufferLength: 45,
-                    maxBufferSize: 40 * 1024 * 1024,
-                    backBufferLength: 15,
-                    liveSyncDurationCount: 3,
-                    liveMaxLatencyDurationCount: 6,
-                    maxLiveSyncPlaybackRate: 1.3,
-                    fragLoadingTimeOut: 7000,
-                    fragLoadingMaxRetry: 2,
-                    fragLoadingRetryDelay: 500,
-                    manifestLoadingTimeOut: 7000,
-                    manifestLoadingMaxRetry: 2,
-                    levelLoadingTimeOut: 7000,
-                    levelLoadingMaxRetry: 2
+                    lowLatencyMode: true
                 });
-
                 hls.loadSource(finalUrl);
                 hls.attachMedia(mainVideo);
-
-                hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-                    triggerInstantPlay(mainVideo);
-                });
-
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    if (sessionId !== loadSessionId) return;
                     triggerInstantPlay(mainVideo);
                 });
-
-                hls.on(Hls.Events.FRAG_BUFFERED, () => {
-                    if (sessionId === loadSessionId && mainVideo && !mainVideo.paused && mainVideo.readyState >= 2) {
-                        markStreamStarted();
-                        statusEl.textContent = "Playing";
-                    }
-                });
-
-                hls.on(Hls.Events.ERROR, function (event, data) {
-                    if (!data.fatal) {
-                        if (sessionId === loadSessionId) {
-                            statusEl.textContent = "Buffering...";
-                        }
-                        return;
-                    }
-                    if (data.fatal && sessionId === loadSessionId) {
-                        if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (sessionId !== loadSessionId) return;
+                    if (data && data.fatal) {
                         triggerSingleClapprFallback();
                     }
                 });
-            } else if (mainVideo && mainVideo.canPlayType('application/vnd.apple.mpegurl')) {
+            } else if (mainVideo.canPlayType('application/vnd.apple.mpegurl')) {
                 mainVideo.src = finalUrl;
                 triggerInstantPlay(mainVideo);
+            } else {
+                triggerSingleClapprFallback();
             }
         }
 
@@ -1825,7 +1518,6 @@
                 document.getElementById('activeChannelName').innerText = "Custom URL - সার্ভার পরিবর্তন করুন";
                 currentChannelObj = null;
                 updateActiveChannelIndicator(null);
-                syncMobileBigscreenPanel([], 0);
                 loadChannelUrl(url, 'main', true);
             }
         }
@@ -1890,8 +1582,6 @@
             } else {
                 container.innerHTML = '<p style="text-align: center; color: #888; grid-column: span 4; padding: 20px;">এই ক্যাটাগরিতে কোনো চ্যানেল পাওয়া যায়নি।</p>';
             }
-
-            syncMobileBigscreenPanel();
         }
 
         function filterCategory(category, btnElement) {
@@ -2031,7 +1721,6 @@
             setupFirstInteractionSoundUnlock();
             startLiveSessionCheck();
             initPlayer();
-            initMobileBigscreenPanel();
             loadPlaylistData();
         }
 
