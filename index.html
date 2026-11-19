@@ -458,6 +458,7 @@
         }
 
         .ch-btn {
+            position: relative;
             background: #21262d;
             padding: 10px;
             border-radius: 8px;
@@ -478,6 +479,30 @@
         .ch-btn:hover {
             background: #30363d;
             border-color: var(--accent-color);
+        }
+
+        .ch-btn .live-led {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(139, 148, 158, 0.35);
+            transition: all 0.25s ease;
+            pointer-events: none;
+        }
+
+        .ch-btn.active-channel {
+            background: #25302b;
+            border-color: #2ea043;
+            box-shadow: 0 0 0 1px rgba(46, 160, 67, 0.35);
+        }
+
+        .ch-btn.active-channel .live-led {
+            background: #2ecc71;
+            box-shadow: 0 0 8px #2ecc71, 0 0 14px rgba(46, 204, 113, 0.85);
+            transform: scale(1.15);
         }
 
         .ch-btn img {
@@ -626,15 +651,15 @@
                 gap: 6px;
             }
             .header-left-socials {
-                min-width: 82px;
-                gap: 4px;
-                justify-content: space-between;
+                min-width: 76px;
+                gap: 2px;
+                justify-content: center;
             }
             .header-social-btn {
-                padding: 4px 6px;
-                font-size: 10px;
-                gap: 3px;
-                border-radius: 5px;
+                padding: 3px 5px;
+                font-size: 9.5px;
+                gap: 2px;
+                border-radius: 4px;
             }
             .server-box-with-brand {
                 min-width: 0;
@@ -665,6 +690,12 @@
                 border-radius: 10px;
             }
             .ch-btn { height: 82px; padding: 6px 4px; gap: 4px; border-radius: 8px; background: #1c2128; }
+            .ch-btn .live-led {
+                top: 6px;
+                right: 6px;
+                width: 7px;
+                height: 7px;
+            }
             .ch-btn img { width: 38px; height: 38px; }
             .ch-btn strong { font-size: 11px; }
             .category-bar { margin-bottom: 8px; gap: 6px; }
@@ -1007,6 +1038,20 @@
 
         const HLS_TO_CLAPPR_MS = 15000;
 
+        function getChannelKey(ch) {
+            if (!ch) return '';
+            const firstUrl = Array.isArray(ch.url) ? ch.url[0] : ch.url;
+            return `${String(ch.name || '').trim()}::${String(firstUrl || '').trim()}`;
+        }
+
+        function updateActiveChannelIndicator(activeCh = currentChannelObj) {
+            const activeKey = getChannelKey(activeCh);
+            document.querySelectorAll('#channelContainer .ch-btn').forEach(btn => {
+                const isMatch = activeKey && btn.dataset.chKey === activeKey;
+                btn.classList.toggle('active-channel', Boolean(isMatch));
+            });
+        }
+
         function unmuteActivePlayers() {
             const mainVideo = document.getElementById("video");
             [mainVideo, html5El].forEach(el => {
@@ -1167,6 +1212,7 @@
 
         function loadChannel(ch) {
             currentChannelObj = ch;
+            updateActiveChannelIndicator(ch);
             currentServerIndex = 0;
             const buttonsContainer = document.getElementById('serverButtonsContainer');
             const channelNameEl = document.getElementById('activeChannelName');
@@ -1521,6 +1567,7 @@
                 document.getElementById('serverButtonsContainer').innerHTML = "";
                 document.getElementById('activeChannelName').innerText = "Custom URL - সার্ভার পরিবর্তন করুন";
                 currentChannelObj = null;
+                updateActiveChannelIndicator(null);
                 loadChannelUrl(url, 'main', true);
             }
         }
@@ -1543,6 +1590,11 @@
                 filteredChannels.forEach((ch) => {
                     const btn = document.createElement('div');
                     btn.className = 'ch-btn';
+                    btn.dataset.chKey = getChannelKey(ch);
+
+                    const ledDot = document.createElement('span');
+                    ledDot.className = 'live-led';
+                    btn.appendChild(ledDot);
 
                     const logoVal = String(ch.logo || '').trim();
                     if (/^(https?:\/\/|data:|\/|\.\.?\/)/i.test(logoVal)) {
@@ -1574,6 +1626,8 @@
 
                 if (filteredChannels.length > 0 && (!currentUrl || !filteredChannels.some(c => Array.isArray(c.url) ? c.url.includes(currentUrl) : c.url === currentUrl))) {
                     loadChannel(filteredChannels[0]);
+                } else {
+                    updateActiveChannelIndicator(currentChannelObj);
                 }
             } else {
                 container.innerHTML = '<p style="text-align: center; color: #888; grid-column: span 4; padding: 20px;">এই ক্যাটাগরিতে কোনো চ্যানেল পাওয়া যায়নি।</p>';
