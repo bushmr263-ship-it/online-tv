@@ -155,29 +155,77 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 15px;
+            gap: 14px;
             margin-bottom: 15px;
             flex-wrap: wrap;
         }
 
-        .logo-header {
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--accent-color);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(229, 184, 96, 0.3);
-            margin: 0;
+        .header-left-socials {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            align-items: stretch;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+
+        .header-social-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 12.5px;
+            color: #fff;
+            transition: 0.25s;
+            border: 1px solid #30363d;
+            line-height: 1.2;
             white-space: nowrap;
         }
 
-        .header-server-switcher {
+        .telegram-btn { background: #0088cc; }
+        .telegram-btn:hover { background: #0077b5; border-color: #fff; }
+
+        .facebook-btn { background: #1877f2; }
+        .facebook-btn:hover { background: #145dbf; border-color: #fff; }
+
+        .whatsapp-btn { background: #25d366; }
+        .whatsapp-btn:hover { background: #1ebe5d; border-color: #fff; }
+
+        .server-box-with-brand {
             flex-grow: 1;
-            min-width: 250px;
+            min-width: 260px;
             background: #0d1117;
             padding: 8px 12px;
             border-radius: 8px;
             border: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .server-brand-left {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--accent-color);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(229, 184, 96, 0.3);
+            padding-right: 12px;
+            border-right: 1px solid #30363d;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            align-self: stretch;
+        }
+
+        .header-server-switcher {
+            flex-grow: 1;
+            min-width: 200px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -299,7 +347,7 @@
         .channel-list {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            height: 72vh;
+            height: 96vh;
             overflow-y: auto;
             background: var(--bg-color);
             padding: 15px;
@@ -308,30 +356,6 @@
             align-content: start;
             gap: 10px;
         }
-
-        .mode-social-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 13px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 12.5px;
-            color: #fff;
-            transition: 0.25s;
-            border: 1px solid #30363d;
-            line-height: 1.2;
-        }
-
-        .telegram-btn { background: #0088cc; }
-        .telegram-btn:hover { background: #0077b5; border-color: #fff; }
-
-        .facebook-btn { background: #1877f2; }
-        .facebook-btn:hover { background: #145dbf; border-color: #fff; }
-
-        .whatsapp-btn { background: #25d366; }
-        .whatsapp-btn:hover { background: #1ebe5d; border-color: #fff; }
 
         .video-box {
             width: 100%;
@@ -582,12 +606,40 @@
                 padding: 8px; border-radius: 10px;
                 box-shadow: 0 4px 18px rgba(0, 0, 0, 0.85);
             }
-            .header-wrapper { margin-bottom: 8px; gap: 6px; }
-            .logo-header { font-size: 20px; }
-            .header-server-switcher { padding: 6px; gap: 4px; }
-            .server-title { font-size: 13px; }
+            .header-wrapper {
+                flex-wrap: nowrap;
+                align-items: stretch;
+                margin-bottom: 8px;
+                gap: 6px;
+            }
+            .header-left-socials {
+                min-width: 82px;
+                gap: 4px;
+                justify-content: space-between;
+            }
+            .header-social-btn {
+                padding: 4px 6px;
+                font-size: 10px;
+                gap: 3px;
+                border-radius: 5px;
+            }
+            .server-box-with-brand {
+                min-width: 0;
+                padding: 6px;
+                gap: 8px;
+            }
+            .server-brand-left {
+                font-size: 15px;
+                letter-spacing: 0.8px;
+                padding-right: 7px;
+            }
+            .header-server-switcher {
+                min-width: 0;
+                gap: 4px;
+            }
+            .server-title { font-size: 12px; }
             .server-inline-notice { padding: 2px 5px; }
-            .server-inline-notice marquee { font-size: 13px; line-height: 1.25; }
+            .server-inline-notice marquee { font-size: 12.5px; line-height: 1.25; }
             .channel-list-container { width: 100%; }
             .channel-list {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -599,33 +651,8 @@
             .ch-btn strong { font-size: 11px; }
             .category-bar { margin-bottom: 8px; gap: 6px; }
             .cat-btn { padding: 6px 12px; font-size: 11px; }
-            .modes {
-                display: flex;
-                flex-wrap: nowrap;
-                justify-content: space-between;
-                gap: 4px;
-                margin-top: 8px;
-                overflow-x: auto;
-                scrollbar-width: none;
-            }
-            .modes::-webkit-scrollbar { display: none; }
-            .btn {
-                padding: 6px 7px;
-                font-size: 10.5px;
-                border-radius: 6px;
-                white-space: nowrap;
-                flex: 1 1 auto;
-                text-align: center;
-            }
-            .mode-social-btn {
-                padding: 6px 6px;
-                font-size: 10.5px;
-                border-radius: 6px;
-                gap: 3px;
-                white-space: nowrap;
-                flex: 1 1 auto;
-                justify-content: center;
-            }
+            .modes { gap: 8px; margin-top: 8px; }
+            .btn { padding: 6px 12px; font-size: 11px; border-radius: 5px; }
             .input-box { flex-direction: row; margin: 10px auto; gap: 6px; }
             #customUrlInput { padding: 10px; font-size: 12px; }
             .play-btn { padding: 10px 16px; font-size: 12px; white-space: nowrap; }
@@ -662,27 +689,35 @@
         <div class="player-section">
 
             <div class="header-wrapper">
-                <div class="logo-header">PB TV</div>
+                <div class="header-left-socials">
+                    <a href="https://www.facebook.com/aribashawon6672" target="_blank" class="header-social-btn facebook-btn">🌐 Facebook</a>
+                    <a href="https://t.me/+VqDOF_-beaQyMWY1" target="_blank" class="header-social-btn telegram-btn">📱 Telegram</a>
+                    <a href="https://wa.me/8801812895985" target="_blank" class="header-social-btn whatsapp-btn">💬 WhatsApp</a>
+                </div>
 
-                <div id="serverSwitcherBox" class="header-server-switcher">
-                    <div class="server-title-notice-row">
-                        <div class="server-title" id="activeChannelName">চ্যানেল সিলেক্ট করুন</div>
+                <div class="server-box-with-brand">
+                    <div class="server-brand-left">PB TV</div>
 
-                        <div class="server-stacked-notices">
-                            <div class="server-inline-notice">
-                                <marquee behavior="scroll" direction="left" scrollamount="4">
-                                    যেকোনো প্রয়োজনে নিচে টেলিগ্রাম, হোয়াটসঅ্যাপ, ফেসবুক যোগাযোগ করুন।
-                                </marquee>
-                            </div>
-                            <div class="server-inline-notice">
-                                <marquee behavior="scroll" direction="left" scrollamount="4">
-                                    কোনো ভিডিও প্লে না হলে HTML মোডে ট্রাই করে এক মিনিট অপেক্ষা করুন।
-                                </marquee>
+                    <div id="serverSwitcherBox" class="header-server-switcher">
+                        <div class="server-title-notice-row">
+                            <div class="server-title" id="activeChannelName">চ্যানেল সিলেক্ট করুন</div>
+
+                            <div class="server-stacked-notices">
+                                <div class="server-inline-notice">
+                                    <marquee behavior="scroll" direction="left" scrollamount="4">
+                                        যেকোনো প্রয়োজনে টেলিগ্রাম, হোয়াটসঅ্যাপ, ফেসবুক যোগাযোগ করুন।
+                                    </marquee>
+                                </div>
+                                <div class="server-inline-notice">
+                                    <marquee behavior="scroll" direction="left" scrollamount="4">
+                                        কোনো ভিডিও প্লে না হলে HTML মোডে ট্রাই করে এক মিনিট অপেক্ষা করুন।
+                                    </marquee>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="server-buttons-wrap" id="serverButtonsContainer"></div>
+                        <div class="server-buttons-wrap" id="serverButtonsContainer"></div>
+                    </div>
                 </div>
             </div>
 
@@ -703,11 +738,8 @@
             </div>
 
             <div class="modes">
-                <a href="https://www.facebook.com/aribashawon6672" target="_blank" class="mode-social-btn facebook-btn">🌐 Facebook</a>
                 <button class="btn" onclick="switchMode('main')">Main</button>
                 <button class="btn" onclick="switchMode('html5')">HTML5</button>
-                <a href="https://t.me/+VqDOF_-beaQyMWY1" target="_blank" class="mode-social-btn telegram-btn">📱 Telegram</a>
-                <a href="https://wa.me/8801812895985" target="_blank" class="mode-social-btn whatsapp-btn">💬 WhatsApp</a>
             </div>
         </div>
 
