@@ -629,7 +629,7 @@
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
 
-        @media screen and (max-width: 768px) {
+        @media screen and (max-width: 768px) and (orientation: portrait) {
             body { padding: 6px; padding-bottom: 72px; }
             .main-container,
             .channel-list-container {
@@ -732,6 +732,141 @@
             #player-container .shaka-volume-bar-container {
                 width: 55px !important;
                 min-width: 45px !important;
+            }
+        }
+
+        @media screen and (max-width: 1024px) and (orientation: landscape) {
+            body {
+                padding: 10px !important;
+                padding-bottom: 10px !important;
+                overflow-x: hidden;
+            }
+
+            .main-container {
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                align-items: flex-start !important;
+                gap: 14px !important;
+                max-width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            .player-section {
+                position: relative !important;
+                top: auto !important;
+                left: auto !important;
+                flex: 1.65 1 0 !important;
+                min-width: 0 !important;
+                width: auto !important;
+                z-index: 1 !important;
+                padding: 12px !important;
+                border-radius: 12px !important;
+                box-shadow: none !important;
+                transition: flex 0.25s ease, width 0.25s ease;
+            }
+
+            .header-wrapper {
+                flex-wrap: nowrap !important;
+                align-items: stretch !important;
+                gap: 8px !important;
+                margin-bottom: 10px !important;
+            }
+
+            .header-left-socials {
+                min-width: 84px !important;
+                gap: 3px !important;
+            }
+
+            .header-social-btn {
+                padding: 4px 6px !important;
+                font-size: 10px !important;
+                gap: 3px !important;
+            }
+
+            .server-box-with-brand {
+                min-width: 0 !important;
+                padding: 6px 10px !important;
+                gap: 10px !important;
+            }
+
+            .server-brand-left {
+                font-size: 17px !important;
+                padding-right: 9px !important;
+            }
+
+            .server-title {
+                font-size: 12.5px !important;
+            }
+
+            .server-inline-notice marquee {
+                font-size: 12.5px !important;
+            }
+
+            .channel-list-container {
+                flex: 1 1 0 !important;
+                min-width: 0 !important;
+                width: auto !important;
+                height: auto !important;
+                overflow: visible !important;
+                transition: opacity 0.2s ease;
+            }
+
+            .channel-list {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                height: 76vh !important;
+                max-height: 76vh !important;
+                overflow-y: auto !important;
+                padding: 10px !important;
+                padding-bottom: 12px !important;
+                gap: 8px !important;
+            }
+
+            .ch-btn {
+                height: 82px !important;
+                padding: 6px 4px !important;
+                gap: 4px !important;
+            }
+
+            .ch-btn .live-led {
+                top: 6px;
+                right: 6px;
+                width: 7px;
+                height: 7px;
+            }
+
+            .ch-btn img {
+                width: 38px !important;
+                height: 38px !important;
+            }
+
+            .ch-btn strong {
+                font-size: 11px !important;
+            }
+
+            .input-box {
+                position: static !important;
+                margin: 12px auto 6px auto !important;
+                padding: 0 !important;
+                background: transparent !important;
+                border-top: none !important;
+                z-index: 1 !important;
+            }
+
+            body.landscape-player-expanded .channel-list-container {
+                display: none !important;
+            }
+
+            body.landscape-player-expanded .player-section {
+                flex: 1 1 100% !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            body.landscape-player-expanded .video-box {
+                max-height: 74vh;
+                width: 100%;
             }
         }
     </style>
@@ -1050,6 +1185,34 @@
             document.querySelectorAll('#channelContainer .ch-btn').forEach(btn => {
                 const isMatch = activeKey && btn.dataset.chKey === activeKey;
                 btn.classList.toggle('active-channel', Boolean(isMatch));
+            });
+        }
+
+        function isLandscapeMode() {
+            return window.innerWidth <= 1024 && window.innerWidth > window.innerHeight;
+        }
+
+        function syncLandscapeExpandedClass() {
+            if (!isLandscapeMode()) {
+                document.body.classList.remove('landscape-player-expanded');
+            }
+        }
+
+        function initLandscapeVideoToggle() {
+            const videoBox = document.querySelector('.video-box');
+            if (!videoBox) return;
+
+            videoBox.addEventListener('click', (e) => {
+                if (!isLandscapeMode()) return;
+                if (e.target.closest('button, a, input, .shaka-controls-button, .shaka-overflow-menu, .shaka-settings-menu')) {
+                    return;
+                }
+                document.body.classList.toggle('landscape-player-expanded');
+            });
+
+            window.addEventListener('resize', syncLandscapeExpandedClass);
+            window.addEventListener('orientationchange', () => {
+                setTimeout(syncLandscapeExpandedClass, 150);
             });
         }
 
@@ -1772,6 +1935,7 @@
             setupFirstInteractionSoundUnlock();
             startLiveSessionCheck();
             initPlayer();
+            initLandscapeVideoToggle();
             loadPlaylistData();
         }
 
