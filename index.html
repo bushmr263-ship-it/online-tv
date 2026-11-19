@@ -482,13 +482,15 @@
         }
 
         .ch-btn .live-led {
+            display: none;
             position: absolute;
             top: 7px;
             right: 7px;
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: rgba(139, 148, 158, 0.35);
+            background: #2ecc71;
+            box-shadow: 0 0 8px #2ecc71, 0 0 14px rgba(46, 204, 113, 0.85);
             transition: all 0.25s ease;
             pointer-events: none;
         }
@@ -500,8 +502,7 @@
         }
 
         .ch-btn.active-channel .live-led {
-            background: #2ecc71;
-            box-shadow: 0 0 8px #2ecc71, 0 0 14px rgba(46, 204, 113, 0.85);
+            display: block;
             transform: scale(1.15);
         }
 
