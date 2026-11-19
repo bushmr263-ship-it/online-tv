@@ -373,7 +373,7 @@
             position: relative;
         }
 
-        /* Always hide native/other player controls; Shaka UI bar always shows on top */
+        /* Hide all native/other player controls completely; show Shaka UI interface cleanly */
         #clappr-container, #html5-video {
             width: 100% !important;
             height: 100% !important;
@@ -382,6 +382,22 @@
             inset: 0;
             background: #000;
             object-fit: contain;
+        }
+
+        #html5-video::-webkit-media-controls,
+        #html5-video::-webkit-media-controls-enclosure,
+        #html5-video::-webkit-media-controls-panel,
+        #html5-video::-webkit-media-controls-play-button,
+        #html5-video::-webkit-media-controls-timeline,
+        #html5-video::-webkit-media-controls-current-time-display,
+        #html5-video::-webkit-media-controls-time-remaining-display,
+        #html5-video::-webkit-media-controls-mute-button,
+        #html5-video::-webkit-media-controls-volume-slider,
+        #html5-video::-webkit-media-controls-fullscreen-button {
+            display: none !important;
+            -webkit-appearance: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
 
         #clappr-container video {
@@ -1122,6 +1138,15 @@
             }
         } catch (e) {}
 
+        function lockNativeControlsOff() {
+            [html5El, document.getElementById('video')].forEach(el => {
+                if (el) {
+                    el.controls = false;
+                    el.removeAttribute("controls");
+                }
+            });
+        }
+
         function getActiveMediaElement() {
             if (activeBackendView === 'html5') return html5El;
             if (activeBackendView === 'clappr') {
@@ -1138,6 +1163,7 @@
         }
 
         function setActivePlayerView(activeView) {
+            lockNativeControlsOff();
             activeBackendView = activeView || 'shaka';
             const mainContainer = document.getElementById("player-container");
             if (mainContainer) {
@@ -1149,6 +1175,7 @@
             }
             if (html5El) {
                 html5El.controls = false;
+                html5El.removeAttribute("controls");
                 html5El.classList.toggle("player-hidden", activeBackendView !== "html5");
             }
         }
@@ -1377,6 +1404,7 @@
                 });
 
                 hookShakaControlsToActiveBackend();
+                lockNativeControlsOff();
 
                 video.addEventListener("waiting", () => {
                     status.textContent = "Buffering...";
@@ -1505,6 +1533,8 @@
 
             const mainVideo = document.getElementById("video");
             if (mainVideo) {
+                mainVideo.controls = false;
+                mainVideo.removeAttribute("controls");
                 mainVideo.onwaiting = null;
                 mainVideo.onplaying = null;
                 mainVideo.onerror = null;
@@ -1514,6 +1544,7 @@
             }
 
             html5El.controls = false;
+            html5El.removeAttribute("controls");
             html5El.onwaiting = null;
             html5El.onplaying = null;
             html5El.onerror = null;
@@ -1558,6 +1589,8 @@
 
             const triggerInstantPlay = (mediaObj) => {
                 if (!mediaObj) return;
+                mediaObj.controls = false;
+                mediaObj.removeAttribute("controls");
                 mediaObj.muted = false;
                 mediaObj.volume = 1.0;
                 let playPromise = mediaObj.play();
@@ -1644,6 +1677,7 @@
             if (effectiveMode === 'html5') {
                 setActivePlayerView('html5');
                 html5El.controls = false;
+                html5El.removeAttribute("controls");
                 html5El.src = finalUrl;
                 triggerInstantPlay(html5El);
 
@@ -1660,6 +1694,8 @@
                 };
                 html5El.onplaying = () => {
                     if (sessionId === loadSessionId) {
+                        html5El.controls = false;
+                        html5El.removeAttribute("controls");
                         markStreamStarted();
                         statusEl.textContent = "Playing";
                         if (hasUserInteracted) {
