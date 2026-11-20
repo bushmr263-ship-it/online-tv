@@ -1158,6 +1158,28 @@
             html5MediaSource = null;
         }
 
+        function forceMediaPlayNow(mediaObj) {
+            if (!mediaObj) return;
+            const tryPlay = () => {
+                if (!mediaObj || !mediaObj.src) return;
+                if (mediaObj.paused) {
+                    const p = mediaObj.play();
+                    if (p && typeof p.catch === "function") {
+                        p.catch(() => {
+                            mediaObj.muted = true;
+                            const p2 = mediaObj.play();
+                            if (p2 && typeof p2.catch === "function") {
+                                p2.catch(() => {});
+                            }
+                        });
+                    }
+                }
+            };
+            tryPlay();
+            setTimeout(tryPlay, 150);
+            setTimeout(tryPlay, 500);
+        }
+
         async function fetchAndAttachHtml5LikeShaka(targetUrl, mediaObj, sessionId, onFirstChunk, onFail) {
             cleanupHtml5Fetcher();
             const controller = new AbortController();
@@ -1381,8 +1403,15 @@
                     e.stopPropagation();
                     hasUserInteracted = true;
                     if (mediaEl) {
-                        if (mediaEl.paused) mediaEl.play().catch(() => {});
-                        else mediaEl.pause();
+                        if (mediaEl.paused) {
+                            mediaEl.muted = false;
+                            mediaEl.play().catch(() => {
+                                mediaEl.muted = true;
+                                mediaEl.play().catch(() => {});
+                            });
+                        } else {
+                            mediaEl.pause();
+                        }
                     } else if (clapprInstance) {
                         try {
                             if (clapprInstance.isPlaying()) clapprInstance.pause();
@@ -1735,6 +1764,8 @@
             html5El.onplaying = null;
             html5El.onplay = null;
             html5El.onloadedmetadata = null;
+            html5El.onloadeddata = null;
+            html5El.oncanplay = null;
             html5El.onerror = null;
             html5El.pause();
             html5El.removeAttribute("src");
@@ -1883,10 +1914,29 @@
                 }, HLS_TO_CLAPPR_MS);
 
                 html5El.onloadedmetadata = () => {
-                    if (sessionId === loadSessionId) showShakaUiBar();
+                    if (sessionId === loadSessionId) {
+                        showShakaUiBar();
+                        forceMediaPlayNow(html5El);
+                    }
+                };
+                html5El.onloadeddata = () => {
+                    if (sessionId === loadSessionId) {
+                        showShakaUiBar();
+                        forceMediaPlayNow(html5El);
+                    }
+                };
+                html5El.oncanplay = () => {
+                    if (sessionId === loadSessionId) {
+                        showShakaUiBar();
+                        forceMediaPlayNow(html5El);
+                    }
                 };
                 html5El.onplay = () => {
-                    if (sessionId === loadSessionId) showShakaUiBar();
+                    if (sessionId === loadSessionId) {
+                        showShakaUiBar();
+                        markStreamStarted();
+                        statusEl.textContent = "Playing";
+                    }
                 };
                 html5El.onwaiting = () => {
                     if (sessionId === loadSessionId) {
@@ -1919,12 +1969,14 @@
                         if (sessionId === loadSessionId) {
                             showShakaUiBar();
                             triggerInstantPlay(html5El, false);
+                            forceMediaPlayNow(html5El);
                         }
                     },
                     () => {
                         if (sessionId === loadSessionId) {
                             showShakaUiBar();
                             triggerInstantPlay(html5El, false);
+                            forceMediaPlayNow(html5El);
                         }
                     }
                 );
