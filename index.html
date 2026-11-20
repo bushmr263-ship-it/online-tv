@@ -385,6 +385,7 @@
 
         #html5-video:not(.player-hidden) {
             z-index: 15;
+            pointer-events: none;
         }
 
         #clappr-container video {
@@ -416,14 +417,25 @@
             pointer-events: auto;
         }
 
-        #player-container:not(.shaka-active) > video {
+        #player-container.html5-shaka-ui {
+            background: transparent;
+            z-index: 18;
+            pointer-events: auto;
+        }
+
+        #player-container.html5-shaka-ui > video {
             opacity: 0;
             pointer-events: none;
         }
 
-        #player-container:not(.shaka-active) .shaka-controls-button-panel,
-        #player-container:not(.shaka-active) .shaka-scrim-container,
-        #player-container:not(.shaka-active) .shaka-bottom-controls {
+        #player-container:not(.shaka-active):not(.html5-shaka-ui) > video {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #player-container:not(.shaka-active):not(.html5-shaka-ui) .shaka-controls-button-panel,
+        #player-container:not(.shaka-active):not(.html5-shaka-ui) .shaka-scrim-container,
+        #player-container:not(.shaka-active):not(.html5-shaka-ui) .shaka-bottom-controls {
             display: none !important;
         }
 
@@ -867,7 +879,7 @@
                 <div id="status">Player Ready</div>
 
                 <div id="clappr-container" class="player-hidden"></div>
-                <video id="html5-video" class="player-hidden" controls autoplay playsinline preload="auto"></video>
+                <video id="html5-video" class="player-hidden" autoplay playsinline preload="auto"></video>
             </div>
 
             <div class="modes">
@@ -1134,6 +1146,16 @@
             }
         } catch (e) {}
 
+        function setOfflineScreenVisible(isOffline) {
+            if (offlineOverlayEl) {
+                offlineOverlayEl.style.display = isOffline ? "block" : "none";
+            }
+            const statusEl = document.getElementById("status");
+            if (isOffline && statusEl) {
+                statusEl.textContent = "Offline";
+            }
+        }
+
         function cleanupHtml5Fetcher() {
             if (html5FetchController) {
                 try { html5FetchController.abort(); } catch (e) {}
@@ -1228,6 +1250,9 @@
                         if (done) {
                             streamDone = true;
                             flushQueue();
+                            if (!firstChunkNotified && sessionId === loadSessionId) {
+                                if (typeof onFail === "function") onFail(new Error("Empty stream"));
+                            }
                             break;
                         }
                         if (value && value.byteLength > 0) {
@@ -1246,7 +1271,6 @@
                 }
             }
 
-            // Shaka-style fetch for manifest / stream blob or direct stream fallback
             try {
                 const res = await fetch(targetUrl, {
                     signal: controller.signal,
@@ -1259,6 +1283,9 @@
 
                 if (isHlsManifest) {
                     const manifestText = await res.text();
+                    if (!manifestText || !manifestText.includes("#EXT")) {
+                        throw new Error("Invalid playlist");
+                    }
                     const base = new URL(targetUrl);
                     const rewritten = manifestText
                         .split(/\r?\n/)
@@ -1278,6 +1305,9 @@
                     mediaObj.src = blobUrl;
                 } else {
                     const blob = await res.blob();
+                    if (!blob || blob.size === 0) {
+                        throw new Error("Empty blob");
+                    }
                     if (sessionId !== loadSessionId || controller.signal.aborted) return;
                     const blobUrl = URL.createObjectURL(blob);
                     html5BlobUrl = blobUrl;
@@ -1287,22 +1317,32 @@
                 if (typeof onFirstChunk === "function") onFirstChunk();
             } catch (fetchErr) {
                 if (sessionId !== loadSessionId || controller.signal.aborted) return;
-                mediaObj.src = targetUrl;
                 if (typeof onFail === "function") onFail(fetchErr);
             }
         }
 
+        function syncShakaUiToHtml5(mediaObj) {
+            if (!shakaUiRef || !mediaObj) return;
+            try {
+                const controls = shakaUiRef.getControls();
+                if (controls) {
+                    const activeMedia = (activeBackendView === "html5")
+                        ? mediaObj
+                        : document.getElementById("video");
+                    if (activeMedia) {
+                        controls.setMediaElement(activeMedia);
+                    }
+                }
+            } catch (e) {}
+        }
+
         function syncHtml5Controls() {
             if (!html5El) return;
-            if (activeBackendView === 'html5') {
-                html5El.controls = true;
-                html5El.setAttribute("controls", "");
-                html5El.disablePictureInPicture = false;
-                html5El.removeAttribute("disablepictureinpicture");
-            } else {
-                html5El.controls = false;
-                html5El.removeAttribute("controls");
-            }
+            html5El.controls = false;
+            html5El.removeAttribute("controls");
+            html5El.disablePictureInPicture = false;
+            html5El.removeAttribute("disablepictureinpicture");
+
             const mainVideo = document.getElementById('video');
             if (mainVideo) {
                 mainVideo.controls = false;
@@ -1319,18 +1359,13 @@
             return document.getElementById('video');
         }
 
-        function setOfflineScreenVisible(isOffline) {
-            if (offlineOverlayEl) {
-                offlineOverlayEl.style.display = isOffline ? "block" : "none";
-            }
-        }
-
         function setActivePlayerView(activeView) {
             activeBackendView = activeView || 'shaka';
             const mainContainer = document.getElementById("player-container");
             if (mainContainer) {
                 mainContainer.classList.remove("player-hidden");
                 mainContainer.classList.toggle("shaka-active", activeBackendView === "shaka");
+                mainContainer.classList.toggle("html5-shaka-ui", activeBackendView === "html5");
             }
             if (clapprEl) {
                 clapprEl.classList.toggle("player-hidden", activeBackendView !== "clappr");
@@ -1339,6 +1374,7 @@
                 html5El.classList.toggle("player-hidden", activeBackendView !== "html5");
             }
             syncHtml5Controls();
+            syncShakaUiToHtml5(html5El);
         }
 
         function hookShakaControlsToActiveBackend() {
@@ -1583,7 +1619,7 @@
 
                 player.addEventListener("error", () => {
                     if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
-                    status.textContent = "Playback Error";
+                    setOfflineScreenVisible(true);
                 });
 
             } catch (error) {
@@ -1652,10 +1688,6 @@
                 loadTimeoutTimer = null;
             }
             setOfflineScreenVisible(true);
-            const statusEl = document.getElementById("status");
-            if (statusEl) {
-                statusEl.textContent = "Offline";
-            }
         }
 
         async function cleanupPreviousPlayers() {
@@ -1751,15 +1783,10 @@
 
             statusEl.textContent = "Loading...";
 
-            const triggerInstantPlay = (mediaObj, enableControls = false) => {
+            const triggerInstantPlay = (mediaObj) => {
                 if (!mediaObj) return;
-                if (enableControls) {
-                    mediaObj.controls = true;
-                    mediaObj.setAttribute("controls", "");
-                } else {
-                    mediaObj.controls = false;
-                    mediaObj.removeAttribute("controls");
-                }
+                mediaObj.controls = false;
+                mediaObj.removeAttribute("controls");
                 mediaObj.muted = false;
                 mediaObj.volume = 1.0;
                 let playPromise = mediaObj.play();
@@ -1767,17 +1794,9 @@
                     playPromise.then(() => {
                         mediaObj.muted = false;
                         mediaObj.volume = 1.0;
-                        if (enableControls) {
-                            mediaObj.controls = true;
-                            mediaObj.setAttribute("controls", "");
-                        }
                     }).catch(() => {
                         mediaObj.muted = true;
                         mediaObj.play().then(() => {
-                            if (enableControls) {
-                                mediaObj.controls = true;
-                                mediaObj.setAttribute("controls", "");
-                            }
                             if (hasUserInteracted) {
                                 mediaObj.muted = false;
                                 mediaObj.volume = 1.0;
@@ -1797,21 +1816,16 @@
             };
 
             const markStreamOffline = () => {
-                if (sessionId !== loadSessionId || fbState.hasStartedPlaying) return;
+                if (sessionId !== loadSessionId) return;
                 if (loadTimeoutTimer) {
                     clearTimeout(loadTimeoutTimer);
                     loadTimeoutTimer = null;
                 }
                 setOfflineScreenVisible(true);
-                statusEl.textContent = "Offline";
             };
 
             const triggerSingleClapprFallback = () => {
                 if (sessionId !== loadSessionId || isMpd) return;
-                if (fbState.hasStartedPlaying) {
-                    statusEl.textContent = "Buffering...";
-                    return;
-                }
                 if (!fbState.movedToClapprOnce) {
                     fbState.movedToClapprOnce = true;
                     loadChannelUrl(rawUrl, 'clappr_once', false);
@@ -1841,7 +1855,7 @@
                         if (sessionId !== loadSessionId) return;
                         markStreamStarted();
                         statusEl.textContent = "Playing";
-                        triggerInstantPlay(mainVideo, false);
+                        triggerInstantPlay(mainVideo);
                     } catch (error) {
                         if (sessionId === loadSessionId) {
                             markStreamOffline();
@@ -1852,36 +1866,40 @@
             }
 
             if (effectiveMode === 'html5') {
+                if (!shakaPlayerRef) {
+                    await initPlayer();
+                }
                 setActivePlayerView('html5');
-                const showNativeBar = () => {
-                    html5El.controls = true;
-                    html5El.setAttribute("controls", "");
+                const showShakaUiBar = () => {
+                    html5El.controls = false;
+                    html5El.removeAttribute("controls");
                     html5El.disablePictureInPicture = false;
                     html5El.removeAttribute("disablepictureinpicture");
+                    syncShakaUiToHtml5(html5El);
                 };
-                showNativeBar();
+                showShakaUiBar();
 
                 loadTimeoutTimer = setTimeout(() => {
-                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                    if (sessionId === loadSessionId) {
                         markStreamOffline();
                     }
                 }, HLS_TO_CLAPPR_MS);
 
                 html5El.onloadedmetadata = () => {
-                    if (sessionId === loadSessionId) showNativeBar();
+                    if (sessionId === loadSessionId) showShakaUiBar();
                 };
                 html5El.onplay = () => {
-                    if (sessionId === loadSessionId) showNativeBar();
+                    if (sessionId === loadSessionId) showShakaUiBar();
                 };
                 html5El.onwaiting = () => {
                     if (sessionId === loadSessionId) {
-                        showNativeBar();
+                        showShakaUiBar();
                         statusEl.textContent = "Buffering...";
                     }
                 };
                 html5El.onplaying = () => {
                     if (sessionId === loadSessionId) {
-                        showNativeBar();
+                        showShakaUiBar();
                         markStreamStarted();
                         statusEl.textContent = "Playing";
                         if (hasUserInteracted) {
@@ -1891,7 +1909,7 @@
                     }
                 };
                 html5El.onerror = () => {
-                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                    if (sessionId === loadSessionId) {
                         markStreamOffline();
                     }
                 };
@@ -1902,12 +1920,13 @@
                     sessionId,
                     () => {
                         if (sessionId === loadSessionId) {
-                            triggerInstantPlay(html5El, true);
+                            showShakaUiBar();
+                            triggerInstantPlay(html5El);
                         }
                     },
                     () => {
                         if (sessionId === loadSessionId) {
-                            triggerInstantPlay(html5El, true);
+                            markStreamOffline();
                         }
                     }
                 );
@@ -1918,7 +1937,7 @@
                 setActivePlayerView('clappr');
 
                 loadTimeoutTimer = setTimeout(() => {
-                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                    if (sessionId === loadSessionId) {
                         triggerSingleClapprFallback();
                     }
                 }, HLS_TO_CLAPPR_MS);
@@ -1947,7 +1966,7 @@
                     }
                     if (Clappr.Events.PLAYER_ERROR) {
                         clapprInstance.on(Clappr.Events.PLAYER_ERROR, () => {
-                            if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                            if (sessionId === loadSessionId) {
                                 triggerSingleClapprFallback();
                             }
                         });
@@ -1965,7 +1984,7 @@
             const mobile = isMobileView();
 
             loadTimeoutTimer = setTimeout(() => {
-                if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                if (sessionId === loadSessionId) {
                     triggerSingleClapprFallback();
                 }
             }, HLS_TO_CLAPPR_MS);
@@ -1994,7 +2013,7 @@
                 hls.attachMedia(mainVideo);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     if (sessionId !== loadSessionId) return;
-                    triggerInstantPlay(mainVideo, false);
+                    triggerInstantPlay(mainVideo);
                 });
                 hls.on(Hls.Events.ERROR, (event, data) => {
                     if (sessionId !== loadSessionId) return;
@@ -2003,20 +2022,22 @@
                             try { hls.startLoad(); } catch (e) {}
                             if (fbState.hasStartedPlaying) {
                                 statusEl.textContent = "Buffering...";
+                            } else {
+                                triggerSingleClapprFallback();
                             }
                         } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
                             try { hls.recoverMediaError(); } catch (e) {}
                             if (fbState.hasStartedPlaying) {
                                 statusEl.textContent = "Buffering...";
                             }
-                        } else if (!fbState.hasStartedPlaying) {
+                        } else {
                             triggerSingleClapprFallback();
                         }
                     }
                 });
             } else if (mainVideo.canPlayType('application/vnd.apple.mpegurl')) {
                 mainVideo.src = finalUrl;
-                triggerInstantPlay(mainVideo, false);
+                triggerInstantPlay(mainVideo);
             } else {
                 triggerSingleClapprFallback();
             }
