@@ -872,6 +872,7 @@
 
             <div class="modes">
                 <button class="btn" onclick="switchMode('main')">Main</button>
+                <button class="btn" id="html5PipBtn" style="display: none;" onclick="toggleHtml5PipMode()">HTML5 PiP</button>
                 <button class="btn" style="display: none !important;" onclick="switchMode('html5')">HTML5</button>
             </div>
         </div>
@@ -1088,6 +1089,7 @@
 
         const clapprEl = document.getElementById('clappr-container');
         const html5El = document.getElementById('html5-video');
+        const html5PipBtn = document.getElementById('html5PipBtn');
         const offlineOverlayEl = document.getElementById('offlineOverlay');
         let clapprInstance;
         let hls;
@@ -1131,11 +1133,48 @@
             }
         } catch (e) {}
 
+        function updateHtml5PipButton() {
+            if (!html5PipBtn) return;
+            const pipSupported = Boolean(document.pictureInPictureEnabled && html5El && typeof html5El.requestPictureInPicture === "function");
+            const isHtml5Active = activeBackendView === 'html5';
+            html5PipBtn.style.display = (isHtml5Active && pipSupported) ? "inline-block" : "none";
+            if (isHtml5Active && pipSupported) {
+                const inPip = document.pictureInPictureElement === html5El;
+                html5PipBtn.textContent = inPip ? "Exit PiP" : "HTML5 PiP";
+            }
+        }
+
+        async function toggleHtml5PipMode() {
+            hasUserInteracted = true;
+            if (!html5El || !document.pictureInPictureEnabled || typeof html5El.requestPictureInPicture !== "function") {
+                return;
+            }
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                } else {
+                    if (html5El.paused && html5El.src) {
+                        await html5El.play().catch(() => {});
+                    }
+                    await html5El.requestPictureInPicture();
+                }
+            } catch (err) {
+                console.error("HTML5 PiP error:", err);
+            } finally {
+                updateHtml5PipButton();
+            }
+        }
+
+        document.addEventListener("enterpictureinpicture", updateHtml5PipButton);
+        document.addEventListener("leavepictureinpicture", updateHtml5PipButton);
+
         function syncHtml5Controls() {
             if (!html5El) return;
             if (activeBackendView === 'html5') {
                 html5El.controls = true;
                 html5El.setAttribute("controls", "");
+                html5El.disablePictureInPicture = false;
+                html5El.removeAttribute("disablepictureinpicture");
             } else {
                 html5El.controls = false;
                 html5El.removeAttribute("controls");
@@ -1145,6 +1184,7 @@
                 mainVideo.controls = false;
                 mainVideo.removeAttribute("controls");
             }
+            updateHtml5PipButton();
         }
 
         function getActiveMediaElement() {
@@ -1692,6 +1732,9 @@
                 const showNativeBar = () => {
                     html5El.controls = true;
                     html5El.setAttribute("controls", "");
+                    html5El.disablePictureInPicture = false;
+                    html5El.removeAttribute("disablepictureinpicture");
+                    updateHtml5PipButton();
                 };
                 showNativeBar();
                 html5El.src = finalUrl;
