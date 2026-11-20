@@ -1146,16 +1146,6 @@
             }
         } catch (e) {}
 
-        function setOfflineScreenVisible(isOffline) {
-            if (offlineOverlayEl) {
-                offlineOverlayEl.style.display = isOffline ? "block" : "none";
-            }
-            const statusEl = document.getElementById("status");
-            if (isOffline && statusEl) {
-                statusEl.textContent = "Offline";
-            }
-        }
-
         function cleanupHtml5Fetcher() {
             if (html5FetchController) {
                 try { html5FetchController.abort(); } catch (e) {}
@@ -1250,9 +1240,6 @@
                         if (done) {
                             streamDone = true;
                             flushQueue();
-                            if (!firstChunkNotified && sessionId === loadSessionId) {
-                                if (typeof onFail === "function") onFail(new Error("Empty stream"));
-                            }
                             break;
                         }
                         if (value && value.byteLength > 0) {
@@ -1283,9 +1270,6 @@
 
                 if (isHlsManifest) {
                     const manifestText = await res.text();
-                    if (!manifestText || !manifestText.includes("#EXT")) {
-                        throw new Error("Invalid playlist");
-                    }
                     const base = new URL(targetUrl);
                     const rewritten = manifestText
                         .split(/\r?\n/)
@@ -1305,9 +1289,6 @@
                     mediaObj.src = blobUrl;
                 } else {
                     const blob = await res.blob();
-                    if (!blob || blob.size === 0) {
-                        throw new Error("Empty blob");
-                    }
                     if (sessionId !== loadSessionId || controller.signal.aborted) return;
                     const blobUrl = URL.createObjectURL(blob);
                     html5BlobUrl = blobUrl;
@@ -1317,6 +1298,7 @@
                 if (typeof onFirstChunk === "function") onFirstChunk();
             } catch (fetchErr) {
                 if (sessionId !== loadSessionId || controller.signal.aborted) return;
+                mediaObj.src = targetUrl;
                 if (typeof onFail === "function") onFail(fetchErr);
             }
         }
@@ -1357,6 +1339,12 @@
                 return cVid || null;
             }
             return document.getElementById('video');
+        }
+
+        function setOfflineScreenVisible(isOffline) {
+            if (offlineOverlayEl) {
+                offlineOverlayEl.style.display = isOffline ? "block" : "none";
+            }
         }
 
         function setActivePlayerView(activeView) {
@@ -1619,7 +1607,7 @@
 
                 player.addEventListener("error", () => {
                     if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
-                    setOfflineScreenVisible(true);
+                    status.textContent = "Playback Error";
                 });
 
             } catch (error) {
@@ -1688,6 +1676,10 @@
                 loadTimeoutTimer = null;
             }
             setOfflineScreenVisible(true);
+            const statusEl = document.getElementById("status");
+            if (statusEl) {
+                statusEl.textContent = "Offline";
+            }
         }
 
         async function cleanupPreviousPlayers() {
@@ -1783,7 +1775,7 @@
 
             statusEl.textContent = "Loading...";
 
-            const triggerInstantPlay = (mediaObj) => {
+            const triggerInstantPlay = (mediaObj, enableControls = false) => {
                 if (!mediaObj) return;
                 mediaObj.controls = false;
                 mediaObj.removeAttribute("controls");
@@ -1816,16 +1808,21 @@
             };
 
             const markStreamOffline = () => {
-                if (sessionId !== loadSessionId) return;
+                if (sessionId !== loadSessionId || fbState.hasStartedPlaying) return;
                 if (loadTimeoutTimer) {
                     clearTimeout(loadTimeoutTimer);
                     loadTimeoutTimer = null;
                 }
                 setOfflineScreenVisible(true);
+                statusEl.textContent = "Offline";
             };
 
             const triggerSingleClapprFallback = () => {
                 if (sessionId !== loadSessionId || isMpd) return;
+                if (fbState.hasStartedPlaying) {
+                    statusEl.textContent = "Buffering...";
+                    return;
+                }
                 if (!fbState.movedToClapprOnce) {
                     fbState.movedToClapprOnce = true;
                     loadChannelUrl(rawUrl, 'clappr_once', false);
@@ -1855,7 +1852,7 @@
                         if (sessionId !== loadSessionId) return;
                         markStreamStarted();
                         statusEl.textContent = "Playing";
-                        triggerInstantPlay(mainVideo);
+                        triggerInstantPlay(mainVideo, false);
                     } catch (error) {
                         if (sessionId === loadSessionId) {
                             markStreamOffline();
@@ -1880,7 +1877,7 @@
                 showShakaUiBar();
 
                 loadTimeoutTimer = setTimeout(() => {
-                    if (sessionId === loadSessionId) {
+                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                         markStreamOffline();
                     }
                 }, HLS_TO_CLAPPR_MS);
@@ -1909,7 +1906,7 @@
                     }
                 };
                 html5El.onerror = () => {
-                    if (sessionId === loadSessionId) {
+                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                         markStreamOffline();
                     }
                 };
@@ -1921,12 +1918,13 @@
                     () => {
                         if (sessionId === loadSessionId) {
                             showShakaUiBar();
-                            triggerInstantPlay(html5El);
+                            triggerInstantPlay(html5El, false);
                         }
                     },
                     () => {
                         if (sessionId === loadSessionId) {
-                            markStreamOffline();
+                            showShakaUiBar();
+                            triggerInstantPlay(html5El, false);
                         }
                     }
                 );
@@ -1937,7 +1935,7 @@
                 setActivePlayerView('clappr');
 
                 loadTimeoutTimer = setTimeout(() => {
-                    if (sessionId === loadSessionId) {
+                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                         triggerSingleClapprFallback();
                     }
                 }, HLS_TO_CLAPPR_MS);
@@ -1966,7 +1964,7 @@
                     }
                     if (Clappr.Events.PLAYER_ERROR) {
                         clapprInstance.on(Clappr.Events.PLAYER_ERROR, () => {
-                            if (sessionId === loadSessionId) {
+                            if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                                 triggerSingleClapprFallback();
                             }
                         });
@@ -1984,7 +1982,7 @@
             const mobile = isMobileView();
 
             loadTimeoutTimer = setTimeout(() => {
-                if (sessionId === loadSessionId) {
+                if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                     triggerSingleClapprFallback();
                 }
             }, HLS_TO_CLAPPR_MS);
@@ -2013,7 +2011,7 @@
                 hls.attachMedia(mainVideo);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     if (sessionId !== loadSessionId) return;
-                    triggerInstantPlay(mainVideo);
+                    triggerInstantPlay(mainVideo, false);
                 });
                 hls.on(Hls.Events.ERROR, (event, data) => {
                     if (sessionId !== loadSessionId) return;
@@ -2022,22 +2020,20 @@
                             try { hls.startLoad(); } catch (e) {}
                             if (fbState.hasStartedPlaying) {
                                 statusEl.textContent = "Buffering...";
-                            } else {
-                                triggerSingleClapprFallback();
                             }
                         } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
                             try { hls.recoverMediaError(); } catch (e) {}
                             if (fbState.hasStartedPlaying) {
                                 statusEl.textContent = "Buffering...";
                             }
-                        } else {
+                        } else if (!fbState.hasStartedPlaying) {
                             triggerSingleClapprFallback();
                         }
                     }
                 });
             } else if (mainVideo.canPlayType('application/vnd.apple.mpegurl')) {
                 mainVideo.src = finalUrl;
-                triggerInstantPlay(mainVideo);
+                triggerInstantPlay(mainVideo, false);
             } else {
                 triggerSingleClapprFallback();
             }
