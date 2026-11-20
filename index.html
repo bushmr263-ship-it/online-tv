@@ -1104,9 +1104,6 @@
         let clapprInstance;
         let hls;
         let dashPlayer;
-        let html5FetchController = null;
-        let html5MediaSource = null;
-        let html5BlobUrl = null;
         let currentMode = 'main';
         let currentUrl = '';
         let allChannels = [];
@@ -1146,18 +1143,6 @@
             }
         } catch (e) {}
 
-        function cleanupHtml5Fetcher() {
-            if (html5FetchController) {
-                try { html5FetchController.abort(); } catch (e) {}
-                html5FetchController = null;
-            }
-            if (html5BlobUrl && html5BlobUrl.startsWith("blob:")) {
-                try { URL.revokeObjectURL(html5BlobUrl); } catch (e) {}
-                html5BlobUrl = null;
-            }
-            html5MediaSource = null;
-        }
-
         function forceMediaPlayNow(mediaObj) {
             if (!mediaObj) return;
             const tryPlay = () => {
@@ -1178,151 +1163,6 @@
             tryPlay();
             setTimeout(tryPlay, 150);
             setTimeout(tryPlay, 500);
-        }
-
-        async function fetchAndAttachHtml5LikeShaka(targetUrl, mediaObj, sessionId, onFirstChunk, onFail) {
-            cleanupHtml5Fetcher();
-            const controller = new AbortController();
-            html5FetchController = controller;
-
-            const isHlsManifest = /\.m3u8(\?|$)/i.test(targetUrl);
-            const canUseMse = typeof window.MediaSource !== "undefined" &&
-                (MediaSource.isTypeSupported('video/mp4; codecs="avc1.42E01E, mp4a.40.2"') ||
-                 MediaSource.isTypeSupported('video/mp2t; codecs="avc1.42E01E, mp4a.40.2"'));
-
-            if (!isHlsManifest && canUseMse) {
-                try {
-                    const mediaSource = new MediaSource();
-                    html5MediaSource = mediaSource;
-                    const objectUrl = URL.createObjectURL(mediaSource);
-                    html5BlobUrl = objectUrl;
-                    mediaObj.src = objectUrl;
-
-                    await new Promise((resolve, reject) => {
-                        const onOpen = () => {
-                            mediaSource.removeEventListener("sourceopen", onOpen);
-                            resolve();
-                        };
-                        mediaSource.addEventListener("sourceopen", onOpen);
-                        mediaSource.addEventListener("error", reject);
-                    });
-
-                    if (sessionId !== loadSessionId || controller.signal.aborted) return;
-
-                    const response = await fetch(targetUrl, {
-                        signal: controller.signal,
-                        referrerPolicy: "no-referrer"
-                    });
-                    if (!response.ok || !response.body) {
-                        throw new Error("HTTP " + response.status);
-                    }
-
-                    const contentType = (response.headers.get("content-type") || "").toLowerCase();
-                    let mimeCodec = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
-                    if (contentType.includes("mpegurl") || contentType.includes("mp2t") || /\.ts(\?|$)/i.test(targetUrl)) {
-                        if (MediaSource.isTypeSupported('video/mp2t; codecs="avc1.42E01E, mp4a.40.2"')) {
-                            mimeCodec = 'video/mp2t; codecs="avc1.42E01E, mp4a.40.2"';
-                        } else {
-                            throw new Error("TS MSE unsupported");
-                        }
-                    }
-
-                    if (!MediaSource.isTypeSupported(mimeCodec)) {
-                        throw new Error("Codec unsupported: " + mimeCodec);
-                    }
-
-                    const sourceBuffer = mediaSource.addSourceBuffer(mimeCodec);
-                    sourceBuffer.mode = "sequence";
-                    const queue = [];
-                    let streamDone = false;
-                    let firstChunkNotified = false;
-
-                    const flushQueue = () => {
-                        if (sessionId !== loadSessionId || controller.signal.aborted) return;
-                        if (!sourceBuffer.updating && queue.length > 0 && mediaSource.readyState === "open") {
-                            const chunk = queue.shift();
-                            try {
-                                sourceBuffer.appendBuffer(chunk);
-                            } catch (e) {}
-                        }
-                        if (streamDone && queue.length === 0 && !sourceBuffer.updating && mediaSource.readyState === "open") {
-                            try { mediaSource.endOfStream(); } catch (e) {}
-                        }
-                    };
-
-                    sourceBuffer.addEventListener("updateend", flushQueue);
-
-                    const reader = response.body.getReader();
-                    while (true) {
-                        if (sessionId !== loadSessionId || controller.signal.aborted) {
-                            try { reader.cancel(); } catch (e) {}
-                            return;
-                        }
-                        const { done, value } = await reader.read();
-                        if (done) {
-                            streamDone = true;
-                            flushQueue();
-                            break;
-                        }
-                        if (value && value.byteLength > 0) {
-                            queue.push(value);
-                            flushQueue();
-                            if (!firstChunkNotified) {
-                                firstChunkNotified = true;
-                                if (typeof onFirstChunk === "function") onFirstChunk();
-                            }
-                        }
-                    }
-                    return;
-                } catch (mseErr) {
-                    if (sessionId !== loadSessionId || controller.signal.aborted) return;
-                    cleanupHtml5Fetcher();
-                }
-            }
-
-            try {
-                const res = await fetch(targetUrl, {
-                    signal: controller.signal,
-                    referrerPolicy: "no-referrer"
-                });
-                if (!res.ok) {
-                    throw new Error("Fetch failed: " + res.status);
-                }
-                if (sessionId !== loadSessionId || controller.signal.aborted) return;
-
-                if (isHlsManifest) {
-                    const manifestText = await res.text();
-                    const base = new URL(targetUrl);
-                    const rewritten = manifestText
-                        .split(/\r?\n/)
-                        .map(line => {
-                            const trimmed = line.trim();
-                            if (!trimmed || trimmed.startsWith("#")) return line;
-                            try {
-                                return new URL(trimmed, base).href;
-                            } catch (e) {
-                                return line;
-                            }
-                        })
-                        .join("\n");
-                    const blob = new Blob([rewritten], { type: "application/vnd.apple.mpegurl" });
-                    const blobUrl = URL.createObjectURL(blob);
-                    html5BlobUrl = blobUrl;
-                    mediaObj.src = blobUrl;
-                } else {
-                    const blob = await res.blob();
-                    if (sessionId !== loadSessionId || controller.signal.aborted) return;
-                    const blobUrl = URL.createObjectURL(blob);
-                    html5BlobUrl = blobUrl;
-                    mediaObj.src = blobUrl;
-                }
-
-                if (typeof onFirstChunk === "function") onFirstChunk();
-            } catch (fetchErr) {
-                if (sessionId !== loadSessionId || controller.signal.aborted) return;
-                mediaObj.src = targetUrl;
-                if (typeof onFail === "function") onFail(fetchErr);
-            }
         }
 
         function syncShakaUiToHtml5(mediaObj) {
@@ -1712,7 +1552,6 @@
         }
 
         async function cleanupPreviousPlayers() {
-            cleanupHtml5Fetcher();
             if (stallCheckInterval) {
                 clearInterval(stallCheckInterval);
                 stallCheckInterval = null;
@@ -1961,25 +1800,9 @@
                     }
                 };
 
-                await fetchAndAttachHtml5LikeShaka(
-                    finalUrl,
-                    html5El,
-                    sessionId,
-                    () => {
-                        if (sessionId === loadSessionId) {
-                            showShakaUiBar();
-                            triggerInstantPlay(html5El, false);
-                            forceMediaPlayNow(html5El);
-                        }
-                    },
-                    () => {
-                        if (sessionId === loadSessionId) {
-                            showShakaUiBar();
-                            triggerInstantPlay(html5El, false);
-                            forceMediaPlayNow(html5El);
-                        }
-                    }
-                );
+                html5El.src = finalUrl;
+                triggerInstantPlay(html5El, false);
+                forceMediaPlayNow(html5El);
                 return;
             }
 
