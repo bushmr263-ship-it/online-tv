@@ -384,8 +384,8 @@
         }
 
         #html5-video:not(.player-hidden) {
-            z-index: 15;
-            pointer-events: none;
+            z-index: 18;
+            pointer-events: auto;
         }
 
         #clappr-container video {
@@ -417,25 +417,29 @@
             pointer-events: auto;
         }
 
-        #player-container.html5-shaka-ui {
+        #player-container.html5-mode {
             background: transparent;
-            z-index: 18;
-            pointer-events: auto;
+            z-index: 5;
+            pointer-events: none;
         }
 
-        #player-container.html5-shaka-ui > video {
+        #player-container.html5-mode > video,
+        #player-container.html5-mode .shaka-controls-button-panel,
+        #player-container.html5-mode .shaka-scrim-container,
+        #player-container.html5-mode .shaka-bottom-controls {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        #player-container:not(.shaka-active):not(.html5-mode) > video {
             opacity: 0;
             pointer-events: none;
         }
 
-        #player-container:not(.shaka-active):not(.html5-shaka-ui) > video {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        #player-container:not(.shaka-active):not(.html5-shaka-ui) .shaka-controls-button-panel,
-        #player-container:not(.shaka-active):not(.html5-shaka-ui) .shaka-scrim-container,
-        #player-container:not(.shaka-active):not(.html5-shaka-ui) .shaka-bottom-controls {
+        #player-container:not(.shaka-active):not(.html5-mode) .shaka-controls-button-panel,
+        #player-container:not(.shaka-active):not(.html5-mode) .shaka-scrim-container,
+        #player-container:not(.shaka-active):not(.html5-mode) .shaka-bottom-controls {
             display: none !important;
         }
 
@@ -867,7 +871,6 @@
             <div class="video-box" id="videoBox">
                 <div id="offlineOverlay">Offline</div>
 
-                <!-- Always-visible Shaka UI Overlay -->
                 <div id="player-container" class="shaka-active">
                   <video id="video"
                     autoplay
@@ -879,7 +882,7 @@
                 <div id="status">Player Ready</div>
 
                 <div id="clappr-container" class="player-hidden"></div>
-                <video id="html5-video" class="player-hidden" autoplay playsinline preload="auto"></video>
+                <video id="html5-video" class="player-hidden" controls autoplay playsinline preload="auto"></video>
             </div>
 
             <div class="modes">
@@ -1165,44 +1168,6 @@
             setTimeout(tryPlay, 500);
         }
 
-        function syncShakaUiToHtml5(mediaObj) {
-            if (!shakaUiRef || !mediaObj) return;
-            try {
-                const controls = shakaUiRef.getControls();
-                if (controls) {
-                    const activeMedia = (activeBackendView === "html5")
-                        ? mediaObj
-                        : document.getElementById("video");
-                    if (activeMedia) {
-                        controls.setMediaElement(activeMedia);
-                    }
-                }
-            } catch (e) {}
-        }
-
-        function syncHtml5Controls() {
-            if (!html5El) return;
-            html5El.controls = false;
-            html5El.removeAttribute("controls");
-            html5El.disablePictureInPicture = false;
-            html5El.removeAttribute("disablepictureinpicture");
-
-            const mainVideo = document.getElementById('video');
-            if (mainVideo) {
-                mainVideo.controls = false;
-                mainVideo.removeAttribute("controls");
-            }
-        }
-
-        function getActiveMediaElement() {
-            if (activeBackendView === 'html5') return html5El;
-            if (activeBackendView === 'clappr') {
-                const cVid = clapprEl ? clapprEl.querySelector('video') : null;
-                return cVid || null;
-            }
-            return document.getElementById('video');
-        }
-
         function setOfflineScreenVisible(isOffline) {
             if (offlineOverlayEl) {
                 offlineOverlayEl.style.display = isOffline ? "block" : "none";
@@ -1215,78 +1180,15 @@
             if (mainContainer) {
                 mainContainer.classList.remove("player-hidden");
                 mainContainer.classList.toggle("shaka-active", activeBackendView === "shaka");
-                mainContainer.classList.toggle("html5-shaka-ui", activeBackendView === "html5");
+                mainContainer.classList.toggle("html5-mode", activeBackendView === "html5");
             }
             if (clapprEl) {
                 clapprEl.classList.toggle("player-hidden", activeBackendView !== "clappr");
             }
             if (html5El) {
                 html5El.classList.toggle("player-hidden", activeBackendView !== "html5");
+                html5El.controls = (activeBackendView === "html5");
             }
-            syncHtml5Controls();
-            syncShakaUiToHtml5(html5El);
-        }
-
-        function hookShakaControlsToActiveBackend() {
-            const mainContainer = document.getElementById("player-container");
-            if (!mainContainer || mainContainer.dataset.hooked === "1") return;
-            mainContainer.dataset.hooked = "1";
-
-            mainContainer.addEventListener("click", (e) => {
-                if (activeBackendView === "shaka") return;
-                const mediaEl = getActiveMediaElement();
-                const btn = e.target.closest("button");
-                if (!btn) return;
-
-                if (btn.classList.contains("shaka-small-play-button")) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    hasUserInteracted = true;
-                    if (mediaEl) {
-                        if (mediaEl.paused) {
-                            mediaEl.muted = false;
-                            mediaEl.play().catch(() => {
-                                mediaEl.muted = true;
-                                mediaEl.play().catch(() => {});
-                            });
-                        } else {
-                            mediaEl.pause();
-                        }
-                    } else if (clapprInstance) {
-                        try {
-                            if (clapprInstance.isPlaying()) clapprInstance.pause();
-                            else clapprInstance.play();
-                        } catch (err) {}
-                    }
-                } else if (btn.classList.contains("shaka-mute-button")) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    hasUserInteracted = true;
-                    if (mediaEl) {
-                        mediaEl.muted = !mediaEl.muted;
-                    } else if (clapprInstance) {
-                        try {
-                            const vol = clapprInstance.getVolume ? clapprInstance.getVolume() : 100;
-                            clapprInstance.setVolume(vol > 0 ? 0 : 100);
-                        } catch (err) {}
-                    }
-                } else if (btn.classList.contains("shaka-fullscreen-button")) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const box = document.getElementById("videoBox");
-                    if (box) {
-                        if (!document.fullscreenElement) box.requestFullscreen().catch(() => {});
-                        else document.exitFullscreen().catch(() => {});
-                    }
-                } else if (btn.classList.contains("shaka-pip-button")) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (mediaEl && typeof mediaEl.requestPictureInPicture === "function") {
-                        if (document.pictureInPictureElement) document.exitPictureInPicture().catch(() => {});
-                        else mediaEl.requestPictureInPicture().catch(() => {});
-                    }
-                }
-            }, true);
         }
 
         function getUrlHostLower(rawUrl) {
@@ -1457,9 +1359,6 @@
                     ]
                 });
 
-                hookShakaControlsToActiveBackend();
-                syncHtml5Controls();
-
                 video.addEventListener("waiting", () => {
                     status.textContent = "Buffering...";
                 });
@@ -1597,8 +1496,6 @@
                 mainVideo.load();
             }
 
-            html5El.controls = false;
-            html5El.removeAttribute("controls");
             html5El.onwaiting = null;
             html5El.onplaying = null;
             html5El.onplay = null;
@@ -1645,10 +1542,8 @@
 
             statusEl.textContent = "Loading...";
 
-            const triggerInstantPlay = (mediaObj, enableControls = false) => {
+            const triggerInstantPlay = (mediaObj) => {
                 if (!mediaObj) return;
-                mediaObj.controls = false;
-                mediaObj.removeAttribute("controls");
                 mediaObj.muted = false;
                 mediaObj.volume = 1.0;
                 let playPromise = mediaObj.play();
@@ -1722,7 +1617,7 @@
                         if (sessionId !== loadSessionId) return;
                         markStreamStarted();
                         statusEl.textContent = "Playing";
-                        triggerInstantPlay(mainVideo, false);
+                        triggerInstantPlay(mainVideo);
                     } catch (error) {
                         if (sessionId === loadSessionId) {
                             markStreamOffline();
@@ -1733,18 +1628,7 @@
             }
 
             if (effectiveMode === 'html5') {
-                if (!shakaPlayerRef) {
-                    await initPlayer();
-                }
                 setActivePlayerView('html5');
-                const showShakaUiBar = () => {
-                    html5El.controls = false;
-                    html5El.removeAttribute("controls");
-                    html5El.disablePictureInPicture = false;
-                    html5El.removeAttribute("disablepictureinpicture");
-                    syncShakaUiToHtml5(html5El);
-                };
-                showShakaUiBar();
 
                 loadTimeoutTimer = setTimeout(() => {
                     if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
@@ -1754,38 +1638,32 @@
 
                 html5El.onloadedmetadata = () => {
                     if (sessionId === loadSessionId) {
-                        showShakaUiBar();
                         forceMediaPlayNow(html5El);
                     }
                 };
                 html5El.onloadeddata = () => {
                     if (sessionId === loadSessionId) {
-                        showShakaUiBar();
                         forceMediaPlayNow(html5El);
                     }
                 };
                 html5El.oncanplay = () => {
                     if (sessionId === loadSessionId) {
-                        showShakaUiBar();
                         forceMediaPlayNow(html5El);
                     }
                 };
                 html5El.onplay = () => {
                     if (sessionId === loadSessionId) {
-                        showShakaUiBar();
                         markStreamStarted();
                         statusEl.textContent = "Playing";
                     }
                 };
                 html5El.onwaiting = () => {
                     if (sessionId === loadSessionId) {
-                        showShakaUiBar();
                         statusEl.textContent = "Buffering...";
                     }
                 };
                 html5El.onplaying = () => {
                     if (sessionId === loadSessionId) {
-                        showShakaUiBar();
                         markStreamStarted();
                         statusEl.textContent = "Playing";
                         if (hasUserInteracted) {
@@ -1801,7 +1679,7 @@
                 };
 
                 html5El.src = finalUrl;
-                triggerInstantPlay(html5El, false);
+                triggerInstantPlay(html5El);
                 forceMediaPlayNow(html5El);
                 return;
             }
@@ -1886,7 +1764,7 @@
                 hls.attachMedia(mainVideo);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     if (sessionId !== loadSessionId) return;
-                    triggerInstantPlay(mainVideo, false);
+                    triggerInstantPlay(mainVideo);
                 });
                 hls.on(Hls.Events.ERROR, (event, data) => {
                     if (sessionId !== loadSessionId) return;
@@ -1908,7 +1786,7 @@
                 });
             } else if (mainVideo.canPlayType('application/vnd.apple.mpegurl')) {
                 mainVideo.src = finalUrl;
-                triggerInstantPlay(mainVideo, false);
+                triggerInstantPlay(mainVideo);
             } else {
                 triggerSingleClapprFallback();
             }
