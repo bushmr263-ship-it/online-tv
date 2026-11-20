@@ -393,10 +393,14 @@
         #html5-video::-webkit-media-controls-time-remaining-display,
         #html5-video::-webkit-media-controls-mute-button,
         #html5-video::-webkit-media-controls-volume-slider,
-        #html5-video::-webkit-media-controls-fullscreen-button {
+        #html5-video::-webkit-media-controls-fullscreen-button,
+        #html5-video::-moz-media-controls,
+        #html5-video::-ms-media-controls {
             display: none !important;
             -webkit-appearance: none !important;
+            appearance: none !important;
             opacity: 0 !important;
+            visibility: hidden !important;
             pointer-events: none !important;
         }
 
@@ -1143,6 +1147,7 @@
                 if (el) {
                     el.controls = false;
                     el.removeAttribute("controls");
+                    el.setAttribute("disablepictureinpicture", "");
                 }
             });
         }
@@ -1676,8 +1681,12 @@
 
             if (effectiveMode === 'html5') {
                 setActivePlayerView('html5');
-                html5El.controls = false;
-                html5El.removeAttribute("controls");
+                const forceHideNativeBar = () => {
+                    html5El.controls = false;
+                    html5El.removeAttribute("controls");
+                    html5El.setAttribute("disablepictureinpicture", "");
+                };
+                forceHideNativeBar();
                 html5El.src = finalUrl;
                 triggerInstantPlay(html5El);
 
@@ -1687,6 +1696,8 @@
                     }
                 }, HLS_TO_CLAPPR_MS);
 
+                html5El.addEventListener("loadedmetadata", forceHideNativeBar);
+                html5El.addEventListener("play", forceHideNativeBar);
                 html5El.onwaiting = () => {
                     if (sessionId === loadSessionId) {
                         statusEl.textContent = "Buffering...";
@@ -1694,8 +1705,7 @@
                 };
                 html5El.onplaying = () => {
                     if (sessionId === loadSessionId) {
-                        html5El.controls = false;
-                        html5El.removeAttribute("controls");
+                        forceHideNativeBar();
                         markStreamStarted();
                         statusEl.textContent = "Playing";
                         if (hasUserInteracted) {
