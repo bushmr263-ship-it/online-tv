@@ -386,6 +386,120 @@ https://livetv.shamon-cable.net/proxy/proxy.php?id=e71046eec45f34656698d0a6f590b
 
 
 #------------------------------------------------------------------------------
+# CATEGORY: CARTOON
+#------------------------------------------------------------------------------
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/wTvMLMp2/20240823_021706.png" group-title="Cartoon",Kids cartoon
+https://stream.ottplus.live/live/discovery_kids_abr/index.m3u8
+
+#EXTINF:-1 tvg-logo="https://imglink.cc/cdn/TxPUulKGQh.jpg" group-title="Cartoon",Berbe friends
+https://d1xqdnwy1bo05f.cloudfront.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-jh1ol665g3amg/b92b0971-d6ef-4bd2-b72c-e286339cb91b/0.m3u8
+
+#EXTINF:-1 tvg-logo="https://imglink.cc/cdn/YkXRQgC4-_.jpg" group-title="Cartoon",Tom & Jerry TV
+https://live20.bozztv.com/giatvplayout7/giatv-208314/tracks-v1a1/mono.ts.m3u8
+
+#EXTINF:-1 group-title="Cartoon",Jungle Book
+https://cc-4bhi5osabejc9.akamaized.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-4bhi5osabejc9/c437e5d9-4027-4850-9d79-17b235719743/0.m3u8
+
+#EXTINF:-1 group-title="Cartoon",Tiny Pop Cartoon
+https://amg01753-narrativeuk-amg01753c1-rakuten-uk-2339.playouts.now.amagi.tv/480p/index.m3u8
+
+#EXTINF:-1 tvg-logo="https://imglink.cc/cdn/rmNeL8f6NR.png" group-title="Cartoon",Doraemon TV
+https://live20.bozztv.com/giatvplayout7/giatv-209902/tracks-v1a1/mono.ts.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.ibb.co.com/XfqV4B56/png-transparent-mr-bean-illustration-youtube-coloring-book-character-cartoon-mr-bean-television-chil.png" group-title="Cartoon",Mr Bean
+https://amg00627-amg00627c29-rakuten-it-3989.playouts.now.amagi.tv/playlist/amg00627-banijayfast-mrbeanitcc-rakutenit/playlist.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/jSBDsbBX/20240823_021324.png" group-title="Cartoon",Sony YaY
+https://r2.amml.in/sony-yay/live.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/k4mDbyJR/20240823_021424.png" group-title="Cartoon",Cartoon Network HD
+https://cdn4.skygo.mn/live/disk1/Cartoon_Network/HLSv3-FTA/Cartoon_Network-avc1_3000000=12-mp4a_256000_eng=6.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/C1s5Hf5P/20240823_021444.png" group-title="Cartoon",Pogo
+https://stream.ottplus.live/live/pogo_sd_abr/index.m3u8
+
+#EXTINF:-1 group-title="Cartoon",Miniamx
+https://vodzong.mjunoon.tv:8087/streamtest/disckids-157-1/live/157-1L/chunks.m3u8?nimblesessionid=743437668
+
+#EXTINF:-1 tvg-id="019de785-3a1e-7c94-91e5-6b6755d5ab6b" tvg-name="Disney Channel" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-16/images_92666995d4995d2bb46b92598d2b3e48_playmist_disney_channel_400x400.jpg" group-title="Cartoon",Disney Channel
+https://tvsen7.aynaott.com/disney/index.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/G2F8757j/20240823_021053.png" group-title="Cartoon",Rongeen
+https://server.thelegitpro.in/rongeentv/rongeentv/tracks-v1a1/mono.m3u8
+
+#EXTINF:-1 group-title="Cartoon",sonic hd
+https://live.devm3u.top/sonic/c29uaWMtanNvbi1zb25pY3w0OTg0NzM.fa08fef3b2983673766c9b1e4ebc94865118b4aec62831e963d766764eb262f1/playlist.m3u8
+
+#EXTINF:-1 tvg-id="ch_190" tvg-name="Teen Nick" tvg-logo="https://pub-dbd59bcc344f405ab5a1f9697b81831f.r2.dev/teen-nick.webp" group-title="Cartoon",Teen Nick
+https://tvsen7.aynaott.com/teennick/index.m3u8
+
+#EXTINF:-1 group-title="AS | IN | Cartoon" tvg-logo="https://go4.pw/India/SONY_yay.png" group-title="Cartoon", SONY YAY
+https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_yay.m3u8
+
+#EXTINF:-1 group-title="Cartoon",Epic kids
+https://cc-t8lqe1o99pszu.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-t8lqe1o99pszu/playlist.m3u8
+
+
+#------------------------------------------------------------------------------
+# CATEGORY: MUSIC
+#------------------------------------------------------------------------------
+
+#EXTINF:-1 group-title="Music" tvg-logo="https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/PS6F-JQBv9knK3AHqjVz/posters/0f83ee72-be0f-4861-94df-30b158d3df8d.webp",B4U Music
+https://amg00877-b4unew-amg00877c3-xiaomi-in-5474.playouts.now.amagi.tv/1080p/index.m3u8
+
+#EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/IYDn_LwwiV.png",9X Tashan
+https://wiselp.wiseplayout.com/9X_Tashan/master.m3u8
+
+#EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/IYDn_LwwiV.png",9X Jalwa
+https://wiselp.wiseplayout.com/9X_Jalwa/master.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/SRKS6TwR/20240823_022008.png" group-title="Music",9XM
+https://wiselp.wiseplayout.com/9XM/master.m3u8
+
+#EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/LmVOSdl3ku.png",Sangeet Bangla
+https://mumt05.tangotv.in/87NeALx2SANGEETBANGLA/index.m3u8
+
+#EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/IYDn_LwwiV.png",Rana Cable Music
+https://ranacable.duckdns.org/RanaCableMusic/tracks-v1a1/mono.m3u8
+
+#EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/IYDn_LwwiV.png",hit music
+https://d2lk5u59tns74c.cloudfront.net/out/v1/f913cf893c594f73b114216e74a2efbc/index.m3u8
+
+#EXTINF:-1 tvg-id="ch_160" tvg-name="Only Music" tvg-logo="https://pub-dbd59bcc344f405ab5a1f9697b81831f.r2.dev/only-music.webp" group-title="Music",Only Music
+https://mumbai-edge.smartplaytv.in/OnlyMusic/index.m3u8
+
+#------------------------------------------------------------------------------
+# CATEGORY: DOCUMENTARY
+#------------------------------------------------------------------------------
+
+#EXTINF:-1 tvg-id="019de785-3bf4-757f-8e66-683777e40ff6" tvg-name="CGTN Documentary" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_99873e9c7dfcfc8c5f5e7ee1874b7f91_playmist_cgtn_documentary_400x400.jpg" group-title="Documentary",CGTN Documentary
+https://english-livebkali.cgtn.com/live/doccgtn_1.m3u8
+
+#EXTINF:-1 tvg-id="019de785-3c02-77aa-aa8c-5457eec46ac3" tvg-name="Discover Pikstan" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_efeb6a966b36ef807b0aa9bfd5229360_playmist_discover_pikstan.jpg" group-title="Documentary",Discover Pikstan
+https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/discoverpakistan.stream/playlist.m3u8
+
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/43NXkFx5/20240823_023458.png" group-title="Documentary",Animal Planet
+https://drk6xq0vhn.gpcdn.net/live/animal_planet_hd_abr/live/animal_planet_hd/chunks.m3u8
+
+#EXTINF:-1 tvg-logo="https://imglink.cc/cdn/mv5xd7yy0d.png" group-title="Documentary",Discovery
+https://drk6xq0vhn.gpcdn.net/live/discovery_hd_abr/index.m3u8
+
+#EXTINF:-1 tvg-id="019de785-3bb3-70ca-b613-205c5c22da6b" tvg-name="Discovery Science" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_b4a182b0d66620e67de189fa25763c3e_playmist_discovery_science400x400.jpg" group-title="Documentary",Discovery Science
+https://drk6xq0vhn.gpcdn.net/live/discovery_science_abr/index.m3u8
+
+#EXTINF:-1 tvg-id="019de785-3bac-72a7-b7ff-9d20d69bb27d" tvg-name="Nat Geo TV" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_25b786047244481532eb505dfba85580_playmist_nat_geo_tv_400x400.jpg" group-title="Documentary",Nat Geo TV
+https://tvsen3.aynaott.com/7mm4pwCy/index.m3u8
+
+#EXTINF:-1 tvg-id="019de785-3c27-75af-aecc-b972908c76b3" tvg-name="Adventure Earth" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-14/images_535399f1d6f11a7f9e501b4db33e2d0c_playmist_adventure_earth.jpg" group-title="Documentary",Adventure Earth
+https://autentic-adventure-earth-1-eu.rakuten.wurl.tv/playlist.m3u8
+
+#EXTINF:-1 tvg-logo="https://imglink.cc/cdn/mv5xd7yy0d.png" group-title="Documentary",Discovery
+https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/ghwcl6hv68/out/v1/83536910d8034e9b9895a20fbe1c1687/cenc.mpd|drmScheme=clearkey&drmLicense=335dad778109954503dcbb21dc92015f:24bfd75d436cbf73168a2a2dccd40281
+
+
+
+#------------------------------------------------------------------------------
 # CATEGORY: SPORTS
 #------------------------------------------------------------------------------
 
@@ -575,125 +689,6 @@ https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/tdijwiga2k/out/v1
 
 #EXTINF:-1 tvg-id="019efa45-d8f0-7732-8263-6030073a34fe" tvg-name="FIFA+" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-06-24/bcc9699c8a3c8faf509c92e9280e576f.jpg" group-title="Sports",FIFA+
 https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1_FJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8
-
-
-
-#------------------------------------------------------------------------------
-# CATEGORY: CARTOON
-#------------------------------------------------------------------------------
-
-#EXTINF:-1 tvg-logo="https://i.postimg.cc/wTvMLMp2/20240823_021706.png" group-title="Cartoon",Kids cartoon
-https://stream.ottplus.live/live/discovery_kids_abr/index.m3u8
-
-#EXTINF:-1 tvg-logo="https://imglink.cc/cdn/TxPUulKGQh.jpg" group-title="Cartoon",Berbe friends
-https://d1xqdnwy1bo05f.cloudfront.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-jh1ol665g3amg/b92b0971-d6ef-4bd2-b72c-e286339cb91b/0.m3u8
-
-#EXTINF:-1 tvg-logo="https://imglink.cc/cdn/YkXRQgC4-_.jpg" group-title="Cartoon",Tom & Jerry TV
-https://live20.bozztv.com/giatvplayout7/giatv-208314/tracks-v1a1/mono.ts.m3u8
-
-#EXTINF:-1 group-title="Cartoon",Jungle Book
-https://cc-4bhi5osabejc9.akamaized.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-4bhi5osabejc9/c437e5d9-4027-4850-9d79-17b235719743/0.m3u8
-
-#EXTINF:-1 group-title="Cartoon",Tiny Pop Cartoon
-https://amg01753-narrativeuk-amg01753c1-rakuten-uk-2339.playouts.now.amagi.tv/480p/index.m3u8
-
-#EXTINF:-1 tvg-logo="https://imglink.cc/cdn/rmNeL8f6NR.png" group-title="Cartoon",Doraemon TV
-https://live20.bozztv.com/giatvplayout7/giatv-209902/tracks-v1a1/mono.ts.m3u8
-
-#EXTINF:-1 tvg-logo="https://i.ibb.co.com/XfqV4B56/png-transparent-mr-bean-illustration-youtube-coloring-book-character-cartoon-mr-bean-television-chil.png" group-title="Cartoon",Mr Bean
-https://amg00627-amg00627c29-rakuten-it-3989.playouts.now.amagi.tv/playlist/amg00627-banijayfast-mrbeanitcc-rakutenit/playlist.m3u8
-
-#EXTINF:-1 tvg-logo="https://i.postimg.cc/jSBDsbBX/20240823_021324.png" group-title="Cartoon",Sony YaY
-https://r2.amml.in/sony-yay/live.m3u8
-
-#EXTINF:-1 tvg-logo="https://i.postimg.cc/k4mDbyJR/20240823_021424.png" group-title="Cartoon",Cartoon Network HD
-https://cdn4.skygo.mn/live/disk1/Cartoon_Network/HLSv3-FTA/Cartoon_Network-avc1_3000000=12-mp4a_256000_eng=6.m3u8
-
-#EXTINF:-1 tvg-logo="https://i.postimg.cc/C1s5Hf5P/20240823_021444.png" group-title="Cartoon",Pogo
-https://stream.ottplus.live/live/pogo_sd_abr/index.m3u8
-
-#EXTINF:-1 group-title="Cartoon",Miniamx
-https://vodzong.mjunoon.tv:8087/streamtest/disckids-157-1/live/157-1L/chunks.m3u8?nimblesessionid=743437668
-
-#EXTINF:-1 tvg-id="019de785-3a1e-7c94-91e5-6b6755d5ab6b" tvg-name="Disney Channel" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-16/images_92666995d4995d2bb46b92598d2b3e48_playmist_disney_channel_400x400.jpg" group-title="Cartoon",Disney Channel
-https://tvsen7.aynaott.com/disney/index.m3u8
-
-#EXTINF:-1 tvg-logo="https://i.postimg.cc/G2F8757j/20240823_021053.png" group-title="Cartoon",Rongeen
-https://server.thelegitpro.in/rongeentv/rongeentv/tracks-v1a1/mono.m3u8
-
-#EXTINF:-1 group-title="Cartoon",sonic hd
-https://live.devm3u.top/sonic/c29uaWMtanNvbi1zb25pY3w0OTg0NzM.fa08fef3b2983673766c9b1e4ebc94865118b4aec62831e963d766764eb262f1/playlist.m3u8
-
-#EXTINF:-1 tvg-id="ch_190" tvg-name="Teen Nick" tvg-logo="https://pub-dbd59bcc344f405ab5a1f9697b81831f.r2.dev/teen-nick.webp" group-title="Cartoon",Teen Nick
-https://tvsen7.aynaott.com/teennick/index.m3u8
-
-#EXTINF:-1 group-title="AS | IN | Cartoon" tvg-logo="https://go4.pw/India/SONY_yay.png" group-title="Cartoon", SONY YAY
-https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_yay.m3u8
-
-#EXTINF:-1 group-title="Cartoon",Epic kids
-https://cc-t8lqe1o99pszu.akamaized.net/v1/master/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-t8lqe1o99pszu/playlist.m3u8
-
-
-#------------------------------------------------------------------------------
-# CATEGORY: MUSIC
-#------------------------------------------------------------------------------
-
-#EXTINF:-1 group-title="Music" tvg-logo="https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/PS6F-JQBv9knK3AHqjVz/posters/0f83ee72-be0f-4861-94df-30b158d3df8d.webp",B4U Music
-https://amg00877-b4unew-amg00877c3-xiaomi-in-5474.playouts.now.amagi.tv/1080p/index.m3u8
-
-#EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/IYDn_LwwiV.png",9X Tashan
-https://wiselp.wiseplayout.com/9X_Tashan/master.m3u8
-
-#EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/IYDn_LwwiV.png",9X Jalwa
-https://wiselp.wiseplayout.com/9X_Jalwa/master.m3u8
-
-#EXTINF:-1 tvg-logo="https://i.postimg.cc/SRKS6TwR/20240823_022008.png" group-title="Music",9XM
-https://wiselp.wiseplayout.com/9XM/master.m3u8
-
-#EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/LmVOSdl3ku.png",Sangeet Bangla
-https://mumt05.tangotv.in/87NeALx2SANGEETBANGLA/index.m3u8
-
-#EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/IYDn_LwwiV.png",Rana Cable Music
-https://ranacable.duckdns.org/RanaCableMusic/tracks-v1a1/mono.m3u8
-
-#EXTINF:-1 group-title="Music" tvg-logo="https://imglink.cc/cdn/IYDn_LwwiV.png",hit music
-https://d2lk5u59tns74c.cloudfront.net/out/v1/f913cf893c594f73b114216e74a2efbc/index.m3u8
-
-#EXTINF:-1 tvg-id="ch_160" tvg-name="Only Music" tvg-logo="https://pub-dbd59bcc344f405ab5a1f9697b81831f.r2.dev/only-music.webp" group-title="Music",Only Music
-https://mumbai-edge.smartplaytv.in/OnlyMusic/index.m3u8
-
-#------------------------------------------------------------------------------
-# CATEGORY: DOCUMENTARY
-#------------------------------------------------------------------------------
-
-#EXTINF:-1 tvg-id="019de785-3bf4-757f-8e66-683777e40ff6" tvg-name="CGTN Documentary" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_99873e9c7dfcfc8c5f5e7ee1874b7f91_playmist_cgtn_documentary_400x400.jpg" group-title="Documentary",CGTN Documentary
-https://english-livebkali.cgtn.com/live/doccgtn_1.m3u8
-
-#EXTINF:-1 tvg-id="019de785-3c02-77aa-aa8c-5457eec46ac3" tvg-name="Discover Pikstan" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_efeb6a966b36ef807b0aa9bfd5229360_playmist_discover_pikstan.jpg" group-title="Documentary",Discover Pikstan
-https://app.ncare.live/c3VydmVyX8RpbEU9Mi8xNy8yMDE0GIDU6RgzQ6NTAgdEoaeFzbF92YWxIZTO0U0ezN1IzMyfvcGVMZEJCTEFWeVN3PTOmdFsaWRtaW51aiPhnPTI2/discoverpakistan.stream/playlist.m3u8
-
-#EXTINF:-1 tvg-logo="https://i.postimg.cc/43NXkFx5/20240823_023458.png" group-title="Documentary",Animal Planet
-https://drk6xq0vhn.gpcdn.net/live/animal_planet_hd_abr/live/animal_planet_hd/chunks.m3u8
-
-#EXTINF:-1 tvg-logo="https://imglink.cc/cdn/mv5xd7yy0d.png" group-title="Documentary",Discovery
-https://drk6xq0vhn.gpcdn.net/live/discovery_hd_abr/index.m3u8
-
-#EXTINF:-1 tvg-id="019de785-3bb3-70ca-b613-205c5c22da6b" tvg-name="Discovery Science" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_b4a182b0d66620e67de189fa25763c3e_playmist_discovery_science400x400.jpg" group-title="Documentary",Discovery Science
-https://drk6xq0vhn.gpcdn.net/live/discovery_science_abr/index.m3u8
-
-#EXTINF:-1 tvg-id="019de785-3bac-72a7-b7ff-9d20d69bb27d" tvg-name="Nat Geo TV" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_25b786047244481532eb505dfba85580_playmist_nat_geo_tv_400x400.jpg" group-title="Documentary",Nat Geo TV
-https://tvsen3.aynaott.com/7mm4pwCy/index.m3u8
-
-#EXTINF:-1 tvg-id="019de785-3c27-75af-aecc-b972908c76b3" tvg-name="Adventure Earth" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-14/images_535399f1d6f11a7f9e501b4db33e2d0c_playmist_adventure_earth.jpg" group-title="Documentary",Adventure Earth
-https://autentic-adventure-earth-1-eu.rakuten.wurl.tv/playlist.m3u8
-
-
-#EXTINF:-1 tvg-logo="https://imglink.cc/cdn/mv5xd7yy0d.png" group-title="Documentary",Discovery
-https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/ghwcl6hv68/out/v1/83536910d8034e9b9895a20fbe1c1687/cenc.mpd|drmScheme=clearkey&drmLicense=335dad778109954503dcbb21dc92015f:24bfd75d436cbf73168a2a2dccd40281
-
-
-
-
 
 
 
