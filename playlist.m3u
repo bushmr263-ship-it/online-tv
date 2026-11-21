@@ -190,10 +190,10 @@ https://s3.itcnbd.live/server-12/stream/MTc.m3u8
 #------------------------------------------------------------------------------
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/6pCXvxyz/20240823_022553.png" group-title="Hindi",Star Gold HD
-https://livetv.shamon-cable.net/proxy/proxy.php?id=d889c0b52e036f93bc4a8074748020c877bc
+https://livetv.shamon-cable.net/proxy/proxy.php?id=c4847625a9dfbf9d8b0a57dd4acc41f81bde
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/6pCXvxyz/20240823_022553.png" group-title="Hindi",Star Gold select
-https://livetv.shamon-cable.net/proxy/proxy.php?id=d889c0b52e036f93bc4a8074748020c877bc
+	https://livetv.shamon-cable.net/proxy/proxy.php?id=5a34cdf111d9148815bf4c39c38ac86abdce
 
 #EXTINF:-1 tvg-logo="https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Ay52-JQBv9knK3AHFDWt/posters/00afb30b-3c19-4c4c-abd8-891db94e4767.webp" group-title="Hindi",Sony Max
 https://livetv.shamon-cable.net/proxy/proxy.php?id=db0e512e0b69d6eb4bbcb7b2244846d7ac3d 
