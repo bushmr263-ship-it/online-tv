@@ -215,12 +215,6 @@
         }
 
         .server-brand-left {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--accent-color);
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(229, 184, 96, 0.3);
             padding-right: 12px;
             border-right: 1px solid #30363d;
             white-space: nowrap;
@@ -228,6 +222,41 @@
             align-items: center;
             justify-content: center;
             align-self: stretch;
+        }
+
+        .tv-apk-box-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: var(--accent-color);
+            color: #000;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            border-radius: 6px;
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 0 10px rgba(229, 184, 96, 0.25);
+            transition: 0.2s;
+        }
+
+        .tv-apk-box-btn:hover {
+            background: #f3ca78;
+            border-color: #fff;
+            color: #000;
+        }
+
+        .tv-apk-box-btn img {
+            width: 24px;
+            height: 24px;
+            border-radius: 5px;
+            object-fit: cover;
+            background: #fff;
+            padding: 1px;
+            flex-shrink: 0;
         }
 
         .header-server-switcher {
@@ -518,6 +547,20 @@
             align-items: center;
         }
 
+        .main-left-brand {
+            background: var(--accent-color);
+            color: #000;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 13px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            line-height: 1.2;
+            display: inline-flex;
+            align-items: center;
+        }
+
         .btn {
             background: #333;
             color: #fff;
@@ -750,9 +793,17 @@
                 gap: 8px;
             }
             .server-brand-left {
-                font-size: 15px;
-                letter-spacing: 0.8px;
                 padding-right: 7px;
+            }
+            .tv-apk-box-btn {
+                padding: 6px 8px;
+                font-size: 10.5px;
+                letter-spacing: 0.4px;
+                gap: 4px;
+            }
+            .tv-apk-box-btn img {
+                width: 18px;
+                height: 18px;
             }
             .header-server-switcher {
                 min-width: 0;
@@ -784,6 +835,7 @@
             .category-bar { margin-bottom: 8px; gap: 6px; }
             .cat-btn { padding: 6px 12px; font-size: 11px; }
             .modes { gap: 8px; margin-top: 8px; }
+            .main-left-brand { padding: 5px 10px; font-size: 10.5px; }
             .btn { padding: 6px 12px; font-size: 11px; border-radius: 5px; }
             .input-box {
                 position: fixed !important;
@@ -843,7 +895,12 @@
                 </div>
 
                 <div class="server-box-with-brand">
-                    <div class="server-brand-left">PB TV</div>
+                    <div class="server-brand-left">
+                        <a href="https://drive.google.com/uc?export=download&id=1MOyrPjTNScguL1yJlP0XrF-bUl6mDhmD" target="_blank" class="tv-apk-box-btn">
+                            <img src="https://i.postimg.cc/25VNyzRB/tv-icon-logo-vector-illustration-design-1948-11932.png" alt="TV APK">
+                            <span>TV APK</span>
+                        </a>
+                    </div>
 
                     <div id="serverSwitcherBox" class="header-server-switcher">
                         <div class="server-title-notice-row">
@@ -886,6 +943,7 @@
             </div>
 
             <div class="modes">
+                <span class="main-left-brand">PB TV</span>
                 <button class="btn" onclick="switchMode('main')">Main</button>
                 <button class="btn" style="display: none !important;" onclick="switchMode('html5')">HTML5</button>
             </div>
