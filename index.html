@@ -115,6 +115,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/4.7.2/dash.all.min.js"></script>
     <!-- Clappr -->
     <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
+    <!-- mpegts.js (শুধুমাত্র FLV প্লেব্যাকের জন্য) -->
+    <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
 
     <style>
         :root {
@@ -402,7 +404,7 @@
             position: relative;
         }
 
-        #clappr-container, #html5-video {
+        #clappr-container, #html5-video, #flv-video {
             width: 100% !important;
             height: 100% !important;
             border: none;
@@ -412,7 +414,8 @@
             object-fit: contain;
         }
 
-        #html5-video:not(.player-hidden) {
+        #html5-video:not(.player-hidden),
+        #flv-video:not(.player-hidden) {
             z-index: 18;
             pointer-events: auto;
         }
@@ -446,7 +449,8 @@
             pointer-events: auto;
         }
 
-        #player-container.html5-mode {
+        #player-container.html5-mode,
+        #player-container.flv-mode {
             background: transparent;
             z-index: 5;
             pointer-events: none;
@@ -455,20 +459,24 @@
         #player-container.html5-mode > video,
         #player-container.html5-mode .shaka-controls-button-panel,
         #player-container.html5-mode .shaka-scrim-container,
-        #player-container.html5-mode .shaka-bottom-controls {
+        #player-container.html5-mode .shaka-bottom-controls,
+        #player-container.flv-mode > video,
+        #player-container.flv-mode .shaka-controls-button-panel,
+        #player-container.flv-mode .shaka-scrim-container,
+        #player-container.flv-mode .shaka-bottom-controls {
             display: none !important;
             opacity: 0 !important;
             pointer-events: none !important;
         }
 
-        #player-container:not(.shaka-active):not(.html5-mode) > video {
+        #player-container:not(.shaka-active):not(.html5-mode):not(.flv-mode) > video {
             opacity: 0;
             pointer-events: none;
         }
 
-        #player-container:not(.shaka-active):not(.html5-mode) .shaka-controls-button-panel,
-        #player-container:not(.shaka-active):not(.html5-mode) .shaka-scrim-container,
-        #player-container:not(.shaka-active):not(.html5-mode) .shaka-bottom-controls {
+        #player-container:not(.shaka-active):not(.html5-mode):not(.flv-mode) .shaka-controls-button-panel,
+        #player-container:not(.shaka-active):not(.html5-mode):not(.flv-mode) .shaka-scrim-container,
+        #player-container:not(.shaka-active):not(.html5-mode):not(.flv-mode) .shaka-bottom-controls {
             display: none !important;
         }
 
@@ -940,6 +948,7 @@
 
                 <div id="clappr-container" class="player-hidden"></div>
                 <video id="html5-video" class="player-hidden" controls autoplay playsinline preload="auto"></video>
+                <video id="flv-video" class="player-hidden" controls autoplay playsinline preload="auto"></video>
             </div>
 
             <div class="modes">
@@ -969,7 +978,7 @@
     </div>
 
     <div class="input-box">
-        <input type="text" id="customUrlInput" placeholder="লিঙ্ক এখানে দিন (M3U8, MPD বা URL)...">
+        <input type="text" id="customUrlInput" placeholder="লিঙ্ক এখানে দিন (M3U8, MPD, FLV বা URL)...">
         <button class="play-btn" onclick="playCustom()">প্লে করুন</button>
     </div>
 
@@ -1161,10 +1170,12 @@
 
         const clapprEl = document.getElementById('clappr-container');
         const html5El = document.getElementById('html5-video');
+        const flvEl = document.getElementById('flv-video');
         const offlineOverlayEl = document.getElementById('offlineOverlay');
         let clapprInstance;
         let hls;
         let dashPlayer;
+        let mpegtsPlayer = null;
         let currentMode = 'main';
         let currentUrl = '';
         let allChannels = [];
@@ -1239,6 +1250,7 @@
                 mainContainer.classList.remove("player-hidden");
                 mainContainer.classList.toggle("shaka-active", activeBackendView === "shaka");
                 mainContainer.classList.toggle("html5-mode", activeBackendView === "html5");
+                mainContainer.classList.toggle("flv-mode", activeBackendView === "flv");
             }
             if (clapprEl) {
                 clapprEl.classList.toggle("player-hidden", activeBackendView !== "clappr");
@@ -1246,6 +1258,10 @@
             if (html5El) {
                 html5El.classList.toggle("player-hidden", activeBackendView !== "html5");
                 html5El.controls = (activeBackendView === "html5");
+            }
+            if (flvEl) {
+                flvEl.classList.toggle("player-hidden", activeBackendView !== "flv");
+                flvEl.controls = (activeBackendView === "flv");
             }
         }
 
@@ -1260,14 +1276,14 @@
 
         function shouldUseHtml5Directly(rawUrl) {
             const str = String(rawUrl || "").trim();
-            if (!str) return false;
+            if (!str || isFlvUrl(str)) return false;
             const host = getUrlHostLower(str);
             return sessionHtml5Urls.has(str) || Boolean(host && sessionHtml5Hosts.has(host));
         }
 
         function rememberHtml5ForUrl(rawUrl) {
             const str = String(rawUrl || "").trim();
-            if (!str) return;
+            if (!str || isFlvUrl(str)) return;
             sessionHtml5Urls.add(str);
             const host = getUrlHostLower(str);
             if (host) {
@@ -1298,7 +1314,7 @@
 
         function unmuteActivePlayers() {
             const mainVideo = document.getElementById("video");
-            [mainVideo, html5El].forEach(el => {
+            [mainVideo, html5El, flvEl].forEach(el => {
                 if (el) {
                     try {
                         el.muted = false;
@@ -1332,6 +1348,11 @@
         function isMpdUrl(rawUrl) {
             const clean = String(rawUrl || '').split('|')[0].split('?')[0].trim().toLowerCase();
             return clean.endsWith('.mpd');
+        }
+
+        function isFlvUrl(rawUrl) {
+            const clean = String(rawUrl || '').split('|')[0].split('?')[0].split('#')[0].trim().toLowerCase();
+            return clean.endsWith('.flv');
         }
 
         function extractClearKeys(rawUrl, fallbackDrm = null) {
@@ -1446,6 +1467,11 @@
             hasUserInteracted = true;
             if (!currentUrl) return;
 
+            if (isFlvUrl(currentUrl)) {
+                loadChannelUrl(currentUrl, 'flv', true);
+                return;
+            }
+
             if (isMpdUrl(currentUrl)) {
                 loadChannelUrl(currentUrl, 'shaka', true);
                 return;
@@ -1517,6 +1543,15 @@
                 clearTimeout(loadTimeoutTimer);
                 loadTimeoutTimer = null;
             }
+            if (mpegtsPlayer) {
+                try {
+                    mpegtsPlayer.pause();
+                    mpegtsPlayer.unload();
+                    mpegtsPlayer.detachMediaElement();
+                    mpegtsPlayer.destroy();
+                } catch (e) {}
+                mpegtsPlayer = null;
+            }
             if (hls) {
                 try { hls.stopLoad(); hls.destroy(); } catch (e) {}
                 hls = null;
@@ -1564,6 +1599,19 @@
             html5El.pause();
             html5El.removeAttribute("src");
             html5El.load();
+
+            if (flvEl) {
+                flvEl.onwaiting = null;
+                flvEl.onplaying = null;
+                flvEl.onplay = null;
+                flvEl.onloadedmetadata = null;
+                flvEl.onloadeddata = null;
+                flvEl.oncanplay = null;
+                flvEl.onerror = null;
+                flvEl.pause();
+                flvEl.removeAttribute("src");
+                flvEl.load();
+            }
         }
 
         async function loadChannelUrl(url, mode = 'main', isNewLoad = true) {
@@ -1578,14 +1626,17 @@
             const fbState = sessionFallbackState[sessionId];
 
             const rawUrl = String(url || '').trim();
-            const isMpd = isMpdUrl(rawUrl);
-            const directHtml5 = !isMpd && shouldUseHtml5Directly(rawUrl);
+            const isFlv = isFlvUrl(rawUrl);
+            const isMpd = !isFlv && isMpdUrl(rawUrl);
+            const directHtml5 = !isFlv && !isMpd && shouldUseHtml5Directly(rawUrl);
 
-            const effectiveMode = isMpd
-                ? 'shaka'
-                : ((mode === 'html5' || directHtml5)
-                    ? 'html5'
-                    : (mode === 'clappr_once' ? 'clappr_once' : 'main'));
+            const effectiveMode = isFlv
+                ? 'flv'
+                : (isMpd
+                    ? 'shaka'
+                    : ((mode === 'html5' || directHtml5)
+                        ? 'html5'
+                        : (mode === 'clappr_once' ? 'clappr_once' : 'main')));
             const clearKeys = extractClearKeys(rawUrl, currentChannelObj ? currentChannelObj.drm : null);
             const finalUrl = rawUrl.split('|')[0].trim();
 
@@ -1641,7 +1692,7 @@
             };
 
             const triggerSingleClapprFallback = () => {
-                if (sessionId !== loadSessionId || isMpd) return;
+                if (sessionId !== loadSessionId || isMpd || isFlv) return;
                 if (fbState.hasStartedPlaying) {
                     statusEl.textContent = "Buffering...";
                     return;
@@ -1657,6 +1708,76 @@
                     markStreamOffline();
                 }
             };
+
+            // ডেডিকেটেড FLV প্লেয়ার (শুধুমাত্র .flv লিংকের জন্য, অন্য কোনো প্লেয়ারে যাবে না)
+            if (isFlv) {
+                setActivePlayerView('flv');
+
+                if (typeof mpegts === 'undefined' || !mpegts.getFeatureList().mseLivePlayback) {
+                    markStreamOffline();
+                    return;
+                }
+
+                loadTimeoutTimer = setTimeout(() => {
+                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                        markStreamOffline();
+                    }
+                }, HLS_TO_CLAPPR_MS);
+
+                flvEl.onwaiting = () => {
+                    if (sessionId === loadSessionId) {
+                        statusEl.textContent = "Buffering...";
+                    }
+                };
+                flvEl.onplaying = () => {
+                    if (sessionId === loadSessionId) {
+                        markStreamStarted();
+                        statusEl.textContent = "Playing";
+                        if (hasUserInteracted) {
+                            flvEl.muted = false;
+                            flvEl.volume = 1.0;
+                        }
+                    }
+                };
+                flvEl.onplay = () => {
+                    if (sessionId === loadSessionId) {
+                        markStreamStarted();
+                        statusEl.textContent = "Playing";
+                    }
+                };
+                flvEl.onerror = () => {
+                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                        markStreamOffline();
+                    }
+                };
+
+                try {
+                    mpegtsPlayer = mpegts.createPlayer({
+                        type: 'flv',
+                        isLive: true,
+                        url: finalUrl
+                    }, {
+                        enableWorker: true,
+                        enableStashBuffer: false,
+                        stashInitialSize: 128
+                    });
+
+                    mpegtsPlayer.on(mpegts.Events.ERROR, () => {
+                        if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                            markStreamOffline();
+                        }
+                    });
+
+                    mpegtsPlayer.attachMediaElement(flvEl);
+                    mpegtsPlayer.load();
+                    triggerInstantPlay(flvEl);
+                } catch (err) {
+                    if (sessionId === loadSessionId) {
+                        markStreamOffline();
+                    }
+                }
+                return;
+            }
 
             if (isMpd) {
                 setActivePlayerView('shaka');
