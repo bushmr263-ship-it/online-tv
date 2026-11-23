@@ -193,7 +193,8 @@ https://s3.itcnbd.live/server-12/stream/MTc.m3u8
 https://toffee.sm-monirul-islam-rs.workers.dev/sony_max/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Ai51-JQBv9knK3AH_jWs/posters/663e52a6-1a9f-4458-b4aa-7c03d84972f1.webp" group-title="Hindi",Sony Max HD
-https://online-tv-rho.vercel.app/api/proxy?url=http://live.ftpbdlive.com:8080/live/FTPBD-LIVETV/FTPBD-2026/50.m3u8 
+#EXTVLCOPT:http-referrer=https://techandeat.online
+https://techandeat.online/sliv/stream.m3u8?id=1000009247
 
 #EXTINF:-1 tvg-id="TheMovieClub.in@HD" tvg-name="The Movie Club" group-title="Hindi",The Movie Club
 https://sis-global.prod.samsungtv.plus/v1/tvpprd/sc-mp2ar4ca425xo.m3u8
@@ -235,7 +236,15 @@ https://stream.rojatv.cloud/rojatv/rojatv/index.m3u8
 https://bdtop1.tvhunter.top/max1/index.m3u8 
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/hP59QSrm/20240825_075205.png" group-title="Hindi",Sony Max 2
-https://livetv.shamon-cable.net/proxy/proxy.php?id=33d2979dd48a39e45aaea15ee29334945c58
+#EXTVLCOPT:http-referrer=https://techandeat.online
+https://techandeat.online/sliv/stream.m3u8?id=1000044878
+
+#EXTINF:-1 tvg-name="Sony Sab HD" tvg-logo="https://i.postimg.cc/442mfGNp/20250529-132607.png" group-title="Indian Hindi",Sony Sab HD
+#EXTVLCOPT:http-referrer=https://techandeat.online
+https://techandeat.online/sliv/stream.m3u8?id=1000009248
+
+#EXTINF:-1 tvg-name="Sony Kal" tvg-logo="https://i.postimg.cc/L5TmcvqR/hridoytvgate-(14).webp" group-title="Indian Hindi",Sony Kal
+https://e77bef9b.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctY2FfU29ueUtBTF9ITFM/playlist.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/XJ1SbVzN/20240823_022738.png" group-title="Hindi",&Pictures
 https://livetv.shamon-cable.net/proxy/proxy.php?id=c9c6306aeb823a41b05817c5805450d49ad7
@@ -314,7 +323,8 @@ https://mntv.livebox.co.in/mntvhls/live.m3u8
 https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_hd.m3u8 
 
 #EXTINF:-1 group-title="AS | IN | HINDI" tvg-logo="https://go4.pw/India/SONY_PAL.png",HINDI - SONY PAL
-https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_pal.m3u8
+#EXTVLCOPT:http-referrer=https://techandeat.online
+https://techandeat.online/sliv/stream.m3u8?id=1000009273
 
 #EXTINF:-1 group-title="AS | IN | HINDI" tvg-logo="https://go4.pw/India/SONY_wah.png",HINDI - SONY WAH
 https://allinonereborn2.online/livtest3/stream_proxy.php?url=https%3A%2F%2Fallinonereborn2.online%2Fsony-new%2Fplaylists%2Fsony_wah.m3u8
@@ -381,7 +391,8 @@ https://436f59579436473e8168284cac5d725f.mediatailor.us-east-1.amazonaws.com/v1/
 https://a-cdn.klowdtv.com/live1/smc_720p/chunks.m3u8
 
 #EXTINF:-1 tvg-id="" tvg-name="Sony PIX HD Movies" tvg-logo="https://assets-prod.services.toffeelive.com/Ly6C-JQBv9knK3AHOjXt/posters/252e64ca-8d99-46e7-a951-e10c1703c11d.webp" group-title="English",Movie Sony PIX HD 
-https://livetv.shamon-cable.net/proxy/proxy.php?id=3504b10cd7f4f9667da52ae26d01f388f993
+#EXTVLCOPT:http-referrer=https://techandeat.online
+https://techandeat.online/sliv/stream.m3u8?id=1000009258
 
 #EXTINF:-1 tvg-id="019de785-3bd7-7f2e-bd91-7b0fca28970f" tvg-name="LAFF TV" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_4d77b602c1d8bbdb885ddc7e186d440e_playmist_laff_tv_400x400.jpg" group-title="English",LAFF TV
 https://tvsen3.aynaott.com/UC6a8nsf/index.m3u8
