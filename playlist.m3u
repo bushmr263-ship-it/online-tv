@@ -383,6 +383,9 @@ https://a-cdn.klowdtv.com/live1/smc_720p/chunks.m3u8
 #EXTINF:-1 tvg-id="" tvg-name="Sony PIX HD Movies" tvg-logo="https://assets-prod.services.toffeelive.com/Ly6C-JQBv9knK3AHOjXt/posters/252e64ca-8d99-46e7-a951-e10c1703c11d.webp" group-title="English",Movie Sony PIX HD 
 https://livetv.shamon-cable.net/proxy/proxy.php?id=3504b10cd7f4f9667da52ae26d01f388f993
 
+#EXTINF:-1 tvg-id="019de785-3bd7-7f2e-bd91-7b0fca28970f" tvg-name="LAFF TV" tvg-logo="https://web.aynaott.com/storage/019dd92f-107c-7056-9e79-e5233f6e51d9/uploads/images/2026-07-15/images_4d77b602c1d8bbdb885ddc7e186d440e_playmist_laff_tv_400x400.jpg" group-title="English",LAFF TV
+https://tvsen3.aynaott.com/UC6a8nsf/index.m3u8
+
 
 #------------------------------------------------------------------------------
 # CATEGORY: CARTOON
