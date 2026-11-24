@@ -1445,8 +1445,8 @@
         let clapprUiHideTimer = null;
         let clapprUiPollTimer = null;
 
-        // সার্ভার রেসপন্স পেলে প্লে শুরু হওয়ার জন্য সর্বোচ্চ ২০ সেকেন্ড; রেসপন্স না পেলে সাথে সাথেই পরের ধাপ/Offline
-        const RESPONSIVE_PLAY_TIMEOUT_MS = 20000;
+        // ধীরগতির .m3u8 স্ট্রিমের জন্য প্লে শুরু হওয়ার সর্বোচ্চ সময় ১ মিনিট (৬৫ সেকেন্ড)
+        const RESPONSIVE_PLAY_TIMEOUT_MS = 65000;
 
         const SELECTED_TOFFEE_CHANNELS = [
             "Zee Bollywood",
@@ -2356,7 +2356,7 @@
                 statusEl.textContent = "Offline";
             };
 
-            // সার্ভার থেকে রেসপন্স পাওয়া গেলে প্লে শুরু হওয়ার জন্য ২০ সেকেন্ড সময় দেওয়া হবে
+            // ধীরগতির স্ট্রিমের জন্য ১ মিনিট পর্যন্ত প্লে শুরু হওয়ার সুযোগ দেওয়া হবে
             const armResponsivePlayTimer = () => {
                 if (sessionId !== loadSessionId || fbState.hasStartedPlaying) return;
                 if (!fbState.gotServerResponse) {
@@ -2582,6 +2582,7 @@
             // HLS.js Direct / Proxy / Fallback Mode
             if (effectiveMode === 'hls_once') {
                 setActivePlayerView('shaka');
+                armResponsivePlayTimer();
 
                 const mobile = isMobileView();
                 const hlsSupported = (typeof Hls !== 'undefined' && Hls.isSupported());
@@ -2623,8 +2624,8 @@
                             abrEwmaDefaultEstimate: 500000,
                             abrBandWidthFactor: 0.8,
                             abrBandWidthUpFactor: 0.7,
-                            fragLoadingTimeOut: 15000,
-                            manifestLoadingTimeOut: 6000
+                            fragLoadingTimeOut: 45000,
+                            manifestLoadingTimeOut: 25000
                         }
                         : {
                             enableWorker: false,
@@ -2634,8 +2635,8 @@
                             abrEwmaDefaultEstimate: 800000,
                             abrBandWidthFactor: 0.85,
                             abrBandWidthUpFactor: 0.75,
-                            fragLoadingTimeOut: 15000,
-                            manifestLoadingTimeOut: 6000
+                            fragLoadingTimeOut: 45000,
+                            manifestLoadingTimeOut: 25000
                         };
 
                     hls = new Hls(hlsConfig);
@@ -2717,8 +2718,8 @@
                         abrBandWidthUpFactor: 0.7,
                         maxBufferLength: 35,
                         maxMaxBufferLength: 70,
-                        fragLoadingTimeOut: 15000,
-                        manifestLoadingTimeOut: 6000
+                        fragLoadingTimeOut: 45000,
+                        manifestLoadingTimeOut: 25000
                     }
                 }
             });
