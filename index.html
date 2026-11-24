@@ -1445,7 +1445,7 @@
         let clapprUiHideTimer = null;
         let clapprUiPollTimer = null;
 
-        // রেসপন্স পেলে প্লে শুরু হওয়ার জন্য সর্বোচ্চ ২০ সেকেন্ড; রেসপন্স না পেলে সাথে সাথেই Offline
+        // সার্ভার রেসপন্স পেলে প্লে শুরু হওয়ার জন্য সর্বোচ্চ ২০ সেকেন্ড; রেসপন্স না পেলে সাথে সাথেই পরের ধাপ/Offline
         const RESPONSIVE_PLAY_TIMEOUT_MS = 20000;
 
         const SELECTED_TOFFEE_CHANNELS = [
@@ -2370,7 +2370,8 @@
                 }
             };
 
-            const handleNextStep = (fromStage, isCorsOriginBlock = false, isDeadNoResponse = false) => {
+            // ধাপ বদল: Clappr -> HLS.js -> HTML5 -> Offline
+            const handleNextStep = (fromStage, isCorsOriginBlock = false) => {
                 if (sessionId !== loadSessionId || isMpd || isFlv) return;
                 hideClapprErrorCanvas();
                 if (fbState.hasStartedPlaying) {
@@ -2386,12 +2387,6 @@
                     corsBlockedUrls.add(rawUrl);
                 }
 
-                // লিংক রেসপন্স না পেলে / মৃত হলে সাথে সাথেই Offline
-                if (isDeadNoResponse) {
-                    markStreamOffline();
-                    return;
-                }
-
                 if (fromStage === 'clappr' && !fbState.movedToHlsOnce) {
                     fbState.movedToHlsOnce = true;
                     statusEl.textContent = "Loading...";
@@ -2404,7 +2399,7 @@
                     return;
                 }
 
-                if (fbState.corsOriginBlocked && !fbState.movedToHtml5Once) {
+                if ((fromStage === 'hls' || fbState.movedToHlsOnce || fbState.corsOriginBlocked) && !fbState.movedToHtml5Once) {
                     fbState.movedToHtml5Once = true;
                     statusEl.textContent = "Loading...";
                     setCenterWaitVisible(true);
@@ -2586,7 +2581,7 @@
                 return;
             }
 
-            // HLS.js Direct / Proxy Mode
+            // HLS.js Direct / Proxy / Fallback Mode
             if (effectiveMode === 'hls_once') {
                 setActivePlayerView('shaka');
 
@@ -2611,7 +2606,7 @@
                 };
                 mainVideo.onerror = () => {
                     if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                        handleNextStep('hls', false, !fbState.gotServerResponse);
+                        handleNextStep('hls', false);
                     }
                 };
 
@@ -2669,13 +2664,9 @@
                         if (data && data.fatal) {
                             const statusCode = data.response && data.response.code ? Number(data.response.code) : 0;
                             const isCorsBlock = isCorsOrOriginBlockError(data, statusCode);
-                            const noResponse = data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR ||
-                                data.details === Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT ||
-                                data.details === Hls.ErrorDetails.LEVEL_LOAD_ERROR ||
-                                data.details === Hls.ErrorDetails.FRAG_LOAD_ERROR;
 
                             if (!fbState.hasStartedPlaying) {
-                                handleNextStep('hls', isCorsBlock, noResponse && !fbState.gotServerResponse);
+                                handleNextStep('hls', isCorsBlock);
                                 return;
                             }
 
@@ -2697,7 +2688,7 @@
                     mainVideo.src = finalUrl;
                     triggerInstantPlay(mainVideo);
                 } else {
-                    handleNextStep('hls', false, true);
+                    handleNextStep('hls', false);
                 }
                 return;
             }
@@ -2779,7 +2770,7 @@
                     innerVideo.addEventListener("error", () => {
                         hideClapprErrorCanvas();
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                            handleNextStep('clappr', false, !fbState.gotServerResponse);
+                            handleNextStep('clappr', false);
                         }
                     });
                 }
@@ -2800,12 +2791,8 @@
                             if (sessionId !== loadSessionId || !data || !data.fatal) return;
                             const statusCode = data.response && data.response.code ? Number(data.response.code) : 0;
                             const isCorsBlock = isCorsOrOriginBlockError(data, statusCode);
-                            const noResponse = data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR ||
-                                data.details === Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT ||
-                                data.details === Hls.ErrorDetails.LEVEL_LOAD_ERROR ||
-                                data.details === Hls.ErrorDetails.FRAG_LOAD_ERROR;
                             if (!fbState.hasStartedPlaying) {
-                                handleNextStep('clappr', isCorsBlock, noResponse && !fbState.gotServerResponse);
+                                handleNextStep('clappr', isCorsBlock);
                             } else {
                                 applyAdaptiveBitrateDownshift(clapprInstance, innerVideo, true);
                                 setCenterWaitVisible(true);
@@ -2833,7 +2820,7 @@
                         hideClapprErrorCanvas();
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                             const isCorsBlock = isCorsOrOriginBlockError(err);
-                            handleNextStep('clappr', isCorsBlock, !fbState.gotServerResponse);
+                            handleNextStep('clappr', isCorsBlock);
                         }
                     });
                 }
