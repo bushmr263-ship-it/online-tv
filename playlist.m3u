@@ -192,10 +192,10 @@ https://s3.itcnbd.live/server-12/stream/MTc.m3u8
 #EXTINF:-1 tvg-logo="https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Ay52-JQBv9knK3AHFDWt/posters/00afb30b-3c19-4c4c-abd8-891db94e4767.webp" group-title="Hindi",Sony Max
 https://toffee.sm-monirul-islam-rs.workers.dev/sony_max/index.m3u8
 
-
 #EXTINF:-1 tvg-logo="https://assets-prod.services.toffeelive.com/f_png,w_300,q_85/Ai51-JQBv9knK3AH_jWs/posters/663e52a6-1a9f-4458-b4aa-7c03d84972f1.webp" group-title="Hindi",Sony Max HD
 #EXTVLCOPT:http-referrer=https://techandeat.online
-https://robiproxi.bushmr263.workers.dev/?url=https%3A%2F%2Ftechandeat.online%2Fsliv%2Fstream.m3u8%3Fid%3D1000009247&ref=https%3A%2F%2Ftechandeat.online
+https://techandeat.online/sliv/stream.m3u8?id=1000009247
+
 
 #EXTINF:-1 tvg-id="TheMovieClub.in@HD" tvg-name="The Movie Club" group-title="Hindi",The Movie Club
 https://sis-global.prod.samsungtv.plus/v1/tvpprd/sc-mp2ar4ca425xo.m3u8
