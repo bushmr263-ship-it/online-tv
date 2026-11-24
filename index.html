@@ -446,7 +446,7 @@
             opacity: 0 !important;
         }
 
-        /* ভিডিও প্লে হওয়ার আগে বা লোড/বাফারিং অবস্থায় কালো পর্দা ও মাঝখানে "অপেক্ষা করুন..." */
+        /* ভিডিও প্লে হওয়ার আগে বা লোড/বাফারিং অবস্থায় কালো পর্দা ও মাঝখানে ঘুরতে থাকা লোডিং জিরো */
         #videoCenterWaitNotice {
             position: absolute;
             inset: 0;
@@ -458,17 +458,21 @@
             pointer-events: none;
         }
 
-        #videoCenterWaitNotice span {
-            background: rgba(20, 24, 32, 0.92);
-            color: #ffffff;
-            border: 1px solid rgba(46, 204, 113, 0.55);
-            border-radius: 8px;
-            padding: 10px 18px;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            white-space: nowrap;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65);
+        .wait-spinner-ring {
+            width: 44px;
+            height: 44px;
+            border: 4px solid rgba(46, 204, 113, 0.22);
+            border-top-color: #2ecc71;
+            border-radius: 50%;
+            animation: pbSpinRotor 0.75s linear infinite;
+            flex-shrink: 0;
+            box-shadow: 0 0 14px rgba(46, 204, 113, 0.25);
+        }
+
+        @keyframes pbSpinRotor {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         #videoCenterWaitNotice.is-hidden {
@@ -1077,9 +1081,10 @@
                 width: 55px !important;
                 min-width: 45px !important;
             }
-            #videoCenterWaitNotice span {
-                font-size: 12.5px;
-                padding: 8px 14px;
+            .wait-spinner-ring {
+                width: 34px;
+                height: 34px;
+                border-width: 3.5px;
             }
             .clappr-ui-bar {
                 gap: 6px;
@@ -1160,7 +1165,9 @@
             <div class="video-box" id="videoBox">
                 <div id="offlineOverlay">Offline</div>
                 <div id="clapprCenterBadge"></div>
-                <div id="videoCenterWaitNotice"><span>অপেক্ষা করুন...</span></div>
+                <div id="videoCenterWaitNotice">
+                    <span class="wait-spinner-ring" aria-hidden="true"></span>
+                </div>
 
                 <div id="player-container" class="shaka-active">
                     <video id="video"
@@ -1446,10 +1453,8 @@
             );
         }
 
-        function setCenterWaitVisible(show, text = "অপেক্ষা করুন...") {
+        function setCenterWaitVisible(show) {
             if (!centerWaitEl) return;
-            const span = centerWaitEl.querySelector("span");
-            if (span) span.textContent = text;
             centerWaitEl.classList.toggle("is-hidden", !show);
         }
 
@@ -2060,7 +2065,7 @@
 
                 video.addEventListener("waiting", () => {
                     status.textContent = "Buffering...";
-                    setCenterWaitVisible(true, "অপেক্ষা করুন...");
+                    setCenterWaitVisible(true);
                 });
 
                 video.addEventListener("playing", () => {
@@ -2277,7 +2282,7 @@
             if (sessionId !== loadSessionId) return;
 
             statusEl.textContent = "Loading...";
-            setCenterWaitVisible(true, "অপেক্ষা করুন...");
+            setCenterWaitVisible(true);
 
             const triggerInstantPlay = (mediaObj) => {
                 if (!mediaObj) return;
@@ -2322,7 +2327,7 @@
                 }
                 hideClapprErrorCanvas();
                 setCenterBadgeState('none');
-                setCenterWaitVisible(true, "অপেক্ষা করুন...");
+                setCenterWaitVisible(true);
                 statusEl.textContent = "Offline";
             };
 
@@ -2345,7 +2350,7 @@
                 if (fromStage === 'clappr' && !fbState.movedToHlsOnce) {
                     fbState.movedToHlsOnce = true;
                     statusEl.textContent = "Loading...";
-                    setCenterWaitVisible(true, "অপেক্ষা করুন...");
+                    setCenterWaitVisible(true);
                     setTimeout(() => {
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                             loadChannelUrl(rawUrl, 'hls_once', false);
@@ -2357,7 +2362,7 @@
                 if (fbState.corsOriginBlocked && !fbState.movedToHtml5Once) {
                     fbState.movedToHtml5Once = true;
                     statusEl.textContent = "Loading...";
-                    setCenterWaitVisible(true, "অপেক্ষা করুন...");
+                    setCenterWaitVisible(true);
                     setTimeout(() => {
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                             loadChannelUrl(rawUrl, 'html5_cors_only', false);
@@ -2387,7 +2392,7 @@
                 flvEl.onwaiting = () => {
                     if (sessionId === loadSessionId) {
                         statusEl.textContent = "Buffering...";
-                        setCenterWaitVisible(true, "অপেক্ষা করুন...");
+                        setCenterWaitVisible(true);
                     }
                 };
                 flvEl.onplaying = () => {
@@ -2447,7 +2452,7 @@
                 if (shakaPlayerRef && finalUrl && sessionId === loadSessionId) {
                     try {
                         statusEl.textContent = "Loading...";
-                        setCenterWaitVisible(true, "অপেক্ষা করুন...");
+                        setCenterWaitVisible(true);
                         if (clearKeys) {
                             shakaPlayerRef.configure({
                                 drm: { clearKeys: clearKeys }
@@ -2491,7 +2496,7 @@
                 html5El.onwaiting = () => {
                     if (sessionId === loadSessionId) {
                         setCenterBadgeState('none');
-                        setCenterWaitVisible(true, "অপেক্ষা করুন...");
+                        setCenterWaitVisible(true);
                         statusEl.textContent = "Buffering...";
                     }
                 };
@@ -2531,7 +2536,7 @@
                 mainVideo.onwaiting = () => {
                     if (sessionId === loadSessionId) {
                         statusEl.textContent = "Buffering...";
-                        setCenterWaitVisible(true, "অপেক্ষা করুন...");
+                        setCenterWaitVisible(true);
                         applyAdaptiveBitrateDownshift(null, mainVideo, true);
                     }
                 };
@@ -2606,7 +2611,7 @@
                             }
 
                             applyAdaptiveBitrateDownshift(null, mainVideo, true);
-                            setCenterWaitVisible(true, "অপেক্ষা করুন...");
+                            setCenterWaitVisible(true);
                             if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
                                 try { hls.startLoad(); } catch (e) {}
                                 statusEl.textContent = "Buffering...";
@@ -2673,7 +2678,7 @@
                     innerVideo.addEventListener("waiting", () => {
                         if (sessionId === loadSessionId) {
                             statusEl.textContent = "Buffering...";
-                            setCenterWaitVisible(true, "অপেক্ষা করুন...");
+                            setCenterWaitVisible(true);
                             applyAdaptiveBitrateDownshift(clapprInstance, innerVideo, true);
                         }
                     });
@@ -2718,7 +2723,7 @@
                                 handleNextStep('clappr', isCorsBlock);
                             } else {
                                 applyAdaptiveBitrateDownshift(clapprInstance, innerVideo, true);
-                                setCenterWaitVisible(true, "অপেক্ষা করুন...");
+                                setCenterWaitVisible(true);
                                 statusEl.textContent = "Buffering...";
                             }
                         });
