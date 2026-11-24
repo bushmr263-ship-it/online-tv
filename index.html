@@ -414,6 +414,10 @@
             object-fit: contain;
         }
 
+        #clappr-container:not(.player-hidden) {
+            z-index: 16;
+        }
+
         #html5-video:not(.player-hidden),
         #flv-video:not(.player-hidden) {
             z-index: 18;
@@ -427,12 +431,86 @@
             background: #000 !important;
         }
 
-        #clappr-container [data-watermark],
-        #clappr-container .clappr-watermark,
-        #clappr-container .media-control,
-        #clappr-container .media-control-not-playing-state,
-        #clappr-container .spinner-three-bounce {
-            display: none !important;
+        /* Clappr-এর ভেতরে কাস্টম ইন্টারফেস ওভারলে */
+        .clappr-custom-ui {
+            position: absolute;
+            inset: 0;
+            z-index: 22;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.15) 38%, rgba(0, 0, 0, 0) 100%);
+            opacity: 1;
+            transition: opacity 0.25s ease;
+            pointer-events: none;
+        }
+
+        .clappr-custom-ui.ui-auto-hidden {
+            opacity: 0;
+        }
+
+        .clappr-ui-bar {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: rgba(12, 16, 23, 0.9);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .clappr-ui-btn {
+            background: transparent;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 4px 7px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: background 0.15s ease, color 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .clappr-ui-btn:hover {
+            background: rgba(255, 255, 255, 0.14);
+            color: var(--accent-color);
+        }
+
+        .clappr-ui-vol {
+            width: 68px;
+            accent-color: var(--accent-color);
+            cursor: pointer;
+            height: 4px;
+        }
+
+        .clappr-ui-progress {
+            flex: 1;
+            accent-color: var(--accent-color);
+            cursor: pointer;
+            height: 4px;
+            min-width: 45px;
+        }
+
+        .clappr-ui-time {
+            font-size: 11.5px;
+            color: #ddd;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .clappr-ui-hd {
+            background: #e11d48;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 4px;
+            border-radius: 3px;
+            letter-spacing: 0.4px;
         }
 
         #player-container {
@@ -520,7 +598,7 @@
             position: absolute;
             top: 15px;
             right: 15px;
-            z-index: 20;
+            z-index: 26;
             color: white;
             background: rgba(34, 34, 34, 0.88);
             border-radius: 20px;
@@ -534,7 +612,7 @@
             position: absolute;
             top: 15px;
             left: 15px;
-            z-index: 25;
+            z-index: 26;
             background: rgba(220, 38, 38, 0.92);
             color: #fff;
             padding: 6px 14px;
@@ -875,6 +953,20 @@
                 width: 55px !important;
                 min-width: 45px !important;
             }
+            .clappr-ui-bar {
+                gap: 5px;
+                padding: 5px 7px;
+            }
+            .clappr-ui-btn {
+                padding: 3px 5px;
+                font-size: 11px;
+            }
+            .clappr-ui-vol {
+                width: 44px;
+            }
+            .clappr-ui-time {
+                font-size: 10px;
+            }
         }
     </style>
 </head>
@@ -1188,9 +1280,10 @@
         let shakaUiRef = null;
         let playlistLoaded = false;
         let hasUserInteracted = false;
-        let activeBackendView = 'shaka';
+        let activeBackendView = 'clappr';
+        let clapprUiHideTimer = null;
 
-        const HLS_TO_CLAPPR_MS = 15000;
+        const STREAM_TIMEOUT_MS = 10000;
 
         const SELECTED_TOFFEE_CHANNELS = [
             "Zee Bollywood",
@@ -1200,8 +1293,261 @@
             "Somoy TV"
         ];
 
-        const sessionHtml5Urls = new Set();
-        const sessionClapprUrls = new Set();
+        const corsBlockedUrls = new Set();
+
+        function isCorsOrOriginBlockError(errOrData, statusCode = 0) {
+            if (Number(statusCode) === 0 || Number(statusCode) === 403) return true;
+            const text = (typeof errOrData === 'string' ? errOrData : JSON.stringify(errOrData || '')).toLowerCase();
+            return (
+                text.includes('cors') ||
+                text.includes('cross-origin') ||
+                text.includes('cross origin') ||
+                text.includes('origin') ||
+                text.includes('access-control') ||
+                text.includes('403') ||
+                text.includes('forbidden') ||
+                text.includes('failed to fetch') ||
+                text.includes('networkerror')
+            );
+        }
+
+        function formatMediaTime(sec) {
+            if (!isFinite(sec) || sec <= 0) return "0:00";
+            const total = Math.floor(sec);
+            const h = Math.floor(total / 3600);
+            const m = Math.floor((total % 3600) / 60);
+            const s = total % 60;
+            if (h > 0) {
+                return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            }
+            return `${m}:${String(s).padStart(2, '0')}`;
+        }
+
+        // Clappr-এর ভেতরে কাস্টম ইন্টারফেস ওভারলে তৈরি ও সংযুক্ত করার ফাংশন
+        function attachClapprInterface(playerObj, containerEl) {
+            if (!containerEl) return;
+            const oldUi = containerEl.querySelector('.clappr-custom-ui');
+            if (oldUi) oldUi.remove();
+            if (clapprUiHideTimer) {
+                clearTimeout(clapprUiHideTimer);
+                clapprUiHideTimer = null;
+            }
+
+            const uiWrap = document.createElement('div');
+            uiWrap.className = 'clappr-custom-ui';
+
+            const bar = document.createElement('div');
+            bar.className = 'clappr-ui-bar';
+
+            const playBtn = document.createElement('button');
+            playBtn.type = 'button';
+            playBtn.className = 'clappr-ui-btn';
+            playBtn.title = 'Play / Pause';
+            playBtn.textContent = '❚❚';
+
+            const muteBtn = document.createElement('button');
+            muteBtn.type = 'button';
+            muteBtn.className = 'clappr-ui-btn';
+            muteBtn.title = 'Mute / Unmute';
+            muteBtn.textContent = '🔊';
+
+            const volSlider = document.createElement('input');
+            volSlider.type = 'range';
+            volSlider.className = 'clappr-ui-vol';
+            volSlider.min = '0';
+            volSlider.max = '100';
+            volSlider.value = '100';
+
+            const progressSlider = document.createElement('input');
+            progressSlider.type = 'range';
+            progressSlider.className = 'clappr-ui-progress';
+            progressSlider.min = '0';
+            progressSlider.max = '100';
+            progressSlider.value = '100';
+
+            const timeLabel = document.createElement('span');
+            timeLabel.className = 'clappr-ui-time';
+            timeLabel.textContent = 'LIVE';
+
+            const hdBtn = document.createElement('button');
+            hdBtn.type = 'button';
+            hdBtn.className = 'clappr-ui-btn';
+            hdBtn.title = 'Quality / Auto';
+            hdBtn.innerHTML = '<span>⚙</span><span class="clappr-ui-hd">HD</span>';
+
+            const pipBtn = document.createElement('button');
+            pipBtn.type = 'button';
+            pipBtn.className = 'clappr-ui-btn';
+            pipBtn.title = 'Picture-in-Picture';
+            pipBtn.textContent = '⧉';
+
+            const fsBtn = document.createElement('button');
+            fsBtn.type = 'button';
+            fsBtn.className = 'clappr-ui-btn';
+            fsBtn.title = 'Fullscreen';
+            fsBtn.textContent = '⛶';
+
+            bar.appendChild(playBtn);
+            bar.appendChild(muteBtn);
+            bar.appendChild(volSlider);
+            bar.appendChild(progressSlider);
+            bar.appendChild(timeLabel);
+            bar.appendChild(hdBtn);
+            bar.appendChild(pipBtn);
+            bar.appendChild(fsBtn);
+            uiWrap.appendChild(bar);
+            containerEl.appendChild(uiWrap);
+
+            const bumpAutoHide = () => {
+                uiWrap.classList.remove('ui-auto-hidden');
+                if (clapprUiHideTimer) clearTimeout(clapprUiHideTimer);
+                clapprUiHideTimer = setTimeout(() => {
+                    const vid = containerEl.querySelector('video');
+                    if (vid && !vid.paused) {
+                        uiWrap.classList.add('ui-auto-hidden');
+                    }
+                }, 3200);
+            };
+
+            const getInnerVideo = () => containerEl.querySelector('video');
+
+            const syncUiState = () => {
+                const vid = getInnerVideo();
+                if (!vid) return;
+                playBtn.textContent = vid.paused ? '▶' : '❚❚';
+                const isMuted = vid.muted || vid.volume === 0;
+                muteBtn.textContent = isMuted ? '🔇' : '🔊';
+                if (!isMuted) {
+                    volSlider.value = String(Math.round(vid.volume * 100));
+                }
+                if (isFinite(vid.duration) && vid.duration > 0 && vid.duration < 86400) {
+                    progressSlider.max = String(Math.floor(vid.duration));
+                    progressSlider.value = String(Math.floor(vid.currentTime || 0));
+                    timeLabel.textContent = `${formatMediaTime(vid.currentTime)} / ${formatMediaTime(vid.duration)}`;
+                } else {
+                    progressSlider.max = '100';
+                    progressSlider.value = '100';
+                    timeLabel.textContent = vid.currentTime > 0 ? `-${formatMediaTime(vid.currentTime)}` : 'LIVE';
+                }
+            };
+
+            playBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                hasUserInteracted = true;
+                const vid = getInnerVideo();
+                if (!vid) return;
+                if (vid.paused) {
+                    vid.muted = false;
+                    vid.play().catch(() => {});
+                } else {
+                    vid.pause();
+                }
+                syncUiState();
+                bumpAutoHide();
+            });
+
+            muteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                hasUserInteracted = true;
+                const vid = getInnerVideo();
+                if (!vid) return;
+                vid.muted = !vid.muted;
+                if (!vid.muted && vid.volume === 0) vid.volume = 1.0;
+                if (playerObj && typeof playerObj.setVolume === 'function') {
+                    try { playerObj.setVolume(vid.muted ? 0 : Math.round(vid.volume * 100)); } catch (err) {}
+                }
+                syncUiState();
+                bumpAutoHide();
+            });
+
+            volSlider.addEventListener('input', (e) => {
+                e.stopPropagation();
+                hasUserInteracted = true;
+                const val = Number(volSlider.value || 0);
+                const vid = getInnerVideo();
+                if (vid) {
+                    vid.muted = (val === 0);
+                    vid.volume = val / 100;
+                }
+                if (playerObj && typeof playerObj.setVolume === 'function') {
+                    try { playerObj.setVolume(val); } catch (err) {}
+                }
+                syncUiState();
+                bumpAutoHide();
+            });
+
+            progressSlider.addEventListener('input', (e) => {
+                e.stopPropagation();
+                const vid = getInnerVideo();
+                if (vid && isFinite(vid.duration) && vid.duration > 0 && vid.duration < 86400) {
+                    vid.currentTime = Number(progressSlider.value || 0);
+                }
+                bumpAutoHide();
+            });
+
+            hdBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const badge = hdBtn.querySelector('.clappr-ui-hd');
+                if (badge) {
+                    badge.textContent = badge.textContent === 'HD' ? 'AUTO' : 'HD';
+                }
+                bumpAutoHide();
+            });
+
+            pipBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const vid = getInnerVideo();
+                if (!vid) return;
+                try {
+                    if (document.pictureInPictureElement) {
+                        await document.exitPictureInPicture();
+                    } else if (document.pictureInPictureEnabled && typeof vid.requestPictureInPicture === 'function') {
+                        await vid.requestPictureInPicture();
+                    }
+                } catch (err) {}
+                bumpAutoHide();
+            });
+
+            fsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const box = document.getElementById('videoBox') || containerEl;
+                try {
+                    if (!document.fullscreenElement) {
+                        if (box.requestFullscreen) box.requestFullscreen();
+                        else if (box.webkitRequestFullscreen) box.webkitRequestFullscreen();
+                    } else {
+                        if (document.exitFullscreen) document.exitFullscreen();
+                        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                    }
+                } catch (err) {}
+                bumpAutoHide();
+            });
+
+            containerEl.addEventListener('mousemove', bumpAutoHide);
+            containerEl.addEventListener('touchstart', bumpAutoHide, { passive: true });
+            containerEl.addEventListener('click', (e) => {
+                if (e.target === uiWrap || e.target === containerEl) {
+                    const vid = getInnerVideo();
+                    if (vid) {
+                        if (vid.paused) vid.play().catch(() => {});
+                        else vid.pause();
+                    }
+                    syncUiState();
+                }
+                bumpAutoHide();
+            });
+
+            const pollTimer = setInterval(() => {
+                if (!containerEl.contains(uiWrap)) {
+                    clearInterval(pollTimer);
+                    return;
+                }
+                syncUiState();
+            }, 600);
+
+            syncUiState();
+            bumpAutoHide();
+        }
 
         function forceMediaPlayNow(mediaObj) {
             if (!mediaObj) return;
@@ -1232,7 +1578,7 @@
         }
 
         function setActivePlayerView(activeView) {
-            activeBackendView = activeView || 'shaka';
+            activeBackendView = activeView || 'clappr';
             const mainContainer = document.getElementById("player-container");
             if (mainContainer) {
                 mainContainer.classList.remove("player-hidden");
@@ -1251,137 +1597,6 @@
                 flvEl.classList.toggle("player-hidden", activeBackendView !== "flv");
                 flvEl.controls = (activeBackendView === "flv");
             }
-        }
-
-        function shouldUseHtml5Directly(rawUrl) {
-            const str = String(rawUrl || "").trim();
-            if (!str || isFlvUrl(str) || isMpdUrl(str)) return false;
-            return sessionHtml5Urls.has(str);
-        }
-
-        function rememberHtml5ForUrl(rawUrl) {
-            const str = String(rawUrl || "").trim();
-            if (!str || isFlvUrl(str) || isMpdUrl(str)) return;
-            sessionHtml5Urls.add(str);
-        }
-
-        function shouldUseClapprDirectly(rawUrl) {
-            const str = String(rawUrl || "").trim();
-            if (!str || isFlvUrl(str) || isMpdUrl(str)) return false;
-            return sessionClapprUrls.has(str);
-        }
-
-        function rememberClapprForUrl(rawUrl) {
-            const str = String(rawUrl || "").trim();
-            if (!str || isFlvUrl(str) || isMpdUrl(str)) return;
-            sessionClapprUrls.add(str);
-        }
-
-        function createShakaStyleHlsFetchLoader() {
-            if (typeof Hls === 'undefined' || !Hls.DefaultConfig || !Hls.DefaultConfig.loader) {
-                return null;
-            }
-            if (window.__PB_SHAKA_STYLE_HLS_LOADER__) {
-                return window.__PB_SHAKA_STYLE_HLS_LOADER__;
-            }
-
-            const BaseLoader = Hls.DefaultConfig.loader;
-
-            class ShakaStyleFetchLoader extends BaseLoader {
-                constructor(config) {
-                    super(config);
-                    this._abortController = null;
-                }
-
-                abort() {
-                    if (this._abortController) {
-                        try { this._abortController.abort(); } catch (e) {}
-                    }
-                    super.abort();
-                }
-
-                destroy() {
-                    if (this._abortController) {
-                        try { this._abortController.abort(); } catch (e) {}
-                    }
-                    super.destroy();
-                }
-
-                load(context, config, callbacks) {
-                    const targetUrl = context && context.url ? context.url : '';
-                    if (!/^https?:\/\//i.test(targetUrl)) {
-                        super.load(context, config, callbacks);
-                        return;
-                    }
-
-                    this._abortController = new AbortController();
-                    const reqHeaders = new Headers(context.headers || {});
-                    if (context.rangeEnd !== undefined && context.rangeStart !== undefined) {
-                        reqHeaders.set('Range', `bytes=${context.rangeStart}-${context.rangeEnd - 1}`);
-                    }
-
-                    const startTime = performance.now();
-
-                    fetch(targetUrl, {
-                        method: 'GET',
-                        mode: 'cors',
-                        credentials: 'omit',
-                        cache: 'no-store',
-                        referrerPolicy: 'no-referrer',
-                        headers: reqHeaders,
-                        signal: this._abortController.signal
-                    })
-                    .then(async (response) => {
-                        const firstByteTime = performance.now();
-                        if (!response.ok) {
-                            const err = new Error(`HTTP ${response.status}`);
-                            err.status = response.status;
-                            throw err;
-                        }
-
-                        const isText = context.responseType === 'text';
-                        const payload = isText ? await response.text() : await response.arrayBuffer();
-                        const endTime = performance.now();
-                        const byteLen = isText ? payload.length : payload.byteLength;
-
-                        if (callbacks && typeof callbacks.onSuccess === 'function') {
-                            callbacks.onSuccess(
-                                {
-                                    url: response.url || targetUrl,
-                                    data: payload
-                                },
-                                {
-                                    trequest: { start: startTime, end: endTime },
-                                    tfirst: firstByteTime,
-                                    tload: endTime,
-                                    loaded: byteLen,
-                                    total: byteLen,
-                                    bwEstimate: 0
-                                },
-                                context,
-                                response
-                            );
-                        }
-                    })
-                    .catch((error) => {
-                        if (error && error.name === 'AbortError') return;
-                        if (callbacks && typeof callbacks.onError === 'function') {
-                            callbacks.onError(
-                                {
-                                    code: error && error.status ? error.status : 0,
-                                    text: (error && error.message) || 'Origin / Network Fetch Error'
-                                },
-                                context,
-                                null,
-                                null
-                            );
-                        }
-                    });
-                }
-            }
-
-            window.__PB_SHAKA_STYLE_HLS_LOADER__ = ShakaStyleFetchLoader;
-            return ShakaStyleFetchLoader;
         }
 
         function getChannelKey(ch) {
@@ -1411,6 +1626,16 @@
                     } catch (e) {}
                 }
             });
+            if (clapprEl) {
+                const innerVideo = clapprEl.querySelector("video");
+                if (innerVideo) {
+                    try {
+                        innerVideo.muted = false;
+                        innerVideo.volume = 1.0;
+                        if (innerVideo.paused) innerVideo.play().catch(() => {});
+                    } catch (e) {}
+                }
+            }
             if (clapprInstance && typeof clapprInstance.setVolume === 'function') {
                 try {
                     clapprInstance.setVolume(100);
@@ -1568,7 +1793,11 @@
             }
 
             if (mode === 'html5') {
-                loadChannelUrl(currentUrl, 'html5', true);
+                if (corsBlockedUrls.has(currentUrl.trim())) {
+                    loadChannelUrl(currentUrl, 'html5_cors_only', true);
+                } else {
+                    loadChannelUrl(currentUrl, 'main', true);
+                }
                 return;
             }
 
@@ -1617,6 +1846,10 @@
                 clearTimeout(loadTimeoutTimer);
                 loadTimeoutTimer = null;
             }
+            if (clapprUiHideTimer) {
+                clearTimeout(clapprUiHideTimer);
+                clapprUiHideTimer = null;
+            }
             if (mpegtsPlayer) {
                 try {
                     mpegtsPlayer.pause();
@@ -1649,7 +1882,7 @@
             }
 
             setOfflineScreenVisible(false);
-            setActivePlayerView('shaka');
+            setActivePlayerView('clappr');
 
             const mainVideo = document.getElementById("video");
             if (mainVideo) {
@@ -1657,6 +1890,7 @@
                 mainVideo.removeAttribute("controls");
                 mainVideo.onwaiting = null;
                 mainVideo.onplaying = null;
+                mainVideo.ontimeupdate = null;
                 mainVideo.onerror = null;
                 mainVideo.pause();
                 mainVideo.removeAttribute("src");
@@ -1688,15 +1922,15 @@
             }
         }
 
+        // Clappr (Main + Custom Interface) -> HLS.js -> HTML5 (শুধুমাত্র CORS/Origin ব্লক হলেই) -> Offline
         async function loadChannelUrl(url, mode = 'main', isNewLoad = true) {
             const sessionId = isNewLoad ? ++loadSessionId : loadSessionId;
             if (isNewLoad || !sessionFallbackState[sessionId]) {
                 sessionFallbackState[sessionId] = {
                     hasStartedPlaying: false,
-                    movedToClapprOnce: false,
+                    movedToHlsOnce: false,
                     movedToHtml5Once: false,
-                    originBlockedInHls: false,
-                    originBlockedInClappr: false
+                    corsOriginBlocked: false
                 };
             }
             const fbState = sessionFallbackState[sessionId];
@@ -1704,22 +1938,20 @@
             const rawUrl = String(url || '').trim();
             const isFlv = isFlvUrl(rawUrl);
             const isMpd = !isFlv && isMpdUrl(rawUrl);
-            const directHtml5 = !isFlv && !isMpd && shouldUseHtml5Directly(rawUrl);
-            const directClappr = !isFlv && !isMpd && !directHtml5 && shouldUseClapprDirectly(rawUrl);
 
             const effectiveMode = isFlv
                 ? 'flv'
                 : (isMpd
                     ? 'shaka'
-                    : ((mode === 'html5' || directHtml5)
-                        ? 'html5'
-                        : ((mode === 'clappr_once' || directClappr) ? 'clappr_once' : 'main')));
+                    : (mode === 'html5_cors_only'
+                        ? 'html5_cors_only'
+                        : (mode === 'hls_once' ? 'hls_once' : 'clappr_main')));
 
             const clearKeys = extractClearKeys(rawUrl, currentChannelObj ? currentChannelObj.drm : null);
             const finalUrl = rawUrl.split('|')[0].trim();
 
             currentUrl = rawUrl;
-            currentMode = effectiveMode === 'html5' ? 'html5' : 'main';
+            currentMode = effectiveMode === 'html5_cors_only' ? 'html5' : 'main';
 
             const mainVideo = document.getElementById("video");
             const statusEl = document.getElementById("status");
@@ -1751,12 +1983,14 @@
             };
 
             const markStreamStarted = () => {
+                if (sessionId !== loadSessionId) return;
                 fbState.hasStartedPlaying = true;
                 setOfflineScreenVisible(false);
                 if (loadTimeoutTimer) {
                     clearTimeout(loadTimeoutTimer);
                     loadTimeoutTimer = null;
                 }
+                statusEl.textContent = "Playing";
             };
 
             const markStreamOffline = () => {
@@ -1769,36 +2003,29 @@
                 statusEl.textContent = "Offline";
             };
 
-            // HLS না হলে Clappr-এ যাবে; আর HLS ও Clappr দুটোতেই Origin ব্লক খেলে তবেই HTML5-এ যাবে
-            const handleHlsOrClapprFallback = (fromStage, isOriginBlocked = false) => {
+            const handleNextStep = (fromStage, isCorsOriginBlock = false) => {
                 if (sessionId !== loadSessionId || isMpd || isFlv) return;
                 if (fbState.hasStartedPlaying) {
-                    statusEl.textContent = "Buffering...";
+                    setOfflineScreenVisible(false);
+                    statusEl.textContent = "Playing";
                     return;
                 }
 
-                if (fromStage === 'hls') {
-                    if (isOriginBlocked) {
-                        fbState.originBlockedInHls = true;
-                    }
-                    if (!fbState.movedToClapprOnce) {
-                        fbState.movedToClapprOnce = true;
-                        rememberClapprForUrl(rawUrl);
-                        loadChannelUrl(rawUrl, 'clappr_once', false);
-                        return;
-                    }
+                if (isCorsOriginBlock) {
+                    fbState.corsOriginBlocked = true;
+                    corsBlockedUrls.add(rawUrl);
                 }
 
-                if (fromStage === 'clappr') {
-                    if (isOriginBlocked) {
-                        fbState.originBlockedInClappr = true;
-                    }
-                    if ((fbState.originBlockedInHls && fbState.originBlockedInClappr) && !fbState.movedToHtml5Once) {
-                        fbState.movedToHtml5Once = true;
-                        rememberHtml5ForUrl(rawUrl);
-                        loadChannelUrl(rawUrl, 'html5', false);
-                        return;
-                    }
+                if (fromStage === 'clappr' && !fbState.movedToHlsOnce) {
+                    fbState.movedToHlsOnce = true;
+                    loadChannelUrl(rawUrl, 'hls_once', false);
+                    return;
+                }
+
+                if (fbState.corsOriginBlocked && !fbState.movedToHtml5Once) {
+                    fbState.movedToHtml5Once = true;
+                    loadChannelUrl(rawUrl, 'html5_cors_only', false);
+                    return;
                 }
 
                 markStreamOffline();
@@ -1817,15 +2044,16 @@
                     if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                         markStreamOffline();
                     }
-                }, HLS_TO_CLAPPR_MS);
+                }, STREAM_TIMEOUT_MS);
 
                 flvEl.onwaiting = () => {
-                    if (sessionId === loadSessionId) statusEl.textContent = "Buffering...";
+                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                        statusEl.textContent = "Buffering...";
+                    }
                 };
                 flvEl.onplaying = () => {
                     if (sessionId === loadSessionId) {
                         markStreamStarted();
-                        statusEl.textContent = "Playing";
                         if (hasUserInteracted) {
                             flvEl.muted = false;
                             flvEl.volume = 1.0;
@@ -1835,7 +2063,6 @@
                 flvEl.onplay = () => {
                     if (sessionId === loadSessionId) {
                         markStreamStarted();
-                        statusEl.textContent = "Playing";
                     }
                 };
                 flvEl.onerror = () => {
@@ -1889,7 +2116,6 @@
                         await shakaPlayerRef.load(finalUrl);
                         if (sessionId !== loadSessionId) return;
                         markStreamStarted();
-                        statusEl.textContent = "Playing";
                         triggerInstantPlay(mainVideo);
                     } catch (error) {
                         if (sessionId === loadSessionId) {
@@ -1900,15 +2126,15 @@
                 return;
             }
 
-            // HTML5 Mode (শুধুমাত্র HLS ও Clappr দুটোতেই Origin ব্লক খেলে তবেই আসবে)
-            if (effectiveMode === 'html5') {
+            // HTML5 Mode (শুধুমাত্র CORS/Origin ব্লক হলেই এখানে আসে)
+            if (effectiveMode === 'html5_cors_only') {
                 setActivePlayerView('html5');
 
                 loadTimeoutTimer = setTimeout(() => {
                     if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                         markStreamOffline();
                     }
-                }, HLS_TO_CLAPPR_MS);
+                }, STREAM_TIMEOUT_MS);
 
                 html5El.onloadedmetadata = () => {
                     if (sessionId === loadSessionId) forceMediaPlayNow(html5El);
@@ -1922,16 +2148,16 @@
                 html5El.onplay = () => {
                     if (sessionId === loadSessionId) {
                         markStreamStarted();
-                        statusEl.textContent = "Playing";
                     }
                 };
                 html5El.onwaiting = () => {
-                    if (sessionId === loadSessionId) statusEl.textContent = "Buffering...";
+                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                        statusEl.textContent = "Buffering...";
+                    }
                 };
                 html5El.onplaying = () => {
                     if (sessionId === loadSessionId) {
                         markStreamStarted();
-                        statusEl.textContent = "Playing";
                         if (hasUserInteracted) {
                             html5El.muted = false;
                             html5El.volume = 1.0;
@@ -1950,161 +2176,176 @@
                 return;
             }
 
-            const ShakaStyleLoader = createShakaStyleHlsFetchLoader();
+            // HLS.js Fallback Mode (Clappr-এ প্লে না হলে শুধু সেগুলোই এখানে আসবে)
+            if (effectiveMode === 'hls_once') {
+                setActivePlayerView('shaka');
+                if (!shakaPlayerRef) {
+                    await initPlayer();
+                }
 
-            // Clappr Mode (HLS-এ না চললে এখানে আসে; এখানেও Origin ব্লক খেলে HTML5-এ যায়)
-            if (effectiveMode === 'clappr_once') {
-                setActivePlayerView('clappr');
+                const mobile = isMobileView();
 
                 loadTimeoutTimer = setTimeout(() => {
                     if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                        handleHlsOrClapprFallback('clappr', fbState.originBlockedInClappr);
+                        handleNextStep('hls', fbState.corsOriginBlocked);
                     }
-                }, HLS_TO_CLAPPR_MS);
+                }, STREAM_TIMEOUT_MS);
 
-                const clapprHlsConfig = {
-                    enableWorker: false,
-                    lowLatencyMode: true
+                mainVideo.onplaying = () => {
+                    if (sessionId === loadSessionId) {
+                        markStreamStarted();
+                    }
                 };
-                if (ShakaStyleLoader) {
-                    clapprHlsConfig.loader = ShakaStyleLoader;
-                    clapprHlsConfig.pLoader = ShakaStyleLoader;
-                    clapprHlsConfig.fLoader = ShakaStyleLoader;
-                }
+                mainVideo.ontimeupdate = () => {
+                    if (sessionId === loadSessionId && !mainVideo.paused && mainVideo.currentTime > 0) {
+                        markStreamStarted();
+                    }
+                };
 
-                clapprInstance = new Clappr.Player({
-                    source: finalUrl,
-                    parentId: "#clappr-container",
-                    width: '100%',
-                    height: '100%',
-                    autoPlay: true,
-                    mute: false,
-                    hideMediaControl: true,
-                    hlsjsConfig: clapprHlsConfig
-                });
-
-                if (typeof clapprInstance.setVolume === 'function') {
-                    try { clapprInstance.setVolume(100); } catch (e) {}
-                }
-
-                const attachClapprHlsErrorWatch = () => {
-                    try {
-                        const playback = clapprInstance && clapprInstance.core && clapprInstance.core.getCurrentPlayback
-                            ? clapprInstance.core.getCurrentPlayback()
-                            : null;
-                        if (playback && playback._hls && typeof Hls !== 'undefined') {
-                            playback._hls.on(Hls.Events.ERROR, (ev, data) => {
-                                if (sessionId !== loadSessionId || !data || !data.fatal) return;
-                                const statusCode = data.response && data.response.code ? Number(data.response.code) : 0;
-                                const isOriginBlock = data.type === Hls.ErrorTypes.NETWORK_ERROR && (statusCode === 0 || statusCode === 403);
-                                if (!fbState.hasStartedPlaying) {
-                                    handleHlsOrClapprFallback('clappr', isOriginBlock);
-                                }
-                            });
+                if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+                    const hlsConfig = mobile
+                        ? {
+                            enableWorker: false,
+                            lowLatencyMode: false,
+                            capLevelToPlayerSize: true,
+                            maxBufferLength: 40,
+                            maxMaxBufferLength: 75,
+                            maxBufferSize: 35 * 1000 * 1000,
+                            maxFragLookUpTolerance: 0.25,
+                            startLevel: 0,
+                            abrEwmaDefaultEstimate: 450000,
+                            fragLoadingTimeOut: 25000,
+                            manifestLoadingTimeOut: 15000
                         }
-                    } catch (e) {}
-                };
+                        : {
+                            enableWorker: false,
+                            lowLatencyMode: true
+                        };
 
-                if (typeof Clappr !== 'undefined' && Clappr.Events) {
-                    if (Clappr.Events.PLAYER_READY) {
-                        clapprInstance.on(Clappr.Events.PLAYER_READY, attachClapprHlsErrorWatch);
-                    }
-                    if (Clappr.Events.PLAY) {
-                        clapprInstance.on(Clappr.Events.PLAY, () => {
-                            if (sessionId === loadSessionId) {
-                                markStreamStarted();
-                                statusEl.textContent = "Playing";
+                    hls = new Hls(hlsConfig);
+
+                    hls.loadSource(finalUrl);
+                    hls.attachMedia(mainVideo);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        if (sessionId !== loadSessionId) return;
+                        triggerInstantPlay(mainVideo);
+                    });
+                    hls.on(Hls.Events.FRAG_BUFFERED, () => {
+                        if (sessionId !== loadSessionId) return;
+                        if (!mainVideo.paused) {
+                            markStreamStarted();
+                        }
+                    });
+                    hls.on(Hls.Events.ERROR, (event, data) => {
+                        if (sessionId !== loadSessionId) return;
+                        if (data && data.fatal) {
+                            const statusCode = data.response && data.response.code ? Number(data.response.code) : 0;
+                            const isCorsBlock = isCorsOrOriginBlockError(data, statusCode);
+
+                            if (!fbState.hasStartedPlaying) {
+                                handleNextStep('hls', isCorsBlock);
+                                return;
                             }
-                        });
-                    }
-                    if (Clappr.Events.PLAYER_ERROR) {
-                        clapprInstance.on(Clappr.Events.PLAYER_ERROR, (err) => {
-                            if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                                const errStr = JSON.stringify(err || '').toLowerCase();
-                                const isOriginBlock = fbState.originBlockedInClappr || errStr.includes('cors') || errStr.includes('network') || errStr.includes('403') || errStr.includes('manifest');
-                                handleHlsOrClapprFallback('clappr', isOriginBlock);
+
+                            if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                                try { hls.startLoad(); } catch (e) {}
+                                statusEl.textContent = "Buffering...";
+                            } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                                try { hls.recoverMediaError(); } catch (e) {}
+                                statusEl.textContent = "Buffering...";
                             }
-                        });
-                    }
+                        }
+                    });
+                } else if (mainVideo.canPlayType('application/vnd.apple.mpegurl')) {
+                    mainVideo.src = finalUrl;
+                    triggerInstantPlay(mainVideo);
+                } else {
+                    handleNextStep('hls', false);
                 }
-                setTimeout(attachClapprHlsErrorWatch, 200);
                 return;
             }
 
-            // Main Mode (প্রথমে HLS.js দিয়ে প্লে হবে; না চললে স্বয়ংক্রিয়ভাবে Clappr-এ যাবে)
-            setActivePlayerView('shaka');
-            if (!shakaPlayerRef) {
-                await initPlayer();
-            }
-
-            const mobile = isMobileView();
+            // Clappr Main Mode (Clappr দিয়ে প্লে হবে এবং ভেতরে কাস্টম ইন্টারফেস যুক্ত থাকবে)
+            setActivePlayerView('clappr');
 
             loadTimeoutTimer = setTimeout(() => {
                 if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                    handleHlsOrClapprFallback('hls', fbState.originBlockedInHls);
+                    handleNextStep('clappr', fbState.corsOriginBlocked);
                 }
-            }, HLS_TO_CLAPPR_MS);
+            }, STREAM_TIMEOUT_MS);
 
-            if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                const hlsConfig = mobile
-                    ? {
-                        enableWorker: false,
-                        lowLatencyMode: false,
-                        capLevelToPlayerSize: true,
-                        maxBufferLength: 40,
-                        maxMaxBufferLength: 75,
-                        maxBufferSize: 35 * 1000 * 1000,
-                        maxFragLookUpTolerance: 0.25,
-                        startLevel: 0,
-                        abrEwmaDefaultEstimate: 450000,
-                        fragLoadingTimeOut: 25000,
-                        manifestLoadingTimeOut: 15000
-                    }
-                    : {
-                        enableWorker: false,
-                        lowLatencyMode: true
-                    };
+            clapprInstance = new Clappr.Player({
+                source: finalUrl,
+                parentId: "#clappr-container",
+                width: '100%',
+                height: '100%',
+                autoPlay: true,
+                mute: false,
+                hideMediaControl: true
+            });
 
-                if (ShakaStyleLoader) {
-                    hlsConfig.loader = ShakaStyleLoader;
-                    hlsConfig.pLoader = ShakaStyleLoader;
-                    hlsConfig.fLoader = ShakaStyleLoader;
-                }
-
-                hls = new Hls(hlsConfig);
-
-                hls.loadSource(finalUrl);
-                hls.attachMedia(mainVideo);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    if (sessionId !== loadSessionId) return;
-                    triggerInstantPlay(mainVideo);
-                });
-                hls.on(Hls.Events.ERROR, (event, data) => {
-                    if (sessionId !== loadSessionId) return;
-                    if (data && data.fatal) {
-                        const statusCode = data.response && data.response.code ? Number(data.response.code) : 0;
-                        const isOriginBlocked = data.type === Hls.ErrorTypes.NETWORK_ERROR && (statusCode === 0 || statusCode === 403);
-
-                        if (!fbState.hasStartedPlaying) {
-                            handleHlsOrClapprFallback('hls', isOriginBlocked);
-                            return;
-                        }
-
-                        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                            try { hls.startLoad(); } catch (e) {}
-                            statusEl.textContent = "Buffering...";
-                        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-                            try { hls.recoverMediaError(); } catch (e) {}
-                            statusEl.textContent = "Buffering...";
-                        }
-                    }
-                });
-            } else if (mainVideo.canPlayType('application/vnd.apple.mpegurl')) {
-                mainVideo.src = finalUrl;
-                triggerInstantPlay(mainVideo);
-            } else {
-                handleHlsOrClapprFallback('hls', false);
+            if (typeof clapprInstance.setVolume === 'function') {
+                try { clapprInstance.setVolume(100); } catch (e) {}
             }
+
+            attachClapprInterface(clapprInstance, clapprEl);
+
+            const bindClapprVideoListeners = () => {
+                const innerVideo = clapprEl ? clapprEl.querySelector("video") : null;
+                if (innerVideo) {
+                    const onVideoActivePlay = () => {
+                        if (sessionId === loadSessionId) {
+                            markStreamStarted();
+                        }
+                    };
+                    innerVideo.addEventListener("playing", onVideoActivePlay);
+                    innerVideo.addEventListener("timeupdate", onVideoActivePlay);
+                }
+
+                try {
+                    const playback = clapprInstance && clapprInstance.core && clapprInstance.core.getCurrentPlayback
+                        ? clapprInstance.core.getCurrentPlayback()
+                        : null;
+                    if (playback && playback._hls && typeof Hls !== 'undefined') {
+                        playback._hls.on(Hls.Events.FRAG_BUFFERED, () => {
+                            if (sessionId === loadSessionId) {
+                                markStreamStarted();
+                            }
+                        });
+                        playback._hls.on(Hls.Events.ERROR, (ev, data) => {
+                            if (sessionId !== loadSessionId || !data || !data.fatal) return;
+                            const statusCode = data.response && data.response.code ? Number(data.response.code) : 0;
+                            const isCorsBlock = isCorsOrOriginBlockError(data, statusCode);
+                            if (!fbState.hasStartedPlaying) {
+                                handleNextStep('clappr', isCorsBlock);
+                            }
+                        });
+                    }
+                } catch (e) {}
+            };
+
+            if (typeof Clappr !== 'undefined' && Clappr.Events) {
+                if (Clappr.Events.PLAYER_READY) {
+                    clapprInstance.on(Clappr.Events.PLAYER_READY, bindClapprVideoListeners);
+                }
+                if (Clappr.Events.PLAY) {
+                    clapprInstance.on(Clappr.Events.PLAY, () => {
+                        if (sessionId === loadSessionId) {
+                            markStreamStarted();
+                        }
+                    });
+                }
+                if (Clappr.Events.PLAYER_ERROR) {
+                    clapprInstance.on(Clappr.Events.PLAYER_ERROR, (err) => {
+                        if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                            const isCorsBlock = isCorsOrOriginBlockError(err);
+                            handleNextStep('clappr', isCorsBlock);
+                        }
+                    });
+                }
+            }
+            setTimeout(bindClapprVideoListeners, 200);
+            setTimeout(bindClapprVideoListeners, 800);
         }
 
         function playCustom() {
