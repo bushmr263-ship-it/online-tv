@@ -431,86 +431,96 @@
             background: #000 !important;
         }
 
-        /* Clappr-এর ভেতরে কাস্টম ইন্টারফেস ওভারলে */
-        .clappr-custom-ui {
+        #clappr-container [data-watermark],
+        #clappr-container .clappr-watermark,
+        #clappr-container .media-control,
+        #clappr-container .media-control-not-playing-state,
+        #clappr-container .spinner-three-bounce {
+            display: none !important;
+        }
+
+        /* পরিচ্ছন্ন Clappr কন্ট্রোল ইন্টারফেস */
+        #clapprCustomUi {
             position: absolute;
             inset: 0;
             z-index: 22;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.15) 38%, rgba(0, 0, 0, 0) 100%);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.2) 32%, rgba(0, 0, 0, 0) 100%);
             opacity: 1;
             transition: opacity 0.25s ease;
-            pointer-events: none;
+            pointer-events: auto;
         }
 
-        .clappr-custom-ui.ui-auto-hidden {
+        #clapprCustomUi.ui-hidden {
+            display: none !important;
+        }
+
+        #clapprCustomUi.ui-auto-hidden {
             opacity: 0;
         }
 
         .clappr-ui-bar {
-            pointer-events: auto;
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 8px 12px;
-            background: rgba(12, 16, 23, 0.9);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px 14px;
+            background: rgba(15, 19, 26, 0.92);
         }
 
         .clappr-ui-btn {
             background: transparent;
-            color: #fff;
+            color: #f0f6fc;
             border: none;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
-            padding: 4px 7px;
-            border-radius: 5px;
+            padding: 4px 6px;
+            border-radius: 4px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 4px;
-            transition: background 0.15s ease, color 0.15s ease;
-            white-space: nowrap;
+            line-height: 1;
+            transition: color 0.15s ease, background 0.15s ease;
         }
 
         .clappr-ui-btn:hover {
-            background: rgba(255, 255, 255, 0.14);
             color: var(--accent-color);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .clappr-ui-vol {
-            width: 68px;
-            accent-color: var(--accent-color);
+            width: 72px;
+            accent-color: #ffffff;
             cursor: pointer;
             height: 4px;
         }
 
         .clappr-ui-progress {
             flex: 1;
-            accent-color: var(--accent-color);
+            accent-color: #ffffff;
             cursor: pointer;
             height: 4px;
-            min-width: 45px;
+            min-width: 50px;
         }
 
         .clappr-ui-time {
-            font-size: 11.5px;
-            color: #ddd;
+            font-size: 12px;
+            color: #e6edf3;
             white-space: nowrap;
             font-variant-numeric: tabular-nums;
         }
 
         .clappr-ui-hd {
-            background: #e11d48;
+            background: #dc2626;
             color: #fff;
-            font-size: 10px;
+            font-size: 9.5px;
             font-weight: 800;
             padding: 1px 4px;
-            border-radius: 3px;
-            letter-spacing: 0.4px;
+            border-radius: 2px;
+            letter-spacing: 0.3px;
         }
 
         #player-container {
@@ -954,18 +964,18 @@
                 min-width: 45px !important;
             }
             .clappr-ui-bar {
-                gap: 5px;
-                padding: 5px 7px;
+                gap: 6px;
+                padding: 6px 8px;
             }
             .clappr-ui-btn {
-                padding: 3px 5px;
-                font-size: 11px;
+                padding: 3px 4px;
+                font-size: 11.5px;
             }
             .clappr-ui-vol {
-                width: 44px;
+                width: 46px;
             }
             .clappr-ui-time {
-                font-size: 10px;
+                font-size: 10.5px;
             }
         }
     </style>
@@ -1282,8 +1292,10 @@
         let hasUserInteracted = false;
         let activeBackendView = 'clappr';
         let clapprUiHideTimer = null;
+        let clapprUiPollTimer = null;
 
         const STREAM_TIMEOUT_MS = 10000;
+        const CLAPPR_NO_PLAY_MS = 4500;
 
         const SELECTED_TOFFEE_CHANNELS = [
             "Zee Bollywood",
@@ -1323,18 +1335,29 @@
             return `${m}:${String(s).padStart(2, '0')}`;
         }
 
-        // Clappr-এর ভেতরে কাস্টম ইন্টারফেস ওভারলে তৈরি ও সংযুক্ত করার ফাংশন
-        function attachClapprInterface(playerObj, containerEl) {
-            if (!containerEl) return;
-            const oldUi = containerEl.querySelector('.clappr-custom-ui');
-            if (oldUi) oldUi.remove();
+        function removeClapprInterface() {
+            const box = document.getElementById('videoBox');
+            const existing = box ? box.querySelector('#clapprCustomUi') : null;
+            if (existing) existing.remove();
             if (clapprUiHideTimer) {
                 clearTimeout(clapprUiHideTimer);
                 clapprUiHideTimer = null;
             }
+            if (clapprUiPollTimer) {
+                clearInterval(clapprUiPollTimer);
+                clapprUiPollTimer = null;
+            }
+        }
+
+        function ensureClapprInterface(playerObj) {
+            const box = document.getElementById('videoBox');
+            if (!box) return;
+
+            removeClapprInterface();
 
             const uiWrap = document.createElement('div');
-            uiWrap.className = 'clappr-custom-ui';
+            uiWrap.id = 'clapprCustomUi';
+            uiWrap.className = activeBackendView === 'clappr' ? '' : 'ui-hidden';
 
             const bar = document.createElement('div');
             bar.className = 'clappr-ui-bar';
@@ -1367,12 +1390,12 @@
 
             const timeLabel = document.createElement('span');
             timeLabel.className = 'clappr-ui-time';
-            timeLabel.textContent = 'LIVE';
+            timeLabel.textContent = '- 0:00';
 
             const hdBtn = document.createElement('button');
             hdBtn.type = 'button';
             hdBtn.className = 'clappr-ui-btn';
-            hdBtn.title = 'Quality / Auto';
+            hdBtn.title = 'Quality';
             hdBtn.innerHTML = '<span>⚙</span><span class="clappr-ui-hd">HD</span>';
 
             const pipBtn = document.createElement('button');
@@ -1396,22 +1419,33 @@
             bar.appendChild(pipBtn);
             bar.appendChild(fsBtn);
             uiWrap.appendChild(bar);
-            containerEl.appendChild(uiWrap);
+            box.appendChild(uiWrap);
+
+            const getInnerVideo = () => clapprEl ? clapprEl.querySelector('video') : null;
 
             const bumpAutoHide = () => {
+                if (activeBackendView !== 'clappr') {
+                    uiWrap.classList.add('ui-hidden');
+                    return;
+                }
+                uiWrap.classList.remove('ui-hidden');
                 uiWrap.classList.remove('ui-auto-hidden');
                 if (clapprUiHideTimer) clearTimeout(clapprUiHideTimer);
                 clapprUiHideTimer = setTimeout(() => {
-                    const vid = containerEl.querySelector('video');
-                    if (vid && !vid.paused) {
+                    const vid = getInnerVideo();
+                    if (vid && !vid.paused && activeBackendView === 'clappr') {
                         uiWrap.classList.add('ui-auto-hidden');
                     }
-                }, 3200);
+                }, 3000);
             };
 
-            const getInnerVideo = () => containerEl.querySelector('video');
-
             const syncUiState = () => {
+                if (activeBackendView !== 'clappr') {
+                    uiWrap.classList.add('ui-hidden');
+                    return;
+                }
+                uiWrap.classList.remove('ui-hidden');
+
                 const vid = getInnerVideo();
                 if (!vid) return;
                 playBtn.textContent = vid.paused ? '▶' : '❚❚';
@@ -1427,7 +1461,7 @@
                 } else {
                     progressSlider.max = '100';
                     progressSlider.value = '100';
-                    timeLabel.textContent = vid.currentTime > 0 ? `-${formatMediaTime(vid.currentTime)}` : 'LIVE';
+                    timeLabel.textContent = `- ${formatMediaTime(vid.currentTime || 0)}`;
                 }
             };
 
@@ -1510,7 +1544,6 @@
 
             fsBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const box = document.getElementById('videoBox') || containerEl;
                 try {
                     if (!document.fullscreenElement) {
                         if (box.requestFullscreen) box.requestFullscreen();
@@ -1523,10 +1556,8 @@
                 bumpAutoHide();
             });
 
-            containerEl.addEventListener('mousemove', bumpAutoHide);
-            containerEl.addEventListener('touchstart', bumpAutoHide, { passive: true });
-            containerEl.addEventListener('click', (e) => {
-                if (e.target === uiWrap || e.target === containerEl) {
+            uiWrap.addEventListener('click', (e) => {
+                if (e.target === uiWrap) {
                     const vid = getInnerVideo();
                     if (vid) {
                         if (vid.paused) vid.play().catch(() => {});
@@ -1537,13 +1568,17 @@
                 bumpAutoHide();
             });
 
-            const pollTimer = setInterval(() => {
-                if (!containerEl.contains(uiWrap)) {
-                    clearInterval(pollTimer);
+            box.addEventListener('mousemove', bumpAutoHide);
+            box.addEventListener('touchstart', bumpAutoHide, { passive: true });
+
+            clapprUiPollTimer = setInterval(() => {
+                if (!box.contains(uiWrap)) {
+                    clearInterval(clapprUiPollTimer);
+                    clapprUiPollTimer = null;
                     return;
                 }
                 syncUiState();
-            }, 600);
+            }, 500);
 
             syncUiState();
             bumpAutoHide();
@@ -1596,6 +1631,10 @@
             if (flvEl) {
                 flvEl.classList.toggle("player-hidden", activeBackendView !== "flv");
                 flvEl.controls = (activeBackendView === "flv");
+            }
+            const clapprUi = document.getElementById("clapprCustomUi");
+            if (clapprUi) {
+                clapprUi.classList.toggle("ui-hidden", activeBackendView !== "clappr");
             }
         }
 
@@ -1846,10 +1885,8 @@
                 clearTimeout(loadTimeoutTimer);
                 loadTimeoutTimer = null;
             }
-            if (clapprUiHideTimer) {
-                clearTimeout(clapprUiHideTimer);
-                clapprUiHideTimer = null;
-            }
+            removeClapprInterface();
+
             if (mpegtsPlayer) {
                 try {
                     mpegtsPlayer.pause();
@@ -1922,7 +1959,7 @@
             }
         }
 
-        // Clappr (Main + Custom Interface) -> HLS.js -> HTML5 (শুধুমাত্র CORS/Origin ব্লক হলেই) -> Offline
+        // Clappr (Main + Interface) -> HLS.js -> HTML5 (শুধুমাত্র CORS/Origin ব্লক হলেই) -> Offline
         async function loadChannelUrl(url, mode = 'main', isNewLoad = true) {
             const sessionId = isNewLoad ? ++loadSessionId : loadSessionId;
             if (isNewLoad || !sessionFallbackState[sessionId]) {
@@ -2265,14 +2302,17 @@
                 return;
             }
 
-            // Clappr Main Mode (Clappr দিয়ে প্লে হবে এবং ভেতরে কাস্টম ইন্টারফেস যুক্ত থাকবে)
+            // Clappr Main Mode (প্রথমে Clappr দিয়ে প্লে হবে; না চললে HLS.js-এ যাবে)
             setActivePlayerView('clappr');
+            ensureClapprInterface(null);
+
+            let clapprProgressed = false;
 
             loadTimeoutTimer = setTimeout(() => {
-                if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                if (sessionId === loadSessionId && !fbState.hasStartedPlaying && !clapprProgressed) {
                     handleNextStep('clappr', fbState.corsOriginBlocked);
                 }
-            }, STREAM_TIMEOUT_MS);
+            }, CLAPPR_NO_PLAY_MS);
 
             clapprInstance = new Clappr.Player({
                 source: finalUrl,
@@ -2287,19 +2327,29 @@
             if (typeof clapprInstance.setVolume === 'function') {
                 try { clapprInstance.setVolume(100); } catch (e) {}
             }
-
-            attachClapprInterface(clapprInstance, clapprEl);
+            ensureClapprInterface(clapprInstance);
 
             const bindClapprVideoListeners = () => {
                 const innerVideo = clapprEl ? clapprEl.querySelector("video") : null;
                 if (innerVideo) {
                     const onVideoActivePlay = () => {
                         if (sessionId === loadSessionId) {
+                            clapprProgressed = true;
                             markStreamStarted();
                         }
                     };
                     innerVideo.addEventListener("playing", onVideoActivePlay);
-                    innerVideo.addEventListener("timeupdate", onVideoActivePlay);
+                    innerVideo.addEventListener("timeupdate", () => {
+                        if (sessionId === loadSessionId && innerVideo.currentTime > 0.2) {
+                            clapprProgressed = true;
+                            markStreamStarted();
+                        }
+                    });
+                    innerVideo.addEventListener("error", () => {
+                        if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                            handleNextStep('clappr', false);
+                        }
+                    });
                 }
 
                 try {
@@ -2307,11 +2357,6 @@
                         ? clapprInstance.core.getCurrentPlayback()
                         : null;
                     if (playback && playback._hls && typeof Hls !== 'undefined') {
-                        playback._hls.on(Hls.Events.FRAG_BUFFERED, () => {
-                            if (sessionId === loadSessionId) {
-                                markStreamStarted();
-                            }
-                        });
                         playback._hls.on(Hls.Events.ERROR, (ev, data) => {
                             if (sessionId !== loadSessionId || !data || !data.fatal) return;
                             const statusCode = data.response && data.response.code ? Number(data.response.code) : 0;
@@ -2331,6 +2376,7 @@
                 if (Clappr.Events.PLAY) {
                     clapprInstance.on(Clappr.Events.PLAY, () => {
                         if (sessionId === loadSessionId) {
+                            clapprProgressed = true;
                             markStreamStarted();
                         }
                     });
