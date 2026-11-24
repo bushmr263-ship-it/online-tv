@@ -648,7 +648,22 @@
         }
 
         #clapprCenterBadge {
-            display: none !important;
+            position: absolute;
+            inset: 0;
+            z-index: 23;
+            background: #000000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        #clapprCenterBadge.is-offline {
+            display: flex !important;
+            color: #ff6b81;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
         }
 
         #player-container {
@@ -1086,6 +1101,9 @@
                 height: 34px;
                 border-width: 3.5px;
             }
+            #clapprCenterBadge.is-offline {
+                font-size: 14px;
+            }
             .clappr-ui-bar {
                 gap: 6px;
                 padding: 6px 8px;
@@ -1164,7 +1182,7 @@
 
             <div class="video-box" id="videoBox">
                 <div id="offlineOverlay">Offline</div>
-                <div id="clapprCenterBadge"></div>
+                <div id="clapprCenterBadge">Offline</div>
                 <div id="videoCenterWaitNotice">
                     <span class="wait-spinner-ring" aria-hidden="true"></span>
                 </div>
@@ -1427,8 +1445,8 @@
         let clapprUiHideTimer = null;
         let clapprUiPollTimer = null;
 
-        const STREAM_TIMEOUT_MS = 10000;
-        const CLAPPR_NO_PLAY_MS = 4500;
+        const STREAM_TIMEOUT_MS = 65000;
+        const CLAPPR_NO_PLAY_MS = 65000;
 
         const SELECTED_TOFFEE_CHANNELS = [
             "Zee Bollywood",
@@ -1486,8 +1504,13 @@
 
         function setCenterBadgeState(state = 'none') {
             if (!centerBadgeEl) return;
-            centerBadgeEl.classList.remove('is-offline');
-            centerBadgeEl.textContent = '';
+            if (state === 'offline') {
+                centerBadgeEl.classList.add('is-offline');
+                centerBadgeEl.textContent = 'Offline';
+            } else {
+                centerBadgeEl.classList.remove('is-offline');
+                centerBadgeEl.textContent = '';
+            }
         }
 
         function formatMediaTime(sec) {
@@ -1875,7 +1898,7 @@
             if (offlineOverlayEl) {
                 offlineOverlayEl.style.display = "none";
             }
-            setCenterBadgeState('none');
+            setCenterBadgeState(isOffline ? 'offline' : 'none');
         }
 
         function setActivePlayerView(activeView) {
@@ -2025,18 +2048,18 @@
                         rebufferingGoal: mobile ? 2 : 1.5,
                         bufferBehind: mobile ? 15 : 15,
                         retryParameters: {
-                            timeout: mobile ? 10000 : 6000,
-                            maxAttempts: mobile ? 2 : 1,
-                            baseDelay: mobile ? 500 : 300,
+                            timeout: mobile ? 15000 : 12000,
+                            maxAttempts: mobile ? 3 : 2,
+                            baseDelay: mobile ? 600 : 400,
                             backoffFactor: 1.5,
                             fuzzFactor: 0.2
                         }
                     },
                     manifest: {
                         retryParameters: {
-                            timeout: mobile ? 10000 : 6000,
-                            maxAttempts: mobile ? 2 : 1,
-                            baseDelay: mobile ? 500 : 300,
+                            timeout: mobile ? 15000 : 12000,
+                            maxAttempts: mobile ? 3 : 2,
+                            baseDelay: mobile ? 600 : 400,
                             backoffFactor: 1.5,
                             fuzzFactor: 0.2
                         }
@@ -2326,8 +2349,8 @@
                     loadTimeoutTimer = null;
                 }
                 hideClapprErrorCanvas();
-                setCenterBadgeState('none');
-                setCenterWaitVisible(true);
+                setCenterWaitVisible(false);
+                setOfflineScreenVisible(true);
                 statusEl.textContent = "Offline";
             };
 
@@ -2570,8 +2593,8 @@
                             abrEwmaDefaultEstimate: 350000,
                             abrBandWidthFactor: 0.75,
                             abrBandWidthUpFactor: 0.65,
-                            fragLoadingTimeOut: 25000,
-                            manifestLoadingTimeOut: 15000
+                            fragLoadingTimeOut: 45000,
+                            manifestLoadingTimeOut: 30000
                         }
                         : {
                             enableWorker: false,
@@ -2581,8 +2604,8 @@
                             abrEwmaDefaultEstimate: 500000,
                             abrBandWidthFactor: 0.8,
                             abrBandWidthUpFactor: 0.7,
-                            fragLoadingTimeOut: 20000,
-                            manifestLoadingTimeOut: 12000
+                            fragLoadingTimeOut: 45000,
+                            manifestLoadingTimeOut: 30000
                         };
 
                     hls = new Hls(hlsConfig);
@@ -2660,7 +2683,9 @@
                         abrBandWidthFactor: 0.75,
                         abrBandWidthUpFactor: 0.65,
                         maxBufferLength: 35,
-                        maxMaxBufferLength: 70
+                        maxMaxBufferLength: 70,
+                        fragLoadingTimeOut: 45000,
+                        manifestLoadingTimeOut: 30000
                     }
                 }
             });
