@@ -905,9 +905,9 @@
                 <div class="server-box-with-brand">
                     <div class="server-brand-left">
                         <a href="https://drive.google.com/uc?export=download&id=1Gf-6mgftctPLEUKBxzT0cx8lg0vzCAfh" target="_blank" rel="noopener noreferrer" class="tv-apk-box-btn">
-                       <img src="https://i.postimg.cc/25VNyzRB/tv-icon-logo-vector-illustration-design-1948-11932.png" alt="TV APK">
-                       <span>TV APK</span>
-                     </a>
+                            <img src="https://i.postimg.cc/25VNyzRB/tv-icon-logo-vector-illustration-design-1948-11932.png" alt="TV APK">
+                            <span>TV APK</span>
+                        </a>
                     </div>
 
                     <div id="serverSwitcherBox" class="header-server-switcher">
@@ -922,7 +922,7 @@
                                 </div>
                                 <div class="server-inline-notice">
                                     <marquee behavior="scroll" direction="left" scrollamount="4">
-                                       স্মার্ট ও এন্ড্রয়েড টিভির জন্য PB PLEX TV ডাউনলোড করুন /কিছু ভিডিও প্লে হতে এক মিনিট অপেক্ষা করুন 
+                                        স্মার্ট ও এন্ড্রয়েড টিভির জন্য PB PLEX TV ডাউনলোড করুন /কিছু ভিডিও প্লে হতে এক মিনিট অপেক্ষা করুন
                                     </marquee>
                                 </div>
                             </div>
@@ -937,11 +937,11 @@
                 <div id="offlineOverlay">Offline</div>
 
                 <div id="player-container" class="shaka-active">
-                  <video id="video"
-                    autoplay
-                    playsinline
-                    preload="metadata">
-                  </video>
+                    <video id="video"
+                        autoplay
+                        playsinline
+                        preload="metadata">
+                    </video>
                 </div>
 
                 <div id="status">Player Ready</div>
@@ -965,21 +965,19 @@
                 <button class="cat-btn" onclick="filterCategory('bangla', this)">Bangla</button>
                 <button class="cat-btn" onclick="filterCategory('indian_bangla', this)">Indian Bangla</button>
                 <button class="cat-btn" onclick="filterCategory('hindi', this)">Hindi</button>
-                <button class="cat-btn" onclick="filterCategory('cartoon', this)">Cartoon</button>
                 <button class="cat-btn" onclick="filterCategory('english', this)">English</button>
+                <button class="cat-btn" onclick="filterCategory('cartoon', this)">Cartoon</button>
                 <button class="cat-btn" onclick="filterCategory('music', this)">Music</button>
                 <button class="cat-btn" onclick="filterCategory('documentary', this)">Documentary</button>
             </div>
 
-            <div class="channel-list" id="channelContainer">
-                <p style="text-align: center; color: #888; grid-column: span 4;">চ্যানেল লোড হচ্ছে...</p>
-            </div>
+            <div class="channel-list" id="channelContainer"></div>
         </div>
     </div>
 
     <div class="input-box">
-        <input type="text" id="customUrlInput" placeholder="লিঙ্ক এখানে দিন (M3U8, MPD, FLV বা URL)...">
-        <button class="play-btn" onclick="playCustom()">প্লে করুন</button>
+        <input type="text" id="customUrlInput" placeholder="Custom .m3u8 / .mpd / .flv URL পেস্ট করুন...">
+        <button class="play-btn" type="button" onclick="playCustom()">Play</button>
     </div>
 
     <script>
@@ -1202,18 +1200,7 @@
             "Somoy TV"
         ];
 
-        const STORAGE_HTML5_HOSTS_KEY = "pb_auto_html5_hosts_v1";
         const sessionHtml5Urls = new Set();
-        const sessionHtml5Hosts = new Set();
-
-        try {
-            const savedHosts = JSON.parse(localStorage.getItem(STORAGE_HTML5_HOSTS_KEY) || "[]");
-            if (Array.isArray(savedHosts)) {
-                savedHosts.forEach(h => {
-                    if (h) sessionHtml5Hosts.add(String(h).toLowerCase());
-                });
-            }
-        } catch (e) {}
 
         function forceMediaPlayNow(mediaObj) {
             if (!mediaObj) return;
@@ -1243,6 +1230,7 @@
             }
         }
 
+        // প্লেব্যাক চলাকালে কোন প্লেয়ার চলছে তা বাইরে থেকে বোঝা না যাওয়ার মতো অভিন্ন ভিউ স্টেট
         function setActivePlayerView(activeView) {
             activeBackendView = activeView || 'shaka';
             const mainContainer = document.getElementById("player-container");
@@ -1265,37 +1253,124 @@
             }
         }
 
-        function getUrlHostLower(rawUrl) {
-            try {
-                const clean = String(rawUrl || "").split("|")[0].trim();
-                return new URL(clean).hostname.toLowerCase();
-            } catch (e) {
-                return "";
-            }
-        }
-
         function shouldUseHtml5Directly(rawUrl) {
             const str = String(rawUrl || "").trim();
-            if (!str || isFlvUrl(str)) return false;
-            const host = getUrlHostLower(str);
-            return sessionHtml5Urls.has(str) || Boolean(host && sessionHtml5Hosts.has(host));
+            if (!str || isFlvUrl(str) || isMpdUrl(str)) return false;
+            return sessionHtml5Urls.has(str);
         }
 
         function rememberHtml5ForUrl(rawUrl) {
             const str = String(rawUrl || "").trim();
-            if (!str || isFlvUrl(str)) return;
+            if (!str || isFlvUrl(str) || isMpdUrl(str)) return;
             sessionHtml5Urls.add(str);
-            const host = getUrlHostLower(str);
-            if (host) {
-                sessionHtml5Hosts.add(host);
-                try {
-                    localStorage.setItem(STORAGE_HTML5_HOSTS_KEY, JSON.stringify([...sessionHtml5Hosts]));
-                } catch (e) {}
-            }
         }
 
-        function isMobileView() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        // Shaka Player-এর মতো Fetch-ভিত্তিক Internal Loader (HLS.js ও Clappr-এর জন্য)
+        function createShakaStyleHlsFetchLoader() {
+            if (typeof Hls === 'undefined' || !Hls.DefaultConfig || !Hls.DefaultConfig.loader) {
+                return null;
+            }
+            if (window.__PB_SHAKA_STYLE_HLS_LOADER__) {
+                return window.__PB_SHAKA_STYLE_HLS_LOADER__;
+            }
+
+            const BaseLoader = Hls.DefaultConfig.loader;
+
+            class ShakaStyleFetchLoader extends BaseLoader {
+                constructor(config) {
+                    super(config);
+                    this._abortController = null;
+                }
+
+                abort() {
+                    if (this._abortController) {
+                        try { this._abortController.abort(); } catch (e) {}
+                    }
+                    super.abort();
+                }
+
+                destroy() {
+                    if (this._abortController) {
+                        try { this._abortController.abort(); } catch (e) {}
+                    }
+                    super.destroy();
+                }
+
+                load(context, config, callbacks) {
+                    const targetUrl = context && context.url ? context.url : '';
+                    if (!/^https?:\/\//i.test(targetUrl)) {
+                        super.load(context, config, callbacks);
+                        return;
+                    }
+
+                    this._abortController = new AbortController();
+                    const reqHeaders = new Headers(context.headers || {});
+                    if (context.rangeEnd !== undefined && context.rangeStart !== undefined) {
+                        reqHeaders.set('Range', `bytes=${context.rangeStart}-${context.rangeEnd - 1}`);
+                    }
+
+                    const startTime = performance.now();
+
+                    fetch(targetUrl, {
+                        method: 'GET',
+                        mode: 'cors',
+                        credentials: 'omit',
+                        cache: 'no-store',
+                        referrerPolicy: 'no-referrer',
+                        headers: reqHeaders,
+                        signal: this._abortController.signal
+                    })
+                    .then(async (response) => {
+                        const firstByteTime = performance.now();
+                        if (!response.ok) {
+                            const err = new Error(`HTTP ${response.status}`);
+                            err.status = response.status;
+                            throw err;
+                        }
+
+                        const isText = context.responseType === 'text';
+                        const payload = isText ? await response.text() : await response.arrayBuffer();
+                        const endTime = performance.now();
+                        const byteLen = isText ? payload.length : payload.byteLength;
+
+                        if (callbacks && typeof callbacks.onSuccess === 'function') {
+                            callbacks.onSuccess(
+                                {
+                                    url: response.url || targetUrl,
+                                    data: payload
+                                },
+                                {
+                                    trequest: { start: startTime, end: endTime },
+                                    tfirst: firstByteTime,
+                                    tload: endTime,
+                                    loaded: byteLen,
+                                    total: byteLen,
+                                    bwEstimate: 0
+                                },
+                                context,
+                                response
+                            );
+                        }
+                    })
+                    .catch((error) => {
+                        if (error && error.name === 'AbortError') return;
+                        if (callbacks && typeof callbacks.onError === 'function') {
+                            callbacks.onError(
+                                {
+                                    code: error && error.status ? error.status : 0,
+                                    text: (error && error.message) || 'Origin / Network Fetch Error'
+                                },
+                                context,
+                                null,
+                                null
+                            );
+                        }
+                    });
+                }
+            }
+
+            window.__PB_SHAKA_STYLE_HLS_LOADER__ = ShakaStyleFetchLoader;
+            return ShakaStyleFetchLoader;
         }
 
         function getChannelKey(ch) {
@@ -1463,6 +1538,10 @@
             }
         }
 
+        function isMobileView() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        }
+
         function switchMode(mode) {
             hasUserInteracted = true;
             if (!currentUrl) return;
@@ -1516,22 +1595,6 @@
             });
 
             loadChannelUrl(urls[0], 'main', true);
-        }
-
-        function playNextChannel() {
-            return;
-        }
-
-        function handleFallback() {
-            if (loadTimeoutTimer) {
-                clearTimeout(loadTimeoutTimer);
-                loadTimeoutTimer = null;
-            }
-            setOfflineScreenVisible(true);
-            const statusEl = document.getElementById("status");
-            if (statusEl) {
-                statusEl.textContent = "Offline";
-            }
         }
 
         async function cleanupPreviousPlayers() {
@@ -1620,7 +1683,9 @@
                 sessionFallbackState[sessionId] = {
                     hasStartedPlaying: false,
                     movedToClapprOnce: false,
-                    movedToHtml5Once: false
+                    movedToHtml5Once: false,
+                    originBlockedInHls: false,
+                    originBlockedInClappr: false
                 };
             }
             const fbState = sessionFallbackState[sessionId];
@@ -1691,25 +1756,34 @@
                 statusEl.textContent = "Offline";
             };
 
-            const triggerSingleClapprFallback = () => {
+            // কেবল HLS ও Clappr দুটোতেই Origin/CORS ব্লক খেলে তবেই HTML5-এ যাবে
+            const triggerSingleClapprFallback = (isOriginBlocked = false) => {
                 if (sessionId !== loadSessionId || isMpd || isFlv) return;
                 if (fbState.hasStartedPlaying) {
                     statusEl.textContent = "Buffering...";
                     return;
                 }
-                if (!fbState.movedToClapprOnce) {
-                    fbState.movedToClapprOnce = true;
-                    loadChannelUrl(rawUrl, 'clappr_once', false);
-                } else if (!fbState.movedToHtml5Once) {
-                    fbState.movedToHtml5Once = true;
-                    rememberHtml5ForUrl(rawUrl);
-                    loadChannelUrl(rawUrl, 'html5', false);
-                } else {
-                    markStreamOffline();
+
+                if (isOriginBlocked) {
+                    if (!fbState.movedToClapprOnce) {
+                        fbState.originBlockedInHls = true;
+                        fbState.movedToClapprOnce = true;
+                        loadChannelUrl(rawUrl, 'clappr_once', false);
+                        return;
+                    }
+                    if (!fbState.movedToHtml5Once) {
+                        fbState.originBlockedInClappr = true;
+                        fbState.movedToHtml5Once = true;
+                        rememberHtml5ForUrl(rawUrl);
+                        loadChannelUrl(rawUrl, 'html5', false);
+                        return;
+                    }
                 }
+
+                markStreamOffline();
             };
 
-            // ডেডিকেটেড FLV প্লেয়ার (শুধুমাত্র .flv লিংকের জন্য, অন্য কোনো প্লেয়ারে যাবে না)
+            // ডেডিকেটেড FLV প্লেয়ার (আগের মতোই অপরিবর্তিত)
             if (isFlv) {
                 setActivePlayerView('flv');
 
@@ -1779,6 +1853,7 @@
                 return;
             }
 
+            // Shaka Player (.mpd)
             if (isMpd) {
                 setActivePlayerView('shaka');
                 if (!shakaPlayerRef) {
@@ -1806,6 +1881,7 @@
                 return;
             }
 
+            // HTML5 Mode (শুধুমাত্র HLS ও Clappr দুটোতেই Origin ব্লক খেলে তবেই যাবে)
             if (effectiveMode === 'html5') {
                 setActivePlayerView('html5');
 
@@ -1816,19 +1892,13 @@
                 }, HLS_TO_CLAPPR_MS);
 
                 html5El.onloadedmetadata = () => {
-                    if (sessionId === loadSessionId) {
-                        forceMediaPlayNow(html5El);
-                    }
+                    if (sessionId === loadSessionId) forceMediaPlayNow(html5El);
                 };
                 html5El.onloadeddata = () => {
-                    if (sessionId === loadSessionId) {
-                        forceMediaPlayNow(html5El);
-                    }
+                    if (sessionId === loadSessionId) forceMediaPlayNow(html5El);
                 };
                 html5El.oncanplay = () => {
-                    if (sessionId === loadSessionId) {
-                        forceMediaPlayNow(html5El);
-                    }
+                    if (sessionId === loadSessionId) forceMediaPlayNow(html5El);
                 };
                 html5El.onplay = () => {
                     if (sessionId === loadSessionId) {
@@ -1863,14 +1933,27 @@
                 return;
             }
 
+            const ShakaStyleLoader = createShakaStyleHlsFetchLoader();
+
+            // Clappr Mode (Shaka-style Fetch Loader সহ)
             if (effectiveMode === 'clappr_once') {
                 setActivePlayerView('clappr');
 
                 loadTimeoutTimer = setTimeout(() => {
                     if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                        triggerSingleClapprFallback();
+                        triggerSingleClapprFallback(fbState.originBlockedInClappr);
                     }
                 }, HLS_TO_CLAPPR_MS);
+
+                const clapprHlsConfig = {
+                    enableWorker: false,
+                    lowLatencyMode: true
+                };
+                if (ShakaStyleLoader) {
+                    clapprHlsConfig.loader = ShakaStyleLoader;
+                    clapprHlsConfig.pLoader = ShakaStyleLoader;
+                    clapprHlsConfig.fLoader = ShakaStyleLoader;
+                }
 
                 clapprInstance = new Clappr.Player({
                     source: finalUrl,
@@ -1879,13 +1962,39 @@
                     height: '100%',
                     autoPlay: true,
                     mute: false,
-                    hideMediaControl: true
+                    hideMediaControl: true,
+                    hlsjsConfig: clapprHlsConfig
                 });
+
                 if (typeof clapprInstance.setVolume === 'function') {
                     try { clapprInstance.setVolume(100); } catch (e) {}
                 }
 
+                const attachClapprHlsErrorWatch = () => {
+                    try {
+                        const playback = clapprInstance && clapprInstance.core && clapprInstance.core.getCurrentPlayback
+                            ? clapprInstance.core.getCurrentPlayback()
+                            : null;
+                        if (playback && playback._hls && typeof Hls !== 'undefined') {
+                            playback._hls.on(Hls.Events.ERROR, (ev, data) => {
+                                if (sessionId !== loadSessionId || !data || !data.fatal) return;
+                                const statusCode = data.response && data.response.code ? Number(data.response.code) : 0;
+                                const isOriginBlock = data.type === Hls.ErrorTypes.NETWORK_ERROR && (statusCode === 0 || statusCode === 403);
+                                if (isOriginBlock && !fbState.hasStartedPlaying) {
+                                    fbState.originBlockedInClappr = true;
+                                    triggerSingleClapprFallback(true);
+                                } else if (!fbState.hasStartedPlaying) {
+                                    markStreamOffline();
+                                }
+                            });
+                        }
+                    } catch (e) {}
+                };
+
                 if (typeof Clappr !== 'undefined' && Clappr.Events) {
+                    if (Clappr.Events.PLAYER_READY) {
+                        clapprInstance.on(Clappr.Events.PLAYER_READY, attachClapprHlsErrorWatch);
+                    }
                     if (Clappr.Events.PLAY) {
                         clapprInstance.on(Clappr.Events.PLAY, () => {
                             if (sessionId === loadSessionId) {
@@ -1895,17 +2004,20 @@
                         });
                     }
                     if (Clappr.Events.PLAYER_ERROR) {
-                        clapprInstance.on(Clappr.Events.PLAYER_ERROR, () => {
+                        clapprInstance.on(Clappr.Events.PLAYER_ERROR, (err) => {
                             if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                                triggerSingleClapprFallback();
+                                const errStr = JSON.stringify(err || '').toLowerCase();
+                                const isOriginBlock = fbState.originBlockedInClappr || errStr.includes('cors') || errStr.includes('network') || errStr.includes('manifest');
+                                triggerSingleClapprFallback(isOriginBlock);
                             }
                         });
                     }
                 }
+                setTimeout(attachClapprHlsErrorWatch, 200);
                 return;
             }
 
-            // Main Mode (HLS.js / Native HLS)
+            // Main Mode (HLS.js - Shaka-style Internal Fetch সহ)
             setActivePlayerView('shaka');
             if (!shakaPlayerRef) {
                 await initPlayer();
@@ -1915,14 +2027,14 @@
 
             loadTimeoutTimer = setTimeout(() => {
                 if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                    triggerSingleClapprFallback();
+                    triggerSingleClapprFallback(fbState.originBlockedInHls);
                 }
             }, HLS_TO_CLAPPR_MS);
 
             if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                hls = mobile
-                    ? new Hls({
-                        enableWorker: true,
+                const hlsConfig = mobile
+                    ? {
+                        enableWorker: false,
                         lowLatencyMode: false,
                         capLevelToPlayerSize: true,
                         maxBufferLength: 40,
@@ -1933,11 +2045,19 @@
                         abrEwmaDefaultEstimate: 450000,
                         fragLoadingTimeOut: 25000,
                         manifestLoadingTimeOut: 15000
-                    })
-                    : new Hls({
-                        enableWorker: true,
+                    }
+                    : {
+                        enableWorker: false,
                         lowLatencyMode: true
-                    });
+                    };
+
+                if (ShakaStyleLoader) {
+                    hlsConfig.loader = ShakaStyleLoader;
+                    hlsConfig.pLoader = ShakaStyleLoader;
+                    hlsConfig.fLoader = ShakaStyleLoader;
+                }
+
+                hls = new Hls(hlsConfig);
 
                 hls.loadSource(finalUrl);
                 hls.attachMedia(mainVideo);
@@ -1948,10 +2068,21 @@
                 hls.on(Hls.Events.ERROR, (event, data) => {
                     if (sessionId !== loadSessionId) return;
                     if (data && data.fatal) {
+                        const statusCode = data.response && data.response.code ? Number(data.response.code) : 0;
+                        const isOriginBlocked = data.type === Hls.ErrorTypes.NETWORK_ERROR && (statusCode === 0 || statusCode === 403);
+
+                        if (isOriginBlocked && !fbState.hasStartedPlaying) {
+                            fbState.originBlockedInHls = true;
+                            triggerSingleClapprFallback(true);
+                            return;
+                        }
+
                         if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
                             try { hls.startLoad(); } catch (e) {}
                             if (fbState.hasStartedPlaying) {
                                 statusEl.textContent = "Buffering...";
+                            } else {
+                                markStreamOffline();
                             }
                         } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
                             try { hls.recoverMediaError(); } catch (e) {}
@@ -1959,7 +2090,7 @@
                                 statusEl.textContent = "Buffering...";
                             }
                         } else if (!fbState.hasStartedPlaying) {
-                            triggerSingleClapprFallback();
+                            markStreamOffline();
                         }
                     }
                 });
@@ -1967,7 +2098,7 @@
                 mainVideo.src = finalUrl;
                 triggerInstantPlay(mainVideo);
             } else {
-                triggerSingleClapprFallback();
+                markStreamOffline();
             }
         }
 
