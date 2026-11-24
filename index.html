@@ -2370,7 +2370,7 @@
                 }
             };
 
-            // ধাপ বদল: Clappr -> HLS.js -> HTML5 -> Offline
+            // ধাপ বদল: Clappr -> HLS.js -> HTML5 -> Offline (যেকোনো নতুন HLS লিংকের জন্য জেনারিক)
             const handleNextStep = (fromStage, isCorsOriginBlock = false) => {
                 if (sessionId !== loadSessionId || isMpd || isFlv) return;
                 hideClapprErrorCanvas();
@@ -2399,7 +2399,7 @@
                     return;
                 }
 
-                if ((fromStage === 'hls' || fbState.movedToHlsOnce || fbState.corsOriginBlocked) && !fbState.movedToHtml5Once) {
+                if (fbState.corsOriginBlocked && !fbState.movedToHtml5Once) {
                     fbState.movedToHtml5Once = true;
                     statusEl.textContent = "Loading...";
                     setCenterWaitVisible(true);
@@ -2472,9 +2472,7 @@
 
                     mpegtsPlayer.on(mpegts.Events.ERROR, (errType, errDetail) => {
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                            if (errType === mpegts.ErrorTypes.NETWORK_ERROR && !fbState.gotServerResponse) {
-                                markStreamOffline();
-                            } else if (!fbState.gotServerResponse) {
+                            if (!fbState.gotServerResponse) {
                                 markStreamOffline();
                             }
                         }
@@ -2586,6 +2584,7 @@
                 setActivePlayerView('shaka');
 
                 const mobile = isMobileView();
+                const hlsSupported = (typeof Hls !== 'undefined' && Hls.isSupported());
 
                 mainVideo.onwaiting = () => {
                     if (sessionId === loadSessionId) {
@@ -2605,36 +2604,36 @@
                     }
                 };
                 mainVideo.onerror = () => {
-                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                    if (!hlsSupported && sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                         handleNextStep('hls', false);
                     }
                 };
 
-                if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+                if (hlsSupported) {
                     const hlsConfig = mobile
                         ? {
                             enableWorker: false,
                             lowLatencyMode: false,
-                            capLevelToPlayerSize: true,
+                            capLevelToPlayerSize: false,
                             maxBufferLength: 35,
                             maxMaxBufferLength: 70,
                             maxBufferSize: 30 * 1000 * 1000,
                             maxFragLookUpTolerance: 0.25,
-                            startLevel: 0,
-                            abrEwmaDefaultEstimate: 350000,
-                            abrBandWidthFactor: 0.75,
-                            abrBandWidthUpFactor: 0.65,
+                            startLevel: -1,
+                            abrEwmaDefaultEstimate: 500000,
+                            abrBandWidthFactor: 0.8,
+                            abrBandWidthUpFactor: 0.7,
                             fragLoadingTimeOut: 15000,
                             manifestLoadingTimeOut: 6000
                         }
                         : {
                             enableWorker: false,
                             lowLatencyMode: true,
-                            capLevelToPlayerSize: true,
-                            startLevel: 0,
-                            abrEwmaDefaultEstimate: 500000,
-                            abrBandWidthFactor: 0.8,
-                            abrBandWidthUpFactor: 0.7,
+                            capLevelToPlayerSize: false,
+                            startLevel: -1,
+                            abrEwmaDefaultEstimate: 800000,
+                            abrBandWidthFactor: 0.85,
+                            abrBandWidthUpFactor: 0.75,
                             fragLoadingTimeOut: 15000,
                             manifestLoadingTimeOut: 6000
                         };
@@ -2711,11 +2710,11 @@
                 playback: {
                     hlsjsConfig: {
                         enableWorker: false,
-                        capLevelToPlayerSize: true,
-                        startLevel: 0,
-                        abrEwmaDefaultEstimate: 350000,
-                        abrBandWidthFactor: 0.75,
-                        abrBandWidthUpFactor: 0.65,
+                        capLevelToPlayerSize: false,
+                        startLevel: -1,
+                        abrEwmaDefaultEstimate: 500000,
+                        abrBandWidthFactor: 0.8,
+                        abrBandWidthUpFactor: 0.7,
                         maxBufferLength: 35,
                         maxMaxBufferLength: 70,
                         fragLoadingTimeOut: 15000,
