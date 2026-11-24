@@ -435,7 +435,9 @@
         #clappr-container .clappr-watermark,
         #clappr-container .media-control,
         #clappr-container .media-control-not-playing-state,
-        #clappr-container .spinner-three-bounce {
+        #clappr-container .spinner-three-bounce,
+        #clappr-container .clappr-error-screen,
+        #clappr-container [data-error-screen] {
             display: none !important;
         }
 
@@ -491,7 +493,47 @@
             color: #ffffff;
         }
 
-        /* ছবির মতো সলিড ফিলড PiP আইকন (সলিড আউটার বক্স + নিচে ডানদিকে ছোট সলিড মিনি-বক্স) */
+        /* বামদিকের LIVE বাটন */
+        .clappr-live-btn {
+            background: rgba(255, 255, 255, 0.14);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 4px;
+            padding: 3px 7px;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            line-height: 1;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+
+        .clappr-live-btn::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ff4757;
+            box-shadow: 0 0 6px #ff4757;
+            display: inline-block;
+        }
+
+        .clappr-live-btn.is-live-edge {
+            background: #e53935;
+            border-color: #ff6b6b;
+            color: #ffffff;
+        }
+
+        .clappr-live-btn.is-live-edge::before {
+            background: #ffffff;
+            box-shadow: none;
+        }
+
+        /* ছবির মতো সলিড ফিলড PiP আইকন */
         .clappr-pip-solid-icon {
             position: relative;
             width: 18px;
@@ -573,7 +615,6 @@
             margin-right: 4px;
         }
 
-        /* Play হওয়ার আগে বা HTML5 মোডে কোনো Offline/Cross ব্যাজ দেখাবে না */
         #clapprCenterBadge {
             display: none !important;
         }
@@ -661,15 +702,18 @@
 
         #status {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 14px;
+            right: 14px;
             z-index: 26;
-            color: white;
-            background: rgba(34, 34, 34, 0.88);
-            border-radius: 20px;
-            padding: 8px 12px;
+            color: #ffffff;
+            background: rgba(15, 18, 24, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 6px;
+            padding: 5px 10px;
             font-size: 12px;
+            font-weight: 600;
             pointer-events: none;
+            letter-spacing: 0.2px;
         }
 
         #offlineOverlay {
@@ -1013,6 +1057,10 @@
                 padding: 2px 3px;
                 font-size: 11.5px;
             }
+            .clappr-live-btn {
+                padding: 2px 5px;
+                font-size: 9.5px;
+            }
             .clappr-ui-vol {
                 width: 38px;
             }
@@ -1089,7 +1137,7 @@
                     </video>
                 </div>
 
-                <div id="status">Player Ready</div>
+                <div id="status">Loading...</div>
 
                 <div id="clappr-container" class="player-hidden"></div>
                 <video id="html5-video" class="player-hidden" controls autoplay playsinline preload="auto"></video>
@@ -1367,7 +1415,6 @@
             );
         }
 
-        // HTML5 মোডে বা Play হওয়ার আগে কোনো Offline/Cross ব্যাজ দেখাবে না
         function setCenterBadgeState(state = 'none') {
             if (!centerBadgeEl) return;
             centerBadgeEl.classList.remove('is-offline');
@@ -1400,7 +1447,85 @@
             }
         }
 
-        // ছবির মতো Clappr কন্ট্রোল ইন্টারফেস (সলিড PiP আইকন + কর্নার-ব্র্যাকেট Fullscreen আইকন)
+        // অটোমেটিক বিটরেট/কোয়ালিটি কমানোর (ABR) সহায়ক ফাংশন (বাফারিং বা স্লো নেটওয়ার্কে লোয়ার কোয়ালিটি বেছে নেয়)
+        function applyAdaptiveBitrateDownshift(playerObj, vidEl, isBuffering = false) {
+            try {
+                const hlsObj = (playerObj && playerObj.core && playerObj.core.getCurrentPlayback && playerObj.core.getCurrentPlayback()._hls)
+                    ? playerObj.core.getCurrentPlayback()._hls
+                    : (typeof hls !== 'undefined' ? hls : null);
+
+                if (hlsObj && Array.isArray(hlsObj.levels) && hlsObj.levels.length > 1) {
+                    if (isBuffering) {
+                        hlsObj.abrEwmaDefaultEstimate = 350000;
+                        const currentIdx = hlsObj.currentLevel;
+                        if (typeof currentIdx === 'number' && currentIdx > 0) {
+                            hlsObj.nextLevel = Math.max(0, currentIdx - 1);
+                        } else {
+                            hlsObj.nextLevel = 0;
+                        }
+                        setTimeout(() => {
+                            try {
+                                if (hlsObj && hlsObj.levels && hlsObj.levels.length > 1) {
+                                    hlsObj.nextLevel = -1; // আবার অটো ABR মোডে ছেড়ে দেওয়া
+                                }
+                            } catch (e) {}
+                        }, 8000);
+                    }
+                }
+            } catch (e) {}
+
+            if (vidEl && isBuffering && vidEl.paused && vidEl.src) {
+                vidEl.play().catch(() => {});
+            }
+        }
+
+        // অরিজিনাল লাইভ পজিশনে (live edge) জাম্প করার ফাংশন
+        function jumpToOriginalLive(playerObj, vidEl) {
+            const statusEl = document.getElementById("status");
+            if (statusEl) statusEl.textContent = "Loading...";
+
+            try {
+                const hlsObj = (playerObj && playerObj.core && playerObj.core.getCurrentPlayback && playerObj.core.getCurrentPlayback()._hls)
+                    ? playerObj.core.getCurrentPlayback()._hls
+                    : (typeof hls !== 'undefined' ? hls : null);
+
+                if (hlsObj) {
+                    if (hlsObj.liveSyncPosition && isFinite(hlsObj.liveSyncPosition)) {
+                        if (vidEl) vidEl.currentTime = hlsObj.liveSyncPosition;
+                    } else if (vidEl && vidEl.seekable && vidEl.seekable.length > 0) {
+                        const endPos = vidEl.seekable.end(vidEl.seekable.length - 1);
+                        if (isFinite(endPos) && endPos > 0) {
+                            vidEl.currentTime = Math.max(0, endPos - 1.5);
+                        }
+                    }
+                    try { hlsObj.startLoad(-1, true); } catch (e) {}
+                } else if (vidEl) {
+                    if (vidEl.seekable && vidEl.seekable.length > 0) {
+                        const endPos = vidEl.seekable.end(vidEl.seekable.length - 1);
+                        if (isFinite(endPos) && endPos > 0) {
+                            vidEl.currentTime = Math.max(0, endPos - 1);
+                        }
+                    } else if (isFinite(vidEl.duration) && vidEl.duration > 0 && vidEl.duration < 86400) {
+                        vidEl.currentTime = Math.max(0, vidEl.duration - 1);
+                    }
+                }
+
+                if (vidEl) {
+                    vidEl.muted = false;
+                    vidEl.volume = 1.0;
+                    const p = vidEl.play();
+                    if (p && typeof p.catch === 'function') {
+                        p.catch(() => {});
+                    }
+                }
+            } catch (e) {}
+
+            setTimeout(() => {
+                if (statusEl) statusEl.textContent = "Playing";
+            }, 350);
+        }
+
+        // Clappr কন্ট্রোল ইন্টারফেস (বামদিকে LIVE বাটন + সলিড PiP আইকন + কর্নার-ব্র্যাকেট Fullscreen আইকন)
         function ensureClapprInterface(playerObj) {
             const box = document.getElementById('videoBox');
             if (!box) return;
@@ -1433,6 +1558,12 @@
             volSlider.max = '100';
             volSlider.value = '100';
 
+            const liveBtn = document.createElement('button');
+            liveBtn.type = 'button';
+            liveBtn.className = 'clappr-live-btn is-live-edge';
+            liveBtn.title = 'Jump to Live';
+            liveBtn.textContent = 'LIVE';
+
             const timeLabel = document.createElement('span');
             timeLabel.className = 'clappr-ui-time';
             timeLabel.textContent = '0:00 / 0:00';
@@ -1442,7 +1573,7 @@
             progressSlider.className = 'clappr-ui-progress';
             progressSlider.min = '0';
             progressSlider.max = '100';
-            progressSlider.value = '0';
+            progressSlider.value = '100';
 
             const pipBtn = document.createElement('button');
             pipBtn.type = 'button';
@@ -1463,6 +1594,7 @@
             bar.appendChild(playBtn);
             bar.appendChild(muteBtn);
             bar.appendChild(volSlider);
+            bar.appendChild(liveBtn);
             bar.appendChild(timeLabel);
             bar.appendChild(progressSlider);
             bar.appendChild(pipBtn);
@@ -1503,15 +1635,31 @@
                 if (!isMuted) {
                     volSlider.value = String(Math.round(vid.volume * 100));
                 }
-                if (isFinite(vid.duration) && vid.duration > 0 && vid.duration < 86400) {
+
+                let isAtLiveEdge = true;
+                if (vid.seekable && vid.seekable.length > 0) {
+                    const liveEnd = vid.seekable.end(vid.seekable.length - 1);
+                    if (isFinite(liveEnd) && liveEnd > 0) {
+                        const lag = Math.max(0, liveEnd - (vid.currentTime || 0));
+                        isAtLiveEdge = lag < 6;
+                        const span = Math.max(1, liveEnd - vid.seekable.start(0));
+                        progressSlider.max = String(Math.floor(span));
+                        progressSlider.value = String(Math.max(0, Math.floor((vid.currentTime || 0) - vid.seekable.start(0))));
+                    }
+                } else if (isFinite(vid.duration) && vid.duration > 0 && vid.duration < 86400) {
+                    const lag = Math.max(0, vid.duration - (vid.currentTime || 0));
+                    isAtLiveEdge = lag < 5;
                     progressSlider.max = String(Math.floor(vid.duration));
                     progressSlider.value = String(Math.floor(vid.currentTime || 0));
-                    timeLabel.textContent = `${formatMediaTime(vid.currentTime)} / ${formatMediaTime(vid.duration)}`;
                 } else {
                     progressSlider.max = '100';
                     progressSlider.value = '100';
-                    timeLabel.textContent = `LIVE ${formatMediaTime(vid.currentTime || 0)}`;
                 }
+
+                liveBtn.classList.toggle('is-live-edge', isAtLiveEdge);
+                timeLabel.textContent = isAtLiveEdge
+                    ? `LIVE ${formatMediaTime(vid.currentTime || 0)}`
+                    : `-${Math.max(1, Math.floor((vid.duration || vid.currentTime || 0) - (vid.currentTime || 0)))}s`;
             };
 
             playBtn.addEventListener('click', (e) => {
@@ -1559,11 +1707,23 @@
                 bumpAutoHide();
             });
 
+            liveBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                hasUserInteracted = true;
+                jumpToOriginalLive(playerObj, getInnerVideo());
+                syncUiState();
+                bumpAutoHide();
+            });
+
             progressSlider.addEventListener('input', (e) => {
                 e.stopPropagation();
                 const vid = getInnerVideo();
-                if (vid && isFinite(vid.duration) && vid.duration > 0 && vid.duration < 86400) {
-                    vid.currentTime = Number(progressSlider.value || 0);
+                if (!vid) return;
+                const targetVal = Number(progressSlider.value || 0);
+                if (vid.seekable && vid.seekable.length > 0) {
+                    vid.currentTime = vid.seekable.start(0) + targetVal;
+                } else if (isFinite(vid.duration) && vid.duration > 0 && vid.duration < 86400) {
+                    vid.currentTime = targetVal;
                 }
                 bumpAutoHide();
             });
@@ -1788,9 +1948,16 @@
                 await player.attach(video);
 
                 player.configure({
+                    abr: {
+                        enabled: true,
+                        defaultBandwidthEstimate: mobile ? 350000 : 500000,
+                        switchInterval: 3,
+                        bandwidthUpgradeTarget: 0.75,
+                        bandwidthDowngradeTarget: 0.92
+                    },
                     streaming: {
-                        bufferingGoal: mobile ? 25 : 10,
-                        rebufferingGoal: mobile ? 3 : 2,
+                        bufferingGoal: mobile ? 25 : 12,
+                        rebufferingGoal: mobile ? 2 : 1.5,
                         bufferBehind: mobile ? 15 : 15,
                         retryParameters: {
                             timeout: mobile ? 10000 : 6000,
@@ -2039,7 +2206,7 @@
             await cleanupPreviousPlayers();
             if (sessionId !== loadSessionId) return;
 
-            statusEl.textContent = effectiveMode === 'hls_once' ? "Trying HLS..." : "Loading...";
+            statusEl.textContent = "Loading...";
 
             const triggerInstantPlay = (mediaObj) => {
                 if (!mediaObj) return;
@@ -2100,6 +2267,7 @@
 
                 if (fromStage === 'clappr' && !fbState.movedToHlsOnce) {
                     fbState.movedToHlsOnce = true;
+                    statusEl.textContent = "Loading...";
                     setTimeout(() => {
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                             loadChannelUrl(rawUrl, 'hls_once', false);
@@ -2110,6 +2278,7 @@
 
                 if (fbState.corsOriginBlocked && !fbState.movedToHtml5Once) {
                     fbState.movedToHtml5Once = true;
+                    statusEl.textContent = "Loading...";
                     setTimeout(() => {
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                             loadChannelUrl(rawUrl, 'html5_cors_only', false);
@@ -2137,7 +2306,7 @@
                 }, STREAM_TIMEOUT_MS);
 
                 flvEl.onwaiting = () => {
-                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                    if (sessionId === loadSessionId) {
                         statusEl.textContent = "Buffering...";
                     }
                 };
@@ -2216,7 +2385,7 @@
                 return;
             }
 
-            // HTML5 Mode (শুধুমাত্র CORS/Origin ব্লক হলেই এখানে আসে; কোনো Offline/Cross বা আগে থেকে ব্যাজ নেই)
+            // HTML5 Mode
             if (effectiveMode === 'html5_cors_only') {
                 setActivePlayerView('html5');
                 setCenterBadgeState('none');
@@ -2240,7 +2409,7 @@
                 html5El.onwaiting = () => {
                     if (sessionId === loadSessionId) {
                         setCenterBadgeState('none');
-                        statusEl.textContent = "Playing";
+                        statusEl.textContent = "Buffering...";
                     }
                 };
                 html5El.onplaying = () => {
@@ -2267,7 +2436,7 @@
                 return;
             }
 
-            // HLS.js Fallback Mode (Clappr-এ প্লে না হলে স্বয়ংক্রিয়ভাবে এখানে আসে)
+            // HLS.js Fallback Mode (অটোমেটিক বিটরেট ডাউনশিফট ও লো-কোয়ালিটি রিকভারিসহ)
             if (effectiveMode === 'hls_once') {
                 setActivePlayerView('shaka');
 
@@ -2279,6 +2448,12 @@
                     }
                 }, STREAM_TIMEOUT_MS);
 
+                mainVideo.onwaiting = () => {
+                    if (sessionId === loadSessionId) {
+                        statusEl.textContent = "Buffering...";
+                        applyAdaptiveBitrateDownshift(null, mainVideo, true);
+                    }
+                };
                 mainVideo.onplaying = () => {
                     if (sessionId === loadSessionId) {
                         markStreamStarted();
@@ -2301,18 +2476,25 @@
                             enableWorker: false,
                             lowLatencyMode: false,
                             capLevelToPlayerSize: true,
-                            maxBufferLength: 40,
-                            maxMaxBufferLength: 75,
-                            maxBufferSize: 35 * 1000 * 1000,
+                            maxBufferLength: 35,
+                            maxMaxBufferLength: 70,
+                            maxBufferSize: 30 * 1000 * 1000,
                             maxFragLookUpTolerance: 0.25,
                             startLevel: 0,
-                            abrEwmaDefaultEstimate: 450000,
+                            abrEwmaDefaultEstimate: 350000,
+                            abrBandWidthFactor: 0.75,
+                            abrBandWidthUpFactor: 0.65,
                             fragLoadingTimeOut: 25000,
                             manifestLoadingTimeOut: 15000
                         }
                         : {
                             enableWorker: false,
-                            lowLatencyMode: true
+                            lowLatencyMode: true,
+                            capLevelToPlayerSize: true,
+                            startLevel: 0,
+                            abrEwmaDefaultEstimate: 500000,
+                            abrBandWidthFactor: 0.8,
+                            abrBandWidthUpFactor: 0.7
                         };
 
                     hls = new Hls(hlsConfig);
@@ -2340,6 +2522,7 @@
                                 return;
                             }
 
+                            applyAdaptiveBitrateDownshift(null, mainVideo, true);
                             if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
                                 try { hls.startLoad(); } catch (e) {}
                                 statusEl.textContent = "Buffering...";
@@ -2358,7 +2541,7 @@
                 return;
             }
 
-            // Clappr Main Mode (প্রথমে Clappr দিয়ে প্লে হবে; না চললে স্বয়ংক্রিয়ভাবে HLS.js-এ যাবে)
+            // Clappr Main Mode (অটোমেটিক বিটরেট ডাউনশিফট + LIVE বাটন + Loading স্ট্যাটাস)
             setActivePlayerView('clappr');
             ensureClapprInterface(null);
 
@@ -2377,7 +2560,19 @@
                 height: '100%',
                 autoPlay: true,
                 mute: false,
-                hideMediaControl: true
+                hideMediaControl: true,
+                playback: {
+                    hlsjsConfig: {
+                        enableWorker: false,
+                        capLevelToPlayerSize: true,
+                        startLevel: 0,
+                        abrEwmaDefaultEstimate: 350000,
+                        abrBandWidthFactor: 0.75,
+                        abrBandWidthUpFactor: 0.65,
+                        maxBufferLength: 35,
+                        maxMaxBufferLength: 70
+                    }
+                }
             });
 
             if (typeof clapprInstance.setVolume === 'function') {
@@ -2388,6 +2583,12 @@
             const bindClapprVideoListeners = () => {
                 const innerVideo = clapprEl ? clapprEl.querySelector("video") : null;
                 if (innerVideo) {
+                    innerVideo.addEventListener("waiting", () => {
+                        if (sessionId === loadSessionId) {
+                            statusEl.textContent = "Buffering...";
+                            applyAdaptiveBitrateDownshift(clapprInstance, innerVideo, true);
+                        }
+                    });
                     const onVideoActivePlay = () => {
                         if (sessionId === loadSessionId) {
                             clapprProgressed = true;
@@ -2419,6 +2620,9 @@
                             const isCorsBlock = isCorsOrOriginBlockError(data, statusCode);
                             if (!fbState.hasStartedPlaying) {
                                 handleNextStep('clappr', isCorsBlock);
+                            } else {
+                                applyAdaptiveBitrateDownshift(clapprInstance, innerVideo, true);
+                                statusEl.textContent = "Buffering...";
                             }
                         });
                     }
