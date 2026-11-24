@@ -431,7 +431,6 @@
             background: #000 !important;
         }
 
-        /* Clappr-এর স্ট্যাটিক ব্যাকগ্রাউন্ড ও browser-not-supported মেসেজ হাইড */
         #clappr-container [data-watermark],
         #clappr-container .clappr-watermark,
         #clappr-container .media-control,
@@ -446,7 +445,6 @@
             opacity: 0 !important;
         }
 
-        /* ভিডিও প্লে হওয়ার আগে বা লোড/বাফারিং অবস্থায় কালো পর্দা ও মাঝখানে ঘুরতে থাকা লোডিং জিরো */
         #videoCenterWaitNotice {
             position: absolute;
             inset: 0;
@@ -479,7 +477,6 @@
             display: none !important;
         }
 
-        /* Clappr কন্ট্রোল ইন্টারফেস */
         #clapprCustomUi {
             position: absolute;
             inset: 0;
@@ -1445,8 +1442,13 @@
         let clapprUiHideTimer = null;
         let clapprUiPollTimer = null;
 
-        // সার্ভার রেসপন্স পেলে প্লে শুরু হওয়ার জন্য সর্বোচ্চ ২০ সেকেন্ড; রেসপন্স না পেলে সাথে সাথেই পরের ধাপ/Offline
         const RESPONSIVE_PLAY_TIMEOUT_MS = 20000;
+
+        // আপনার Cloudflare Worker প্রক্সি URL বসান (যেমন: "https://pb-stream-proxy.YOUR-SUBDOMAIN.workers.dev/?url=")
+        const STREAM_PROXY_BASE = "https://YOUR-STREAM-PROXY.workers.dev/?url=";
+
+        // এই ডোমেইনগুলো বা #EXTVLCOPT:http-referrer থাকা সব লিংক স্বয়ংক্রিয়ভাবে প্রক্সি দিয়ে যাবে
+        const ALWAYS_PROXY_HOSTS = ["techandeat.online"];
 
         const SELECTED_TOFFEE_CHANNELS = [
             "Zee Bollywood",
@@ -1458,6 +1460,10 @@
 
         const corsBlockedUrls = new Set();
 
+        function isProxyConfigured() {
+            return Boolean(STREAM_PROXY_BASE && !STREAM_PROXY_BASE.includes("YOUR-STREAM-PROXY"));
+        }
+
         function isProxyUrl(rawUrl) {
             const str = String(rawUrl || '').trim().toLowerCase();
             if (!str) return false;
@@ -1467,8 +1473,59 @@
                 str.includes('proxy?url=') ||
                 str.includes('proxy?id=') ||
                 str.includes('proxy=') ||
-                str.includes('/proxy/')
+                str.includes('/proxy/') ||
+                (isProxyConfigured() && str.startsWith(STREAM_PROXY_BASE.toLowerCase()))
             );
+        }
+
+        function extractReferrerFromItemOrUrl(rawUrl, itemObj = null) {
+            const rawStr = String(rawUrl || '').trim();
+            if (rawStr.includes('|')) {
+                const pipePart = rawStr.split('|')[1];
+                const params = new URLSearchParams(pipePart.replace(/&amp;/g, '&'));
+                const pipeRef = params.get('http-referrer') || params.get('referrer') || params.get('referer');
+                if (pipeRef) return pipeRef.trim();
+            }
+            if (itemObj && itemObj.referrer) {
+                return String(itemObj.referrer).trim();
+            }
+            if (currentChannelObj && currentChannelObj.referrer) {
+                return String(currentChannelObj.referrer).trim();
+            }
+            try {
+                return new URL(rawStr.split('|')[0].trim()).origin;
+            } catch (e) {
+                return "";
+            }
+        }
+
+        function shouldUseStreamProxy(rawUrl, referrer = "", forceProxy = false) {
+            if (!isProxyConfigured()) return false;
+            const clean = String(rawUrl || '').trim();
+            if (!clean || isProxyUrl(clean)) return false;
+            if (forceProxy || corsBlockedUrls.has(clean) || Boolean(referrer)) return true;
+
+            try {
+                const host = new URL(clean).hostname.toLowerCase();
+                return ALWAYS_PROXY_HOSTS.some(h => host === h || host.endsWith("." + h));
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function buildProxiedStreamUrl(rawUrl, referrer = "") {
+            const cleanUrl = String(rawUrl || '').trim();
+            if (!cleanUrl || !isProxyConfigured() || isProxyUrl(cleanUrl)) {
+                return cleanUrl;
+            }
+            const sep = STREAM_PROXY_BASE.includes("?") && !STREAM_PROXY_BASE.endsWith("?") && !STREAM_PROXY_BASE.endsWith("&")
+                ? "&"
+                : "";
+            let proxied = `${STREAM_PROXY_BASE}${sep}${encodeURIComponent(cleanUrl)}`;
+            if (referrer) {
+                proxied += `&ref=${encodeURIComponent(referrer)}`;
+            }
+            return proxied;
         }
 
         function setCenterWaitVisible(show) {
@@ -2279,22 +2336,32 @@
             const fbState = sessionFallbackState[sessionId];
 
             const rawUrl = String(url || '').trim();
+            const cleanBaseUrl = rawUrl.split('|')[0].trim();
             const isFlv = isFlvUrl(rawUrl);
             const isMpd = !isFlv && isMpdUrl(rawUrl);
             const isProxy = !isFlv && !isMpd && isProxyUrl(rawUrl);
+            const activeReferrer = extractReferrerFromItemOrUrl(rawUrl);
+
+            const forceProxyNow =
+                mode === 'hls_once' ||
+                mode === 'html5_cors_only' ||
+                fbState.corsOriginBlocked ||
+                corsBlockedUrls.has(cleanBaseUrl);
+
+            const useProxyNow = !isFlv && !isMpd && shouldUseStreamProxy(cleanBaseUrl, activeReferrer, forceProxyNow);
 
             const effectiveMode = isFlv
                 ? 'flv'
                 : (isMpd
                     ? 'shaka'
-                    : (isProxy
+                    : (isProxy || useProxyNow
                         ? 'hls_once'
                         : (mode === 'html5_cors_only'
                             ? 'html5_cors_only'
                             : (mode === 'hls_once' ? 'hls_once' : 'clappr_main'))));
 
             const clearKeys = extractClearKeys(rawUrl, currentChannelObj ? currentChannelObj.drm : null);
-            const finalUrl = rawUrl.split('|')[0].trim();
+            const finalUrl = useProxyNow ? buildProxiedStreamUrl(cleanBaseUrl, activeReferrer) : cleanBaseUrl;
 
             currentUrl = rawUrl;
             currentMode = effectiveMode === 'html5_cors_only' ? 'html5' : 'main';
@@ -2356,7 +2423,6 @@
                 statusEl.textContent = "Offline";
             };
 
-            // সার্ভার থেকে রেসপন্স পাওয়া গেলে প্লে শুরু হওয়ার জন্য ২০ সেকেন্ড সময় দেওয়া হবে
             const armResponsivePlayTimer = () => {
                 if (sessionId !== loadSessionId || fbState.hasStartedPlaying) return;
                 if (!fbState.gotServerResponse) {
@@ -2370,7 +2436,6 @@
                 }
             };
 
-            // ধাপ বদল: Clappr -> HLS.js -> HTML5 -> Offline
             const handleNextStep = (fromStage, isCorsOriginBlock = false) => {
                 if (sessionId !== loadSessionId || isMpd || isFlv) return;
                 hideClapprErrorCanvas();
@@ -2384,7 +2449,7 @@
 
                 if (isCorsOriginBlock) {
                     fbState.corsOriginBlocked = true;
-                    corsBlockedUrls.add(rawUrl);
+                    corsBlockedUrls.add(cleanBaseUrl);
                 }
 
                 if (fromStage === 'clappr' && !fbState.movedToHlsOnce) {
@@ -2414,7 +2479,6 @@
                 markStreamOffline();
             };
 
-            // ডেডিকেটেড FLV প্লেয়ার
             if (isFlv) {
                 setActivePlayerView('flv');
 
@@ -2472,11 +2536,7 @@
 
                     mpegtsPlayer.on(mpegts.Events.ERROR, (errType, errDetail) => {
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                            if (errType === mpegts.ErrorTypes.NETWORK_ERROR && !fbState.gotServerResponse) {
-                                markStreamOffline();
-                            } else if (!fbState.gotServerResponse) {
-                                markStreamOffline();
-                            }
+                            markStreamOffline();
                         }
                     });
 
@@ -2491,7 +2551,6 @@
                 return;
             }
 
-            // Shaka Player (.mpd)
             if (isMpd) {
                 setActivePlayerView('shaka');
                 if (!shakaPlayerRef) {
@@ -2521,7 +2580,6 @@
                 return;
             }
 
-            // HTML5 Mode
             if (effectiveMode === 'html5_cors_only') {
                 setActivePlayerView('html5');
                 setCenterBadgeState('none');
@@ -2581,7 +2639,6 @@
                 return;
             }
 
-            // HLS.js Direct / Proxy / Fallback Mode
             if (effectiveMode === 'hls_once') {
                 setActivePlayerView('shaka');
 
@@ -2693,7 +2750,6 @@
                 return;
             }
 
-            // Clappr Main Mode (নন-প্রক্সি স্ট্রিমের জন্য)
             setActivePlayerView('clappr');
             ensureClapprInterface(null);
             hideClapprErrorCanvas();
@@ -2924,10 +2980,19 @@
             let currentTitle = '';
             let currentLogo = 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
             let currentGroup = 'bangla';
+            let currentReferrer = '';
 
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim();
                 if (!line) continue;
+
+                if (line.startsWith('#EXTVLCOPT')) {
+                    const refMatch = line.match(/http-referrer=(.+)$/i);
+                    if (refMatch && refMatch[1]) {
+                        currentReferrer = refMatch[1].trim();
+                    }
+                    continue;
+                }
 
                 if (line.startsWith('#EXTINF')) {
                     let logoMatch = line.match(/tvg-logo="([^"]+)"/);
@@ -2968,10 +3033,12 @@
                                 name: currentTitle,
                                 logo: currentLogo,
                                 url: line,
-                                group: currentGroup
+                                group: currentGroup,
+                                referrer: currentReferrer
                             });
                         }
                         currentTitle = '';
+                        currentReferrer = '';
                     }
                 }
             }
@@ -3006,7 +3073,8 @@
                             url: item.url,
                             group: 'sports',
                             drm: item.drm || null,
-                            tone: item.tone || 'blue'
+                            tone: item.tone || 'blue',
+                            referrer: item.referrer || ''
                         }));
                 })
                 .catch(() => []);
@@ -3020,9 +3088,18 @@
                     let currentTitle = '';
                     let currentLogo = 'https://i.postimg.cc/W1z5BGPZ/20240823_024712.png';
                     let currentGroup = 'bangla';
+                    let currentReferrer = '';
 
                     for (let i = 0; i < lines.length; i++) {
                         let line = lines[i].trim();
+
+                        if (line.startsWith('#EXTVLCOPT')) {
+                            const refMatch = line.match(/http-referrer=(.+)$/i);
+                            if (refMatch && refMatch[1]) {
+                                currentReferrer = refMatch[1].trim();
+                            }
+                            continue;
+                        }
 
                         if (line.startsWith('#') && !line.startsWith('#EXTINF')) {
                             let upperLine = line.toUpperCase();
@@ -3089,10 +3166,12 @@
                                     name: currentTitle,
                                     logo: currentLogo,
                                     url: rawUrls.length === 1 ? rawUrls[0] : rawUrls,
-                                    group: currentGroup
+                                    group: currentGroup,
+                                    referrer: currentReferrer
                                 });
 
                                 currentTitle = '';
+                                currentReferrer = '';
                             }
                         }
                     }
