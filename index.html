@@ -1201,6 +1201,7 @@
         ];
 
         const sessionHtml5Urls = new Set();
+        const sessionClapprUrls = new Set();
 
         function forceMediaPlayNow(mediaObj) {
             if (!mediaObj) return;
@@ -1230,7 +1231,6 @@
             }
         }
 
-        // প্লেব্যাক চলাকালে কোন প্লেয়ার চলছে তা বাইরে থেকে বোঝা না যাওয়ার মতো অভিন্ন ভিউ স্টেট
         function setActivePlayerView(activeView) {
             activeBackendView = activeView || 'shaka';
             const mainContainer = document.getElementById("player-container");
@@ -1265,7 +1265,18 @@
             sessionHtml5Urls.add(str);
         }
 
-        // Shaka Player-এর মতো Fetch-ভিত্তিক Internal Loader (HLS.js ও Clappr-এর জন্য)
+        function shouldUseClapprDirectly(rawUrl) {
+            const str = String(rawUrl || "").trim();
+            if (!str || isFlvUrl(str) || isMpdUrl(str)) return false;
+            return sessionClapprUrls.has(str);
+        }
+
+        function rememberClapprForUrl(rawUrl) {
+            const str = String(rawUrl || "").trim();
+            if (!str || isFlvUrl(str) || isMpdUrl(str)) return;
+            sessionClapprUrls.add(str);
+        }
+
         function createShakaStyleHlsFetchLoader() {
             if (typeof Hls === 'undefined' || !Hls.DefaultConfig || !Hls.DefaultConfig.loader) {
                 return null;
@@ -1694,6 +1705,7 @@
             const isFlv = isFlvUrl(rawUrl);
             const isMpd = !isFlv && isMpdUrl(rawUrl);
             const directHtml5 = !isFlv && !isMpd && shouldUseHtml5Directly(rawUrl);
+            const directClappr = !isFlv && !isMpd && !directHtml5 && shouldUseClapprDirectly(rawUrl);
 
             const effectiveMode = isFlv
                 ? 'flv'
@@ -1701,7 +1713,8 @@
                     ? 'shaka'
                     : ((mode === 'html5' || directHtml5)
                         ? 'html5'
-                        : (mode === 'clappr_once' ? 'clappr_once' : 'main')));
+                        : ((mode === 'clappr_once' || directClappr) ? 'clappr_once' : 'main')));
+
             const clearKeys = extractClearKeys(rawUrl, currentChannelObj ? currentChannelObj.drm : null);
             const finalUrl = rawUrl.split('|')[0].trim();
 
@@ -1720,7 +1733,7 @@
                 if (!mediaObj) return;
                 mediaObj.muted = false;
                 mediaObj.volume = 1.0;
-                let playPromise = mediaObj.play();
+                const playPromise = mediaObj.play();
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
                         mediaObj.muted = false;
@@ -1756,23 +1769,31 @@
                 statusEl.textContent = "Offline";
             };
 
-            // কেবল HLS ও Clappr দুটোতেই Origin/CORS ব্লক খেলে তবেই HTML5-এ যাবে
-            const triggerSingleClapprFallback = (isOriginBlocked = false) => {
+            // HLS না হলে Clappr-এ যাবে; আর HLS ও Clappr দুটোতেই Origin ব্লক খেলে তবেই HTML5-এ যাবে
+            const handleHlsOrClapprFallback = (fromStage, isOriginBlocked = false) => {
                 if (sessionId !== loadSessionId || isMpd || isFlv) return;
                 if (fbState.hasStartedPlaying) {
                     statusEl.textContent = "Buffering...";
                     return;
                 }
 
-                if (isOriginBlocked) {
-                    if (!fbState.movedToClapprOnce) {
+                if (fromStage === 'hls') {
+                    if (isOriginBlocked) {
                         fbState.originBlockedInHls = true;
+                    }
+                    if (!fbState.movedToClapprOnce) {
                         fbState.movedToClapprOnce = true;
+                        rememberClapprForUrl(rawUrl);
                         loadChannelUrl(rawUrl, 'clappr_once', false);
                         return;
                     }
-                    if (!fbState.movedToHtml5Once) {
+                }
+
+                if (fromStage === 'clappr') {
+                    if (isOriginBlocked) {
                         fbState.originBlockedInClappr = true;
+                    }
+                    if ((fbState.originBlockedInHls && fbState.originBlockedInClappr) && !fbState.movedToHtml5Once) {
                         fbState.movedToHtml5Once = true;
                         rememberHtml5ForUrl(rawUrl);
                         loadChannelUrl(rawUrl, 'html5', false);
@@ -1783,7 +1804,7 @@
                 markStreamOffline();
             };
 
-            // ডেডিকেটেড FLV প্লেয়ার (আগের মতোই অপরিবর্তিত)
+            // ডেডিকেটেড FLV প্লেয়ার
             if (isFlv) {
                 setActivePlayerView('flv');
 
@@ -1799,9 +1820,7 @@
                 }, HLS_TO_CLAPPR_MS);
 
                 flvEl.onwaiting = () => {
-                    if (sessionId === loadSessionId) {
-                        statusEl.textContent = "Buffering...";
-                    }
+                    if (sessionId === loadSessionId) statusEl.textContent = "Buffering...";
                 };
                 flvEl.onplaying = () => {
                     if (sessionId === loadSessionId) {
@@ -1881,7 +1900,7 @@
                 return;
             }
 
-            // HTML5 Mode (শুধুমাত্র HLS ও Clappr দুটোতেই Origin ব্লক খেলে তবেই যাবে)
+            // HTML5 Mode (শুধুমাত্র HLS ও Clappr দুটোতেই Origin ব্লক খেলে তবেই আসবে)
             if (effectiveMode === 'html5') {
                 setActivePlayerView('html5');
 
@@ -1907,9 +1926,7 @@
                     }
                 };
                 html5El.onwaiting = () => {
-                    if (sessionId === loadSessionId) {
-                        statusEl.textContent = "Buffering...";
-                    }
+                    if (sessionId === loadSessionId) statusEl.textContent = "Buffering...";
                 };
                 html5El.onplaying = () => {
                     if (sessionId === loadSessionId) {
@@ -1935,13 +1952,13 @@
 
             const ShakaStyleLoader = createShakaStyleHlsFetchLoader();
 
-            // Clappr Mode (Shaka-style Fetch Loader সহ)
+            // Clappr Mode (HLS-এ না চললে এখানে আসে; এখানেও Origin ব্লক খেলে HTML5-এ যায়)
             if (effectiveMode === 'clappr_once') {
                 setActivePlayerView('clappr');
 
                 loadTimeoutTimer = setTimeout(() => {
                     if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                        triggerSingleClapprFallback(fbState.originBlockedInClappr);
+                        handleHlsOrClapprFallback('clappr', fbState.originBlockedInClappr);
                     }
                 }, HLS_TO_CLAPPR_MS);
 
@@ -1980,11 +1997,8 @@
                                 if (sessionId !== loadSessionId || !data || !data.fatal) return;
                                 const statusCode = data.response && data.response.code ? Number(data.response.code) : 0;
                                 const isOriginBlock = data.type === Hls.ErrorTypes.NETWORK_ERROR && (statusCode === 0 || statusCode === 403);
-                                if (isOriginBlock && !fbState.hasStartedPlaying) {
-                                    fbState.originBlockedInClappr = true;
-                                    triggerSingleClapprFallback(true);
-                                } else if (!fbState.hasStartedPlaying) {
-                                    markStreamOffline();
+                                if (!fbState.hasStartedPlaying) {
+                                    handleHlsOrClapprFallback('clappr', isOriginBlock);
                                 }
                             });
                         }
@@ -2007,8 +2021,8 @@
                         clapprInstance.on(Clappr.Events.PLAYER_ERROR, (err) => {
                             if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                                 const errStr = JSON.stringify(err || '').toLowerCase();
-                                const isOriginBlock = fbState.originBlockedInClappr || errStr.includes('cors') || errStr.includes('network') || errStr.includes('manifest');
-                                triggerSingleClapprFallback(isOriginBlock);
+                                const isOriginBlock = fbState.originBlockedInClappr || errStr.includes('cors') || errStr.includes('network') || errStr.includes('403') || errStr.includes('manifest');
+                                handleHlsOrClapprFallback('clappr', isOriginBlock);
                             }
                         });
                     }
@@ -2017,7 +2031,7 @@
                 return;
             }
 
-            // Main Mode (HLS.js - Shaka-style Internal Fetch সহ)
+            // Main Mode (প্রথমে HLS.js দিয়ে প্লে হবে; না চললে স্বয়ংক্রিয়ভাবে Clappr-এ যাবে)
             setActivePlayerView('shaka');
             if (!shakaPlayerRef) {
                 await initPlayer();
@@ -2027,7 +2041,7 @@
 
             loadTimeoutTimer = setTimeout(() => {
                 if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                    triggerSingleClapprFallback(fbState.originBlockedInHls);
+                    handleHlsOrClapprFallback('hls', fbState.originBlockedInHls);
                 }
             }, HLS_TO_CLAPPR_MS);
 
@@ -2071,26 +2085,17 @@
                         const statusCode = data.response && data.response.code ? Number(data.response.code) : 0;
                         const isOriginBlocked = data.type === Hls.ErrorTypes.NETWORK_ERROR && (statusCode === 0 || statusCode === 403);
 
-                        if (isOriginBlocked && !fbState.hasStartedPlaying) {
-                            fbState.originBlockedInHls = true;
-                            triggerSingleClapprFallback(true);
+                        if (!fbState.hasStartedPlaying) {
+                            handleHlsOrClapprFallback('hls', isOriginBlocked);
                             return;
                         }
 
                         if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
                             try { hls.startLoad(); } catch (e) {}
-                            if (fbState.hasStartedPlaying) {
-                                statusEl.textContent = "Buffering...";
-                            } else {
-                                markStreamOffline();
-                            }
+                            statusEl.textContent = "Buffering...";
                         } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
                             try { hls.recoverMediaError(); } catch (e) {}
-                            if (fbState.hasStartedPlaying) {
-                                statusEl.textContent = "Buffering...";
-                            }
-                        } else if (!fbState.hasStartedPlaying) {
-                            markStreamOffline();
+                            statusEl.textContent = "Buffering...";
                         }
                     }
                 });
@@ -2098,7 +2103,7 @@
                 mainVideo.src = finalUrl;
                 triggerInstantPlay(mainVideo);
             } else {
-                markStreamOffline();
+                handleHlsOrClapprFallback('hls', false);
             }
         }
 
