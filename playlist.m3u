@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 
 #EXTINF:-1 tvg-logo="https://static.wikia.nocookie.net/etv-gspn-bangla/images/6/6e/T_Sports_HD_logo_2021.png" group-title="Bangla",T Sports
-https://tvsen5.aynaott.com/TnMn5kZz8/index.m3u8   https://online-tv-rho.vercel.app/api/proxy?url=http://live.ftpbdlive.com:8080/live/FTPBD-LIVETV/FTPBD-2026/11.m3u8    https://tvsen5.aynaott.com/kP9vX2mZ7qL5wN3t/index.m3u8  
+https://tvsen5.aynaott.com/kP9vX2mZ7qL5wN3t/index.m3u8  https://tvsen5.aynaott.com/TnMn5kZz8/index.m3u8   https://online-tv-rho.vercel.app/api/proxy?url=http://live.ftpbdlive.com:8080/live/FTPBD-LIVETV/FTPBD-2026/11.m3u8  
 
 #EXTINF:-1 tvg-logo="https://tstatic.akash-go.com/cms-ui/images/custom-content/1778082545894.png" group-title="Bangla",BTV National
 https://nkafmbewiff.gpcdn.net/tile_2/master.m3u8   
@@ -700,10 +700,6 @@ https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdX
 
 
 
-
-#EXTINF:-1 group-title="Sports",T Sports HD
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36
-https://tvvd.mirpur.cloud/cloudtv/m3u8playlist?ch=1
 
 
 
