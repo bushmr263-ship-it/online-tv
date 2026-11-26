@@ -530,6 +530,9 @@ https://tvsen5.aynaott.com/willowhd/tracks-v1a1/mono.ts.m3u8
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/HntSg3xw/20240823_024624.png" group-title="Sports",Willow Cricbuzz 2
 https://tvsen7.aynaott.com/Sports1/index.m3u8
 
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/HntSg3xw/20240823_024624.png" group-title="Sports",M Cricbuzz
+https://limon-iptv-link.limon-b.workers.dev/s/jyX0NSaeXtARWv6njby34l4tshqPtX2iwOBNZT-b7FGuxRu6A8AO7b-ogy-PH6Vo2h3kuOT8lI1L5N2BXGxzddOV0dh1JUP3nQIhNxK53kks5hYu4j2uIQzKYCBdN22WFjMUG-XZ4U0-3cFfh3dP_czkWyg3yUorZZZydc8R-zqnPms_OD2chQ7vxiZrGdiBGJvAJpo6zjFWqoeQkkekt8T5rg.m3u
+
 #EXTINF:-1 tvg-id="SkySportsCricket" tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/9-by-xfireflix.png" group-title="Sports",SKY SPORTS CRICKET
 #EXTVLCOPT:http-user-agent=Mozilla
 https://bl.rutube.ru/livestream/7c13a51576b9ff2601f08f5d57dd5169/index.m3u8?s=uiXES2ePt7xTpQnbJxn7Dg&e=2074684474&scheme=https
@@ -538,13 +541,17 @@ https://bl.rutube.ru/livestream/7c13a51576b9ff2601f08f5d57dd5169/index.m3u8?s=ui
 https://drk6xq0vhn.gpcdn.net/hls/ten_cricket_hd_720/index.m3u8
 
 #EXTINF:-1 tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/10-by-xfireflix.png",TEN SPORTS
-https://livetv.shamon-cable.net/proxy/proxy.php?id=84c703643b5bf56fb82815da435a5d0feefe
+https://limon-iptv-link.limon-b.workers.dev/s/4Gm2IJpQq5dZzwaNCCiBFfvV8noHDNOlgZ6C6JJ8sFUJEZFaavHhMmu4w2LyyncMD7_F9hsVfKlp4z-E2ZUqycVS0nbY8jYlVTWEgwRSx4u-AM8mFylyN1TRW1Vh_nHk8Ephb-L3rH2sICKeLFXAnuyNYKBus6_hUx-XK3nenQRjCzKQ48lAA-ikN9-YSdnzFMgF0qWQ4E20TfG_CbnAJtHXp9IIUuibD_OTgTRPGqpStJU.m3u8
 
 #EXTINF:-1 tvg-logo="https://asset.brandfetch.io/iduZqK3Qk-/id9YVz4W_W.png" group-title="Sports",Tapmad Live 
 https://seriealeague.akamaized.net/hls/live/2107107/A1@25853-tapmad/master.m3u8
 
+#EXTINF:-1 group-title="Sports" tvg-logo="",Fox Sports Cricket
+https://limon-iptv-link.limon-b.workers.dev/s/zl4-vtwZcUkBVsShufytbgvVRSTNHVlz9IfreHd34X_q_elkTusQzvaCfqf-04Pmc9kTa-r77ug1pk4qm1JglVIEQ_FAtPUxEB4ox7ARaZIPDwLfWfwE61qIJL6bLfZwXhulTPrOv8zfuXdvSfCnPcbULpiYE5WUaYLkHdppcOZY8nj8dJvZumxhKHbmoMNTzfh8_-EHyVcrrcLJQsK02A39GJghfjS3LghfDvVkpUnB6DY.m3u8
+
+
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/DzDHjCJm/20240823_024249.png" group-title="Sports",Star Sports 1 HD
-	https://livetv.shamon-cable.net/proxy/proxy.php?id=e9cdc59e0ca83b675cc19e842c95a0acf5cb    https://s3.itcnbd.live/server-12/stream/Mg.m3u8 
+https://limon-iptv-link.limon-b.workers.dev/s/own_c0l5QX8CKw6rIcWT2H6tutct5-efka_6Lo8o9ZETsioCR1Z35vh4j3ocefVYKX0o9lXd61D0UTbw5bhmNHV43TQm5J4m5MVQkFoFQSwLukb5xBIlbA8u-z8PcGIdVp3ztm0vvmxLnePPptVAKMo6B9_ZDxd2Su_XOWK3UkwlRalV7M8iFL6DZmGWha3coeYPisRcmjNV05usRJMX8k39xJSxHf5bFQ0WR1Jf5q49ZNk.m3u8
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/zBgM9nK7/20240823_024306.png" group-title="Sports",Star Sports HD2
 https://tvsen7.aynaott.com/ssport2hd/index.m3u8
