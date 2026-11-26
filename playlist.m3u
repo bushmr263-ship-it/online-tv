@@ -530,7 +530,7 @@ https://tvsen5.aynaott.com/willowhd/tracks-v1a1/mono.ts.m3u8
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/HntSg3xw/20240823_024624.png" group-title="Sports",Willow Cricbuzz 2
 https://tvsen7.aynaott.com/Sports1/index.m3u8
 
-#EXTINF:-1 tvg-logo="https://i.postimg.cc/HntSg3xw/20240823_024624.png" group-title="Sports",M Cricbuzz
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/VvdTSNKN/CRICBUZZ.webp" group-title="Sports",CRICBUZZ
 https://limon-iptv-link.limon-b.workers.dev/s/jyX0NSaeXtARWv6njby34l4tshqPtX2iwOBNZT-b7FGuxRu6A8AO7b-ogy-PH6Vo2h3kuOT8lI1L5N2BXGxzddOV0dh1JUP3nQIhNxK53kks5hYu4j2uIQzKYCBdN22WFjMUG-XZ4U0-3cFfh3dP_czkWyg3yUorZZZydc8R-zqnPms_OD2chQ7vxiZrGdiBGJvAJpo6zjFWqoeQkkekt8T5rg.m3u8 
 
 #EXTINF:-1 tvg-id="SkySportsCricket" tvg-logo="https://abusaeeidx.github.io/Tv-Channel-Logo/CricHD/runded/9-by-xfireflix.png" group-title="Sports",SKY SPORTS CRICKET
@@ -546,7 +546,7 @@ https://limon-iptv-link.limon-b.workers.dev/s/4Gm2IJpQq5dZzwaNCCiBFfvV8noHDNOlgZ
 #EXTINF:-1 tvg-logo="https://asset.brandfetch.io/iduZqK3Qk-/id9YVz4W_W.png" group-title="Sports",Tapmad Live 
 https://seriealeague.akamaized.net/hls/live/2107107/A1@25853-tapmad/master.m3u8
 
-#EXTINF:-1 group-title="Sports" tvg-logo="",Fox Sports Cricket
+#EXTINF:-1 tvg-logo="https://i.postimg.cc/XvktmmZY/fox-cricket.png" group-title="Sports",FOX SPORTS CRICKET
 https://limon-iptv-link.limon-b.workers.dev/s/zl4-vtwZcUkBVsShufytbgvVRSTNHVlz9IfreHd34X_q_elkTusQzvaCfqf-04Pmc9kTa-r77ug1pk4qm1JglVIEQ_FAtPUxEB4ox7ARaZIPDwLfWfwE61qIJL6bLfZwXhulTPrOv8zfuXdvSfCnPcbULpiYE5WUaYLkHdppcOZY8nj8dJvZumxhKHbmoMNTzfh8_-EHyVcrrcLJQsK02A39GJghfjS3LghfDvVkpUnB6DY.m3u8
 
 
@@ -556,7 +556,7 @@ https://limon-iptv-link.limon-b.workers.dev/s/own_c0l5QX8CKw6rIcWT2H6tutct5-efka
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/zBgM9nK7/20240823_024306.png" group-title="Sports",Star Sports HD2
 https://tvsen7.aynaott.com/ssport2hd/index.m3u8
 
-#EXTINF:-1 tvg-logo="https://i.postimg.cc/zBgM9nK7/20240823_024306.png" group-title="Sports",Star Sports HD3
+#EXTINF:-1 tvg-logo="STAR SPORTS 3" tvg-logo="https://i.postimg.cc/mrLmzDDk/Star-Sports-3.jpg" group-title="Sports",Star Sports HD3
 https://livetv.shamon-cable.net/proxy/proxy.php?id=3109a507fb9f881971cf3a5fcd5ce4d845cf    
 
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/ZnzgZCLS/20240823_024321.png",Star Sports SL 1
