@@ -555,9 +555,7 @@ https://limon-iptv-link.limon-b.workers.dev/s/own_c0l5QX8CKw6rIcWT2H6tutct5-efka
 
 #EXTINF:-1 tvg-logo="https://i.postimg.cc/zBgM9nK7/20240823_024306.png" group-title="Sports",Star Sports HD2
 https://tvsen7.aynaott.com/ssport2hd/index.m3u8
-
-#EXTINF:-1 tvg-logo="STAR SPORTS 3" tvg-logo="https://i.postimg.cc/mrLmzDDk/Star-Sports-3.jpg" group-title="Sports",Star Sports HD3
-https://livetv.shamon-cable.net/proxy/proxy.php?id=3109a507fb9f881971cf3a5fcd5ce4d845cf    
+ 
 
 #EXTINF:-1 group-title="Sports" tvg-logo="https://i.postimg.cc/ZnzgZCLS/20240823_024321.png",Star Sports SL 1
 https://s3.itcnbd.live/server-12/stream/Mjg.m3u8       https://livetv.shamon-cable.net/proxy/proxy.php?id=0e6e3bc849e0d2d12250ab1d605da9967612
