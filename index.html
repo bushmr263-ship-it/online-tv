@@ -1123,7 +1123,6 @@
     </style>
 </head>
 <body>
-
     <div id="pbLoginOverlay">
         <div class="pb-login-card">
             <h2>PB TV LOGIN</h2>
@@ -1432,6 +1431,7 @@
         let currentServerIndex = 0;
         let stallCheckInterval = null;
         let loadTimeoutTimer = null;
+        let fallbackStepTimer = null;
         let loadSessionId = 0;
         let sessionFallbackState = {};
         let shakaPlayerRef = null;
@@ -1442,12 +1442,15 @@
         let clapprUiHideTimer = null;
         let clapprUiPollTimer = null;
 
-        const RESPONSIVE_PLAY_TIMEOUT_MS = 20000;
+        // অফ/ডেড লিংকের জন্য দ্রুত টাইমআউট (দ্রুত Offline দেখানোর জন্য)
+        const RESPONSIVE_PLAY_TIMEOUT_MS = 8000;
+        const DEAD_LINK_CACHE_MS = 120000;
+        const deadLinkTimestamps = new Map();
 
         // আপনার Cloudflare Worker প্রক্সি URL বসান (যেমন: "https://pb-stream-proxy.YOUR-SUBDOMAIN.workers.dev/?url=")
         const STREAM_PROXY_BASE = "https://YOUR-STREAM-PROXY.workers.dev/?url=";
 
-        // এই ডোমেইনগুলো বা #EXTVLCOPT:http-referrer থাকা সব লিংক স্বয়ংক্রিয়ভাবে প্রক্সি দিয়ে যাবে
+        // এই ডোমেইনগুলো বা #EXTVLCOPT:http-referrer থাকা সব লিংক স্বয়ংক্রিয়ভাবে প্রক্সি দিয়ে যাবে
         const ALWAYS_PROXY_HOSTS = ["techandeat.online"];
 
         const SELECTED_TOFFEE_CHANNELS = [
@@ -1459,6 +1462,27 @@
         ];
 
         const corsBlockedUrls = new Set();
+
+        function isKnownDeadUrl(cleanUrl) {
+            if (!cleanUrl) return false;
+            const ts = deadLinkTimestamps.get(cleanUrl);
+            if (!ts) return false;
+            if (Date.now() - ts > DEAD_LINK_CACHE_MS) {
+                deadLinkTimestamps.delete(cleanUrl);
+                return false;
+            }
+            return true;
+        }
+
+        function markUrlDead(cleanUrl) {
+            if (!cleanUrl) return;
+            deadLinkTimestamps.set(cleanUrl, Date.now());
+        }
+
+        function clearUrlDead(cleanUrl) {
+            if (!cleanUrl) return;
+            deadLinkTimestamps.delete(cleanUrl);
+        }
 
         function isProxyConfigured() {
             return Boolean(STREAM_PROXY_BASE && !STREAM_PROXY_BASE.includes("YOUR-STREAM-PROXY"));
@@ -1604,20 +1628,13 @@
 
                 if (hlsObj && Array.isArray(hlsObj.levels) && hlsObj.levels.length > 1) {
                     if (isBuffering) {
-                        hlsObj.abrEwmaDefaultEstimate = 350000;
+                        hlsObj.abrEwmaDefaultEstimate = 300000;
                         const currentIdx = hlsObj.currentLevel;
                         if (typeof currentIdx === 'number' && currentIdx > 0) {
                             hlsObj.nextLevel = Math.max(0, currentIdx - 1);
                         } else {
                             hlsObj.nextLevel = 0;
                         }
-                        setTimeout(() => {
-                            try {
-                                if (hlsObj && hlsObj.levels && hlsObj.levels.length > 1) {
-                                    hlsObj.nextLevel = -1;
-                                }
-                            } catch (e) {}
-                        }, 8000);
                     }
                 }
             } catch (e) {}
@@ -1627,9 +1644,10 @@
             }
         }
 
-        function jumpToOriginalLive(playerObj, vidEl) {
+        // লাইভ স্পোর্টস / HLS স্ট্রিমে বাফারিং বা পিছনে পড়ে গেলে সরাসরি লাইভ পয়েন্টে জাম্প
+        function jumpToOriginalLive(playerObj, vidEl, silent = false) {
             const statusEl = document.getElementById("status");
-            if (statusEl) statusEl.textContent = "Loading...";
+            if (!silent && statusEl) statusEl.textContent = "Loading...";
 
             try {
                 const hlsObj = (playerObj && playerObj.core && playerObj.core.getCurrentPlayback && playerObj.core.getCurrentPlayback()._hls)
@@ -1637,8 +1655,11 @@
                     : (typeof hls !== 'undefined' ? hls : null);
 
                 if (hlsObj) {
-                    if (hlsObj.liveSyncPosition && isFinite(hlsObj.liveSyncPosition)) {
-                        if (vidEl) vidEl.currentTime = hlsObj.liveSyncPosition;
+                    if (hlsObj.liveSyncPosition && isFinite(hlsObj.liveSyncPosition) && vidEl) {
+                        const drift = Math.abs(vidEl.currentTime - hlsObj.liveSyncPosition);
+                        if (drift > 1.2 || !silent) {
+                            vidEl.currentTime = hlsObj.liveSyncPosition;
+                        }
                     } else if (vidEl && vidEl.seekable && vidEl.seekable.length > 0) {
                         const endPos = vidEl.seekable.end(vidEl.seekable.length - 1);
                         if (isFinite(endPos) && endPos > 0) {
@@ -1658,8 +1679,10 @@
                 }
 
                 if (vidEl) {
-                    vidEl.muted = false;
-                    vidEl.volume = 1.0;
+                    if (hasUserInteracted || !silent) {
+                        vidEl.muted = false;
+                        vidEl.volume = 1.0;
+                    }
                     const p = vidEl.play();
                     if (p && typeof p.catch === 'function') {
                         p.catch(() => {});
@@ -1667,9 +1690,11 @@
                 }
             } catch (e) {}
 
-            setTimeout(() => {
-                if (statusEl) statusEl.textContent = "Playing";
-            }, 350);
+            if (!silent) {
+                setTimeout(() => {
+                    if (statusEl) statusEl.textContent = "Playing";
+                }, 300);
+            }
         }
 
         function ensureClapprInterface(playerObj) {
@@ -1854,7 +1879,7 @@
             liveBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 hasUserInteracted = true;
-                jumpToOriginalLive(playerObj, getInnerVideo());
+                jumpToOriginalLive(playerObj, getInnerVideo(), false);
                 syncUiState();
                 bumpAutoHide();
             });
@@ -1947,8 +1972,8 @@
                 }
             };
             tryPlay();
-            setTimeout(tryPlay, 150);
-            setTimeout(tryPlay, 500);
+            setTimeout(tryPlay, 120);
+            setTimeout(tryPlay, 400);
         }
 
         function setOfflineScreenVisible(isOffline) {
@@ -2096,28 +2121,28 @@
                     abr: {
                         enabled: true,
                         defaultBandwidthEstimate: mobile ? 350000 : 500000,
-                        switchInterval: 3,
+                        switchInterval: 2,
                         bandwidthUpgradeTarget: 0.75,
                         bandwidthDowngradeTarget: 0.92
                     },
                     streaming: {
-                        bufferingGoal: mobile ? 25 : 12,
-                        rebufferingGoal: mobile ? 2 : 1.5,
-                        bufferBehind: mobile ? 15 : 15,
+                        bufferingGoal: 4,
+                        rebufferingGoal: 1,
+                        bufferBehind: 8,
                         retryParameters: {
-                            timeout: 5000,
+                            timeout: 3500,
                             maxAttempts: 1,
-                            baseDelay: 300,
-                            backoffFactor: 1.2,
+                            baseDelay: 200,
+                            backoffFactor: 1.1,
                             fuzzFactor: 0.2
                         }
                     },
                     manifest: {
                         retryParameters: {
-                            timeout: 5000,
+                            timeout: 3500,
                             maxAttempts: 1,
-                            baseDelay: 300,
-                            backoffFactor: 1.2,
+                            baseDelay: 200,
+                            backoffFactor: 1.1,
                             fuzzFactor: 0.2
                         }
                     }
@@ -2144,11 +2169,13 @@
                 });
 
                 video.addEventListener("waiting", () => {
+                    if (activeBackendView !== "shaka") return;
                     status.textContent = "Buffering...";
                     setCenterWaitVisible(true);
                 });
 
                 video.addEventListener("playing", () => {
+                    if (activeBackendView !== "shaka") return;
                     if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
                     setCenterBadgeState('none');
                     setOfflineScreenVisible(false);
@@ -2161,6 +2188,7 @@
                 });
 
                 player.addEventListener("error", () => {
+                    if (activeBackendView !== "shaka") return;
                     if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
                     status.textContent = "Playback Error";
                 });
@@ -2247,6 +2275,10 @@
             if (loadTimeoutTimer) {
                 clearTimeout(loadTimeoutTimer);
                 loadTimeoutTimer = null;
+            }
+            if (fallbackStepTimer) {
+                clearTimeout(fallbackStepTimer);
+                fallbackStepTimer = null;
             }
             removeClapprInterface();
             setCenterBadgeState('none');
@@ -2372,6 +2404,14 @@
             await cleanupPreviousPlayers();
             if (sessionId !== loadSessionId) return;
 
+            // অফ/ডেড লিংক আগে থেকেই চিহ্নিত থাকলে সাথে সাথে Offline দেখায়
+            if (isKnownDeadUrl(cleanBaseUrl)) {
+                setCenterWaitVisible(false);
+                setOfflineScreenVisible(true);
+                statusEl.textContent = "Offline";
+                return;
+            }
+
             statusEl.textContent = "Loading...";
             setCenterWaitVisible(true);
 
@@ -2400,6 +2440,7 @@
                 if (sessionId !== loadSessionId) return;
                 fbState.gotServerResponse = true;
                 fbState.hasStartedPlaying = true;
+                clearUrlDead(cleanBaseUrl);
                 hideClapprErrorCanvas();
                 setCenterBadgeState('none');
                 setOfflineScreenVisible(false);
@@ -2407,6 +2448,10 @@
                 if (loadTimeoutTimer) {
                     clearTimeout(loadTimeoutTimer);
                     loadTimeoutTimer = null;
+                }
+                if (fallbackStepTimer) {
+                    clearTimeout(fallbackStepTimer);
+                    fallbackStepTimer = null;
                 }
                 statusEl.textContent = "Playing";
             };
@@ -2417,24 +2462,30 @@
                     clearTimeout(loadTimeoutTimer);
                     loadTimeoutTimer = null;
                 }
+                if (fallbackStepTimer) {
+                    clearTimeout(fallbackStepTimer);
+                    fallbackStepTimer = null;
+                }
+                markUrlDead(cleanBaseUrl);
                 hideClapprErrorCanvas();
                 setCenterWaitVisible(false);
                 setOfflineScreenVisible(true);
                 statusEl.textContent = "Offline";
             };
 
-            const armResponsivePlayTimer = () => {
+            const armResponsivePlayTimer = (customMs = RESPONSIVE_PLAY_TIMEOUT_MS) => {
                 if (sessionId !== loadSessionId || fbState.hasStartedPlaying) return;
-                if (!fbState.gotServerResponse) {
-                    fbState.gotServerResponse = true;
-                    if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
-                    loadTimeoutTimer = setTimeout(() => {
-                        if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
-                            markStreamOffline();
-                        }
-                    }, RESPONSIVE_PLAY_TIMEOUT_MS);
-                }
+                fbState.gotServerResponse = true;
+                if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
+                loadTimeoutTimer = setTimeout(() => {
+                    if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
+                        markStreamOffline();
+                    }
+                }, customMs);
             };
+
+            // মোট ডেড/অফ লিংক দ্রুত Offline করার গার্ড
+            armResponsivePlayTimer(RESPONSIVE_PLAY_TIMEOUT_MS);
 
             const handleNextStep = (fromStage, isCorsOriginBlock = false) => {
                 if (sessionId !== loadSessionId || isMpd || isFlv) return;
@@ -2452,15 +2503,20 @@
                     corsBlockedUrls.add(cleanBaseUrl);
                 }
 
+                if (fallbackStepTimer) {
+                    clearTimeout(fallbackStepTimer);
+                    fallbackStepTimer = null;
+                }
+
                 if (fromStage === 'clappr' && !fbState.movedToHlsOnce) {
                     fbState.movedToHlsOnce = true;
                     statusEl.textContent = "Loading...";
                     setCenterWaitVisible(true);
-                    setTimeout(() => {
+                    fallbackStepTimer = setTimeout(() => {
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                             loadChannelUrl(rawUrl, 'hls_once', false);
                         }
-                    }, 40);
+                    }, 30);
                     return;
                 }
 
@@ -2468,11 +2524,11 @@
                     fbState.movedToHtml5Once = true;
                     statusEl.textContent = "Loading...";
                     setCenterWaitVisible(true);
-                    setTimeout(() => {
+                    fallbackStepTimer = setTimeout(() => {
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                             loadChannelUrl(rawUrl, 'html5_cors_only', false);
                         }
-                    }, 40);
+                    }, 30);
                     return;
                 }
 
@@ -2488,10 +2544,10 @@
                 }
 
                 flvEl.onloadedmetadata = () => {
-                    if (sessionId === loadSessionId) armResponsivePlayTimer();
+                    if (sessionId === loadSessionId) armResponsivePlayTimer(7000);
                 };
                 flvEl.onprogress = () => {
-                    if (sessionId === loadSessionId) armResponsivePlayTimer();
+                    if (sessionId === loadSessionId) armResponsivePlayTimer(7000);
                 };
                 flvEl.onwaiting = () => {
                     if (sessionId === loadSessionId) {
@@ -2531,10 +2587,10 @@
                     });
 
                     mpegtsPlayer.on(mpegts.Events.MEDIA_INFO, () => {
-                        if (sessionId === loadSessionId) armResponsivePlayTimer();
+                        if (sessionId === loadSessionId) armResponsivePlayTimer(7000);
                     });
 
-                    mpegtsPlayer.on(mpegts.Events.ERROR, (errType, errDetail) => {
+                    mpegtsPlayer.on(mpegts.Events.ERROR, () => {
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                             markStreamOffline();
                         }
@@ -2566,7 +2622,7 @@
                             });
                         }
                         const loadPromise = shakaPlayerRef.load(finalUrl);
-                        armResponsivePlayTimer();
+                        armResponsivePlayTimer(7000);
                         await loadPromise;
                         if (sessionId !== loadSessionId) return;
                         markStreamStarted();
@@ -2586,22 +2642,22 @@
 
                 html5El.onloadedmetadata = () => {
                     if (sessionId === loadSessionId) {
-                        armResponsivePlayTimer();
+                        armResponsivePlayTimer(6000);
                         forceMediaPlayNow(html5El);
                     }
                 };
                 html5El.onprogress = () => {
-                    if (sessionId === loadSessionId) armResponsivePlayTimer();
+                    if (sessionId === loadSessionId) armResponsivePlayTimer(6000);
                 };
                 html5El.onloadeddata = () => {
                     if (sessionId === loadSessionId) {
-                        armResponsivePlayTimer();
+                        armResponsivePlayTimer(6000);
                         forceMediaPlayNow(html5El);
                     }
                 };
                 html5El.oncanplay = () => {
                     if (sessionId === loadSessionId) {
-                        armResponsivePlayTimer();
+                        armResponsivePlayTimer(6000);
                         forceMediaPlayNow(html5El);
                         if (!html5El.paused) markStreamStarted();
                     }
@@ -2643,21 +2699,27 @@
                 setActivePlayerView('shaka');
 
                 const mobile = isMobileView();
+                let hlsStallCount = 0;
 
                 mainVideo.onwaiting = () => {
-                    if (sessionId === loadSessionId) {
-                        statusEl.textContent = "Buffering...";
-                        setCenterWaitVisible(true);
-                        applyAdaptiveBitrateDownshift(null, mainVideo, true);
+                    if (sessionId !== loadSessionId || activeBackendView !== 'shaka') return;
+                    statusEl.textContent = "Buffering...";
+                    setCenterWaitVisible(true);
+                    applyAdaptiveBitrateDownshift(null, mainVideo, true);
+                    hlsStallCount++;
+                    if (hlsStallCount >= 2 && hls) {
+                        jumpToOriginalLive(null, mainVideo, true);
                     }
                 };
                 mainVideo.onplaying = () => {
-                    if (sessionId === loadSessionId) {
-                        markStreamStarted();
-                    }
+                    if (sessionId !== loadSessionId || activeBackendView !== 'shaka') return;
+                    hlsStallCount = 0;
+                    markStreamStarted();
                 };
                 mainVideo.ontimeupdate = () => {
-                    if (sessionId === loadSessionId && !mainVideo.paused && mainVideo.currentTime > 0) {
+                    if (sessionId !== loadSessionId || activeBackendView !== 'shaka') return;
+                    if (!mainVideo.paused && mainVideo.currentTime > 0) {
+                        hlsStallCount = 0;
                         markStreamStarted();
                     }
                 };
@@ -2668,33 +2730,30 @@
                 };
 
                 if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-                    const hlsConfig = mobile
-                        ? {
-                            enableWorker: false,
-                            lowLatencyMode: false,
-                            capLevelToPlayerSize: true,
-                            maxBufferLength: 35,
-                            maxMaxBufferLength: 70,
-                            maxBufferSize: 30 * 1000 * 1000,
-                            maxFragLookUpTolerance: 0.25,
-                            startLevel: 0,
-                            abrEwmaDefaultEstimate: 350000,
-                            abrBandWidthFactor: 0.75,
-                            abrBandWidthUpFactor: 0.65,
-                            fragLoadingTimeOut: 15000,
-                            manifestLoadingTimeOut: 6000
-                        }
-                        : {
-                            enableWorker: false,
-                            lowLatencyMode: true,
-                            capLevelToPlayerSize: true,
-                            startLevel: 0,
-                            abrEwmaDefaultEstimate: 500000,
-                            abrBandWidthFactor: 0.8,
-                            abrBandWidthUpFactor: 0.7,
-                            fragLoadingTimeOut: 15000,
-                            manifestLoadingTimeOut: 6000
-                        };
+                    // লাইভ স্ট্রিম ও স্পোর্টসের জন্য কম ল্যাটেন্সি ও দ্রুত স্টার্ট কনফিগারেশন
+                    const hlsConfig = {
+                        enableWorker: true,
+                        lowLatencyMode: false,
+                        backBufferLength: 6,
+                        maxBufferLength: mobile ? 6 : 8,
+                        maxMaxBufferLength: mobile ? 12 : 16,
+                        maxBufferSize: 12 * 1000 * 1000,
+                        liveSyncDurationCount: 2,
+                        liveMaxLatencyDurationCount: 5,
+                        startLevel: 0,
+                        capLevelToPlayerSize: true,
+                        abrEwmaDefaultEstimate: 450000,
+                        abrBandWidthFactor: 0.8,
+                        abrBandWidthUpFactor: 0.7,
+                        fragLoadingTimeOut: 4500,
+                        fragLoadingMaxRetry: 1,
+                        fragLoadingRetryDelay: 300,
+                        manifestLoadingTimeOut: 4000,
+                        manifestLoadingMaxRetry: 1,
+                        manifestLoadingRetryDelay: 300,
+                        levelLoadingTimeOut: 4000,
+                        levelLoadingMaxRetry: 1
+                    };
 
                     hls = new Hls(hlsConfig);
 
@@ -2702,16 +2761,16 @@
                     hls.attachMedia(mainVideo);
                     hls.on(Hls.Events.MANIFEST_PARSED, () => {
                         if (sessionId !== loadSessionId) return;
-                        armResponsivePlayTimer();
+                        armResponsivePlayTimer(6000);
                         triggerInstantPlay(mainVideo);
                     });
                     hls.on(Hls.Events.FRAG_LOADED, () => {
                         if (sessionId !== loadSessionId) return;
-                        armResponsivePlayTimer();
+                        armResponsivePlayTimer(6000);
                     });
                     hls.on(Hls.Events.FRAG_BUFFERED, () => {
                         if (sessionId !== loadSessionId) return;
-                        armResponsivePlayTimer();
+                        armResponsivePlayTimer(6000);
                         if (!mainVideo.paused) {
                             markStreamStarted();
                         }
@@ -2729,18 +2788,17 @@
 
                             applyAdaptiveBitrateDownshift(null, mainVideo, true);
                             setCenterWaitVisible(true);
-                            if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                                try { hls.startLoad(); } catch (e) {}
-                                statusEl.textContent = "Buffering...";
-                            } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                            statusEl.textContent = "Buffering...";
+                            if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
                                 try { hls.recoverMediaError(); } catch (e) {}
-                                statusEl.textContent = "Buffering...";
+                            } else {
+                                try { hls.startLoad(-1); } catch (e) {}
                             }
                         }
                     });
                 } else if (mainVideo.canPlayType('application/vnd.apple.mpegurl')) {
                     mainVideo.onloadedmetadata = () => {
-                        if (sessionId === loadSessionId) armResponsivePlayTimer();
+                        if (sessionId === loadSessionId) armResponsivePlayTimer(6000);
                     };
                     mainVideo.src = finalUrl;
                     triggerInstantPlay(mainVideo);
@@ -2754,7 +2812,7 @@
             ensureClapprInterface(null);
             hideClapprErrorCanvas();
 
-            let clapprProgressed = false;
+            let clapprStallCount = 0;
 
             clapprInstance = new Clappr.Player({
                 source: finalUrl,
@@ -2766,16 +2824,22 @@
                 hideMediaControl: true,
                 playback: {
                     hlsjsConfig: {
-                        enableWorker: false,
+                        enableWorker: true,
+                        lowLatencyMode: false,
+                        backBufferLength: 6,
                         capLevelToPlayerSize: true,
                         startLevel: 0,
-                        abrEwmaDefaultEstimate: 350000,
-                        abrBandWidthFactor: 0.75,
-                        abrBandWidthUpFactor: 0.65,
-                        maxBufferLength: 35,
-                        maxMaxBufferLength: 70,
-                        fragLoadingTimeOut: 15000,
-                        manifestLoadingTimeOut: 6000
+                        abrEwmaDefaultEstimate: 450000,
+                        abrBandWidthFactor: 0.8,
+                        abrBandWidthUpFactor: 0.7,
+                        maxBufferLength: 8,
+                        maxMaxBufferLength: 16,
+                        liveSyncDurationCount: 2,
+                        liveMaxLatencyDurationCount: 5,
+                        fragLoadingTimeOut: 4500,
+                        fragLoadingMaxRetry: 1,
+                        manifestLoadingTimeOut: 4000,
+                        manifestLoadingMaxRetry: 1
                     }
                 }
             });
@@ -2791,35 +2855,39 @@
                 const innerVideo = clapprEl ? clapprEl.querySelector("video") : null;
                 if (innerVideo) {
                     innerVideo.addEventListener("loadedmetadata", () => {
-                        if (sessionId === loadSessionId) armResponsivePlayTimer();
+                        if (sessionId === loadSessionId) armResponsivePlayTimer(6000);
                     });
                     innerVideo.addEventListener("progress", () => {
-                        if (sessionId === loadSessionId) armResponsivePlayTimer();
+                        if (sessionId === loadSessionId) armResponsivePlayTimer(6000);
                     });
                     innerVideo.addEventListener("waiting", () => {
                         if (sessionId === loadSessionId) {
                             statusEl.textContent = "Buffering...";
                             setCenterWaitVisible(true);
                             applyAdaptiveBitrateDownshift(clapprInstance, innerVideo, true);
+                            clapprStallCount++;
+                            if (clapprStallCount >= 2) {
+                                jumpToOriginalLive(clapprInstance, innerVideo, true);
+                            }
                         }
                     });
                     const onVideoActivePlay = () => {
                         if (sessionId === loadSessionId) {
-                            clapprProgressed = true;
+                            clapprStallCount = 0;
                             markStreamStarted();
                         }
                     };
                     innerVideo.addEventListener("playing", onVideoActivePlay);
                     innerVideo.addEventListener("canplay", () => {
-                        if (sessionId === loadSessionId) armResponsivePlayTimer();
+                        if (sessionId === loadSessionId) armResponsivePlayTimer(6000);
                         if (sessionId === loadSessionId && !innerVideo.paused) {
-                            clapprProgressed = true;
+                            clapprStallCount = 0;
                             markStreamStarted();
                         }
                     });
                     innerVideo.addEventListener("timeupdate", () => {
                         if (sessionId === loadSessionId && !innerVideo.paused && innerVideo.currentTime > 0) {
-                            clapprProgressed = true;
+                            clapprStallCount = 0;
                             markStreamStarted();
                         }
                     });
@@ -2837,10 +2905,10 @@
                         : null;
                     if (playback && playback._hls && typeof Hls !== 'undefined') {
                         playback._hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                            if (sessionId === loadSessionId) armResponsivePlayTimer();
+                            if (sessionId === loadSessionId) armResponsivePlayTimer(6000);
                         });
                         playback._hls.on(Hls.Events.FRAG_LOADED, () => {
-                            if (sessionId === loadSessionId) armResponsivePlayTimer();
+                            if (sessionId === loadSessionId) armResponsivePlayTimer(6000);
                         });
                         playback._hls.on(Hls.Events.ERROR, (ev, data) => {
                             hideClapprErrorCanvas();
@@ -2853,6 +2921,11 @@
                                 applyAdaptiveBitrateDownshift(clapprInstance, innerVideo, true);
                                 setCenterWaitVisible(true);
                                 statusEl.textContent = "Buffering...";
+                                if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                                    try { playback._hls.recoverMediaError(); } catch (e) {}
+                                } else {
+                                    try { playback._hls.startLoad(-1); } catch (e) {}
+                                }
                             }
                         });
                     }
@@ -2866,7 +2939,7 @@
                 if (Clappr.Events.PLAY) {
                     clapprInstance.on(Clappr.Events.PLAY, () => {
                         if (sessionId === loadSessionId) {
-                            clapprProgressed = true;
+                            clapprStallCount = 0;
                             markStreamStarted();
                         }
                     });
@@ -2881,9 +2954,9 @@
                     });
                 }
             }
-            setTimeout(bindClapprVideoListeners, 100);
-            setTimeout(bindClapprVideoListeners, 400);
-            setTimeout(bindClapprVideoListeners, 900);
+            setTimeout(bindClapprVideoListeners, 80);
+            setTimeout(bindClapprVideoListeners, 300);
+            setTimeout(bindClapprVideoListeners, 750);
         }
 
         function playCustom() {
@@ -2950,7 +3023,11 @@
                     container.appendChild(btn);
                 });
 
-                if (filteredChannels.length > 0 && (!currentUrl || !filteredChannels.some(c => Array.isArray(c.url) ? c.url.includes(currentUrl) : c.url === currentUrl))) {
+                // প্রথমবার পেজে আসলে লিস্টের প্রথম চ্যানেল স্বয়ংক্রিয়ভাবে প্লে হবে
+                const isCurrentInList = currentUrl && filteredChannels.some(c =>
+                    Array.isArray(c.url) ? c.url.includes(currentUrl) : c.url === currentUrl
+                );
+                if (!isCurrentInList) {
                     loadChannel(filteredChannels[0]);
                 } else {
                     updateActiveChannelIndicator(currentChannelObj);
