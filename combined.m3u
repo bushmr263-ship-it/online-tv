@@ -6,8 +6,7 @@
 # Channels Count: 35
 # ==========================================
 
-#EXTINF:-1 tvg-id="1090556911_ENG" tvg-name="Pakistan A vs Bangladesh A - Semi-Final - 27 Nov 2026 [ENG]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029940/1795599539816102_ACC_Rising_Star_SF_PAK_vs_BAN_live_landscape_thumb.jpg" group-title="Cricket",Pakistan A vs Bangladesh A - Semi-Final - 27 Nov 2026 [ENG]
-https://sonyeventsglobal.akamaized.net/hls/live/2120299/Criclive2711/ENG/std_lrh-800300010.m3u8?hdnea=exp=1795819677~acl=/*~id=78973381526161956875363365212627~hmac=4099769193cd881806b44beffe620bd38c00309688305479785dc8c6a1bc6073
+
 #EXTINF:-1 tvg-name="Sony Sab HD" tvg-logo="https://i.postimg.cc/442mfGNp/20250529-132607.png" group-title="Indian Hindi",Sony Sab HD
 #EXTVLCOPT:http-referrer=https://techandeat.online
 https://techandeat.online/sliv/stream.m3u8?id=1000009248
@@ -62,6 +61,13 @@ http://103.114.11.37:8081/Star-Movies/index.m3u8?token=scn
 http://103.114.11.37:8081/Star-movies-select/index.m3u8?token=scn
 #EXTINF:-1 tvg-name="Hum TV" tvg-logo="https://i.postimg.cc/RFXqn515/20250529-132912.png" group-title="Indian Hindi",Hum TV
 https://toffee.sm-monirul-islam-rs.workers.dev/hum/index.m3u8
+#EXTINF:-1 tvg-name="Zee Bollywood" tvg-logo="https://i.postimg.cc/x81JsTj1/20250529-134250.png" group-title="Indian Hindi",Zee Bollywood
+https://toffee.sm-monirul-islam-rs.workers.dev/zee_bollywood/index.m3u8
+#EXTINF:-1 tvg-name="Sony Max HD" tvg-logo="https://i.postimg.cc/zX9vhkhB/20250529-131834.png" group-title="Indian Hindi",Sony Max HD
+#EXTVLCOPT:http-referrer=https://techandeat.online
+https://techandeat.online/sliv/stream.m3u8?id=1000009247
+
+
 #EXTINF:-1 tvg-name="Gold Mines" tvg-logo="https://static.wikia.nocookie.net/jhmovie/images/7/7b/Goldmines_logo.png/revision/latest/scale-to-width-down/360?cb=20240404141630" group-title="Indian Hindi",Gold Mines
 https://mumt04.tangotv.in/m18aqlK4GOLDMINES/index.m3u8
 #EXTINF:-1 tvg-name="Gold Mines Movies" tvg-logo="https://static.wikia.nocookie.net/jhmovie/images/7/7b/Goldmines_logo.png/revision/latest/scale-to-width-down/360?cb=20240404141630" group-title="Indian Hindi",Gold Mines Movies
@@ -80,8 +86,3 @@ https://sonyeventsglobal.akamaized.net/hls/live/2119941/cricodi_2711/TEL/std_lrh
 https://sonyeventsglobal.akamaized.net/hls/live/2119782/cricodi_2711/KAN/std_lrh-800300010.m3u8?hdnea=exp=1795877319~acl=/*~id=15997512402601762959803083441372~hmac=8680fce4402c550be148296b73a64348346f30483e1090b3f62f968363c9c9ed
 #EXTINF:-1 tvg-id="1090556997_ENG" tvg-name="DP World Tour [ENG]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029986/1795622259556554_DP_World_Tour_BMW_PGA_day3_landscape_thumb.jpg" group-title="Golf",DP World Tour [ENG]
 https://sonyeventsglobal.akamaized.net/hls/live/2120303/Golf_BMW2711/ENG/std_lrh-800300010.m3u8?hdnea=exp=1795877319~acl=/*~id=15997512402601762959803083441372~hmac=8680fce4402c550be148296b73a64348346f30483e1090b3f62f968363c9c9ed
-#EXTINF:-1 tvg-name="Zee Bollywood" tvg-logo="https://i.postimg.cc/x81JsTj1/20250529-134250.png" group-title="Indian Hindi",Zee Bollywood
-https://toffee.sm-monirul-islam-rs.workers.dev/zee_bollywood/index.m3u8
-#EXTINF:-1 tvg-name="Sony Max HD" tvg-logo="https://i.postimg.cc/zX9vhkhB/20250529-131834.png" group-title="Indian Hindi",Sony Max HD
-#EXTVLCOPT:http-referrer=https://techandeat.online
-https://techandeat.online/sliv/stream.m3u8?id=1000009247
