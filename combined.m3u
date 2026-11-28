@@ -2,10 +2,9 @@
 # ==========================================
 # Developed by: Shawon
 # Telegram: https://t.me/+VqDOF_-beaQyMWY1
-# Last Updated: 2026-11-28 13:58:22 (BD Time)
-# Channels Count: 35
+# Last Updated: 2026-11-28 14:08:49 (BD Time)
+# Channels Count: 34
 # ==========================================
-
 
 #EXTINF:-1 tvg-name="Sony Sab HD" tvg-logo="https://i.postimg.cc/442mfGNp/20250529-132607.png" group-title="Indian Hindi",Sony Sab HD
 #EXTVLCOPT:http-referrer=https://techandeat.online
@@ -66,23 +65,21 @@ https://toffee.sm-monirul-islam-rs.workers.dev/zee_bollywood/index.m3u8
 #EXTINF:-1 tvg-name="Sony Max HD" tvg-logo="https://i.postimg.cc/zX9vhkhB/20250529-131834.png" group-title="Indian Hindi",Sony Max HD
 #EXTVLCOPT:http-referrer=https://techandeat.online
 https://techandeat.online/sliv/stream.m3u8?id=1000009247
-
-
 #EXTINF:-1 tvg-name="Gold Mines" tvg-logo="https://static.wikia.nocookie.net/jhmovie/images/7/7b/Goldmines_logo.png/revision/latest/scale-to-width-down/360?cb=20240404141630" group-title="Indian Hindi",Gold Mines
 https://mumt04.tangotv.in/m18aqlK4GOLDMINES/index.m3u8
 #EXTINF:-1 tvg-name="Gold Mines Movies" tvg-logo="https://static.wikia.nocookie.net/jhmovie/images/7/7b/Goldmines_logo.png/revision/latest/scale-to-width-down/360?cb=20240404141630" group-title="Indian Hindi",Gold Mines Movies
 https://mumt04.tangotv.in/m18aqlK4GOLDMINEMOVIES/index.m3u8
 #EXTINF:-1 tvg-name="Gold Mines Bollywood" tvg-logo="https://static.wikia.nocookie.net/jhmovie/images/7/7b/Goldmines_logo.png/revision/latest/scale-to-width-down/360?cb=20240404141630" group-title="Indian Hindi",Gold Mines Bollywood
 https://mumt03.tangotv.in/Dsly5z3HGOLDMINESBOLLYWOOD/index.m3u8
-#EXTINF:-1 tvg-id="1090556990_ENG" tvg-name="India Tour of New Zealand 2026 [ENG]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029844/1795521587084816_NZ_vs_IND_2nd_Test_Day2_landscape_thumb.jpg" group-title="Cricket",India Tour of New Zealand 2026 [ENG]
+#EXTINF:-1 tvg-id="1090556990_ENG" tvg-name="2nd Test - Day 2 - 28 Nov 2026 [ENG]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029844/1795521587084816_NZ_vs_IND_2nd_Test_Day2_landscape_thumb.jpg" group-title="Cricket",2nd Test - Day 2 - 28 Nov 2026 [ENG]
 https://sonyeventsglobal.akamaized.net/hls/live/2119931/cricodi_2711/ENG/std_lrh-800300010.m3u8?hdnea=exp=1795877319~acl=/*~id=15997512402601762959803083441372~hmac=8680fce4402c550be148296b73a64348346f30483e1090b3f62f968363c9c9ed
-#EXTINF:-1 tvg-id="1090556990_HIN" tvg-name="India Tour of New Zealand 2026 [HIN]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029844/1795521587084816_NZ_vs_IND_2nd_Test_Day2_landscape_thumb.jpg" group-title="Cricket",India Tour of New Zealand 2026 [HIN]
+#EXTINF:-1 tvg-id="1090556990_HIN" tvg-name="2nd Test - Day 2 - 28 Nov 2026 [HIN]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029844/1795521587084816_NZ_vs_IND_2nd_Test_Day2_landscape_thumb.jpg" group-title="Cricket",2nd Test - Day 2 - 28 Nov 2026 [HIN]
 https://sonyeventsglobal.akamaized.net/hls/live/2119921/cricodi_2711/HIN/std_lrh-800300010.m3u8?hdnea=exp=1795877319~acl=/*~id=15997512402601762959803083441372~hmac=8680fce4402c550be148296b73a64348346f30483e1090b3f62f968363c9c9ed
-#EXTINF:-1 tvg-id="1090556990_TAM" tvg-name="India Tour of New Zealand 2026 [TAM]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029844/1795521587084816_NZ_vs_IND_2nd_Test_Day2_landscape_thumb.jpg" group-title="Cricket",India Tour of New Zealand 2026 [TAM]
+#EXTINF:-1 tvg-id="1090556990_TAM" tvg-name="2nd Test - Day 2 - 28 Nov 2026 [TAM]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029844/1795521587084816_NZ_vs_IND_2nd_Test_Day2_landscape_thumb.jpg" group-title="Cricket",2nd Test - Day 2 - 28 Nov 2026 [TAM]
 https://sonyeventsglobal.akamaized.net/hls/live/2119951/cricodi_2711/TAM/std_lrh-800300010.m3u8?hdnea=exp=1795877319~acl=/*~id=15997512402601762959803083441372~hmac=8680fce4402c550be148296b73a64348346f30483e1090b3f62f968363c9c9ed
-#EXTINF:-1 tvg-id="1090556990_TEL" tvg-name="India Tour of New Zealand 2026 [TEL]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029844/1795521587084816_NZ_vs_IND_2nd_Test_Day2_landscape_thumb.jpg" group-title="Cricket",India Tour of New Zealand 2026 [TEL]
+#EXTINF:-1 tvg-id="1090556990_TEL" tvg-name="2nd Test - Day 2 - 28 Nov 2026 [TEL]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029844/1795521587084816_NZ_vs_IND_2nd_Test_Day2_landscape_thumb.jpg" group-title="Cricket",2nd Test - Day 2 - 28 Nov 2026 [TEL]
 https://sonyeventsglobal.akamaized.net/hls/live/2119941/cricodi_2711/TEL/std_lrh-800300010.m3u8?hdnea=exp=1795877319~acl=/*~id=15997512402601762959803083441372~hmac=8680fce4402c550be148296b73a64348346f30483e1090b3f62f968363c9c9ed
-#EXTINF:-1 tvg-id="1090556990_KAN" tvg-name="India Tour of New Zealand 2026 [KAN]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029844/1795521587084816_NZ_vs_IND_2nd_Test_Day2_landscape_thumb.jpg" group-title="Cricket",India Tour of New Zealand 2026 [KAN]
+#EXTINF:-1 tvg-id="1090556990_KAN" tvg-name="2nd Test - Day 2 - 28 Nov 2026 [KAN]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029844/1795521587084816_NZ_vs_IND_2nd_Test_Day2_landscape_thumb.jpg" group-title="Cricket",2nd Test - Day 2 - 28 Nov 2026 [KAN]
 https://sonyeventsglobal.akamaized.net/hls/live/2119782/cricodi_2711/KAN/std_lrh-800300010.m3u8?hdnea=exp=1795877319~acl=/*~id=15997512402601762959803083441372~hmac=8680fce4402c550be148296b73a64348346f30483e1090b3f62f968363c9c9ed
-#EXTINF:-1 tvg-id="1090556997_ENG" tvg-name="DP World Tour [ENG]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029986/1795622259556554_DP_World_Tour_BMW_PGA_day3_landscape_thumb.jpg" group-title="Golf",DP World Tour [ENG]
+#EXTINF:-1 tvg-id="1090556997_ENG" tvg-name="BMW Australian PGA Championship - Day 3 - 28 Nov 2026 [ENG]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029986/1795622259556554_DP_World_Tour_BMW_PGA_day3_landscape_thumb.jpg" group-title="Golf",BMW Australian PGA Championship - Day 3 - 28 Nov 2026 [ENG]
 https://sonyeventsglobal.akamaized.net/hls/live/2120303/Golf_BMW2711/ENG/std_lrh-800300010.m3u8?hdnea=exp=1795877319~acl=/*~id=15997512402601762959803083441372~hmac=8680fce4402c550be148296b73a64348346f30483e1090b3f62f968363c9c9ed
