@@ -2,14 +2,14 @@ name: Auto Combine Playlist
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "0 */3 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  update-playlist:
+  combine:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -20,13 +20,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install requests
+      - name: Install dependencies
         run: pip install requests
 
       - name: Run combine script
         run: python combine.py
 
-      - name: Commit and push combined.m3u
+      - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -34,4 +34,6 @@ jobs:
           if ! git diff --staged --quiet; then
             git commit -m "Auto update combined.m3u"
             git push
+          else
+            echo "No changes to commit"
           fi
