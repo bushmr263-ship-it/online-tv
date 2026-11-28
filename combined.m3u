@@ -2,8 +2,8 @@
 # ==========================================
 # Developed by: Shawon
 # Telegram: https://t.me/+VqDOF_-beaQyMWY1
-# Last Updated: 2026-11-28 14:08:49 (BD Time)
-# Channels Count: 34
+# Last Updated: 2026-11-28 14:19:05 (BD Time)
+# Channels Count: 38
 # ==========================================
 
 #EXTINF:-1 tvg-name="Sony Sab HD" tvg-logo="https://i.postimg.cc/442mfGNp/20250529-132607.png" group-title="Indian Hindi",Sony Sab HD
@@ -83,3 +83,11 @@ https://sonyeventsglobal.akamaized.net/hls/live/2119941/cricodi_2711/TEL/std_lrh
 https://sonyeventsglobal.akamaized.net/hls/live/2119782/cricodi_2711/KAN/std_lrh-800300010.m3u8?hdnea=exp=1795877319~acl=/*~id=15997512402601762959803083441372~hmac=8680fce4402c550be148296b73a64348346f30483e1090b3f62f968363c9c9ed
 #EXTINF:-1 tvg-id="1090556997_ENG" tvg-name="BMW Australian PGA Championship - Day 3 - 28 Nov 2026 [ENG]" tvg-logo="https://origin-staticv2.sonyliv.com/videoasset_images/manage_file/1000029986/1795622259556554_DP_World_Tour_BMW_PGA_day3_landscape_thumb.jpg" group-title="Golf",BMW Australian PGA Championship - Day 3 - 28 Nov 2026 [ENG]
 https://sonyeventsglobal.akamaized.net/hls/live/2120303/Golf_BMW2711/ENG/std_lrh-800300010.m3u8?hdnea=exp=1795877319~acl=/*~id=15997512402601762959803083441372~hmac=8680fce4402c550be148296b73a64348346f30483e1090b3f62f968363c9c9ed
+#EXTINF:-1 tvg-logo="https://www.fancode.com/skillup-uploads/cms-media/4250970_53025_ITT_NEOM_FC-App_1795077050706.png" group-title="Football",Al Ittihad Vs Neom Sc
+https://fancode.sm-monirul-islam-rs.workers.dev/4250970/index.m3u8
+#EXTINF:-1 tvg-logo="https://images.fancode.com/aig/match/v1795678540541/4251117_CASACARDS_SPORTY_APP.png" group-title="Football",Leganes Vs Ce Sabadell
+https://fancode.sm-monirul-islam-rs.workers.dev/4251117/index.m3u8
+#EXTINF:-1 tvg-id="tapmad_19066" tvg-name="New Zealand vs India" tvg-logo="" group-title="Sports",New Zealand vs India
+https://tencent-cdn.tapmad.com/v1/01a14ab8af8915fc600b1e3e9683f0/01a14ab953dd1ea540a81c2b41b75f/main.m3u8
+#EXTINF:-1 tvg-id="tapmad_20533" tvg-name="GT1 Race Club - Race 2 - Adelaide, Australia" tvg-logo="" group-title="Sports",GT1 Race Club - Race 2 - Adelaide, Australia
+https://multiregion-asia-cdn.tapmad.com/v1/01a1548c4faf15fc600b1e3e968408/01a1548c7fde1ea557841e1612cf76/main.m3u8
