@@ -19,7 +19,6 @@ EAMIN_M3U_URL = (
 
 TARGET_M3U_PATH = "combined.m3u"
 
-# eamin-tv.m3u থেকে শুধু যেসব চ্যানেল নেবেন তাদের নাম
 EAMIN_SELECTED_CHANNELS = [
     "Colors",
     "Colors Cineplex",
@@ -59,6 +58,12 @@ def normalize_text(text: str) -> str:
 EAMIN_TARGET_SET = {normalize_text(name) for name in EAMIN_SELECTED_CHANNELS}
 
 
+def is_http_url(url: str | None) -> bool:
+    if not isinstance(url, str):
+        return False
+    return bool(re.match(r"^https?://[^\s]+$", url.strip(), re.IGNORECASE))
+
+
 def extract_channel_name(extinf: str) -> str:
     tvg_name_match = re.search(r'tvg-name="([^"]*)"', extinf)
     if tvg_name_match and tvg_name_match.group(1).strip():
@@ -68,16 +73,21 @@ def extract_channel_name(extinf: str) -> str:
     return ""
 
 
-def get_entry_key(extinf: str) -> str:
-    tvg_id_match = re.search(r'tvg-id="([^"]*)"', extinf)
-    if tvg_id_match and tvg_id_match.group(1).strip():
-        return "id:" + normalize_text(tvg_id_match.group(1))
+def extract_tvg_id(extinf: str) -> str:
+    m = re.search(r'tvg-id="([^"]*)"', extinf)
+    return m.group(1).strip() if m else ""
+
+
+def get_entry_key(extinf: str, stream_url: str = "") -> str:
+    tvg_id = extract_tvg_id(extinf)
+    if tvg_id:
+        return "id:" + normalize_text(tvg_id)
 
     name = extract_channel_name(extinf)
     if name:
         return "name:" + normalize_text(name)
 
-    return "raw:" + normalize_text(extinf)
+    return "url:" + normalize_text(stream_url)
 
 
 def fetch_text(url: str) -> str:
@@ -92,33 +102,6 @@ def fetch_json(url: str) -> dict:
     return resp.json()
 
 
-def find_stream_url_in_match(match_obj: dict) -> str | None:
-    candidate_keys = [
-        "stream_url",
-        "streamUrl",
-        "url",
-        "m3u8",
-        "m3u8_url",
-        "hls_url",
-        "play_url",
-        "video_url",
-        "link",
-    ]
-    for k in candidate_keys:
-        val = match_obj.get(k)
-        if isinstance(val, str) and re.match(r"^https?://", val.strip(), re.IGNORECASE):
-            return val.strip()
-
-    for _, val in match_obj.items():
-        if isinstance(val, str):
-            s = val.strip()
-            if re.match(r"^https?://", s, re.IGNORECASE) and (
-                ".m3u8" in s.lower() or "hdnea=" in s.lower() or "/hls/" in s.lower()
-            ):
-                return s
-    return None
-
-
 def parse_sony_json_blocks(data: dict) -> list[dict]:
     matches = data.get("matches", [])
     if not isinstance(matches, list):
@@ -129,33 +112,37 @@ def parse_sony_json_blocks(data: dict) -> list[dict]:
         if not isinstance(m, dict):
             continue
 
-        stream_url = find_stream_url_in_match(m)
-        if not stream_url:
+        stream_url = m.get("stream_link") or m.get("stream_url") or m.get("url")
+        if not is_http_url(stream_url):
             continue
+        stream_url = stream_url.strip()
 
         content_id = str(m.get("contentId") or "").strip()
-        event_name = str(m.get("event_name") or m.get("title") or "SonyLiv Event").strip()
+        match_name = str(m.get("match_name") or "").strip()
+        event_name = str(m.get("event_name") or "").strip()
         lang = str(m.get("audioLanguageName") or "").strip()
         channel_name = str(m.get("broadcast_channel") or "").strip()
         category = str(m.get("event_category") or "Sports").strip()
-        logo = str(m.get("src") or m.get("logo") or "").strip()
+        logo = str(m.get("src") or "").strip()
 
-        display_name = event_name
-        if lang and lang.upper() not in display_name.upper():
+        display_name = match_name or event_name or channel_name or "SonyLiv Live"
+        if lang and f"[{lang.upper()}]" not in display_name.upper():
             display_name = f"{display_name} [{lang}]"
-        elif channel_name and channel_name.lower() not in display_name.lower():
-            display_name = f"{display_name} - {channel_name}"
+
+        tvg_id_val = content_id
+        if tvg_id_val and lang and not tvg_id_val.lower().endswith(f"_{lang.lower()}"):
+            tvg_id_val = f"{tvg_id_val}_{lang}"
 
         safe_display = display_name.replace('"', "")
         extinf = (
-            f'#EXTINF:-1 tvg-id="{content_id}" '
+            f'#EXTINF:-1 tvg-id="{tvg_id_val}" '
             f'tvg-name="{safe_display}" '
             f'tvg-logo="{logo}" '
             f'group-title="{category}",{display_name}'
         )
 
         blocks.append({
-            "key": get_entry_key(extinf),
+            "key": get_entry_key(extinf, stream_url),
             "extinf": extinf,
             "extras": [],
             "url": stream_url,
@@ -180,7 +167,7 @@ def parse_m3u_blocks(m3u_text: str, allowed_names: set[str] | None = None) -> li
             while j < len(lines) and not lines[j].startswith("#EXTINF"):
                 if lines[j].startswith("#"):
                     extras.append(lines[j])
-                elif re.match(r"^https?://", lines[j], re.IGNORECASE):
+                elif is_http_url(lines[j]):
                     stream_url = lines[j]
                     break
                 j += 1
@@ -189,7 +176,7 @@ def parse_m3u_blocks(m3u_text: str, allowed_names: set[str] | None = None) -> li
                 ch_name = normalize_text(extract_channel_name(extinf))
                 if allowed_names is None or ch_name in allowed_names:
                     blocks.append({
-                        "key": get_entry_key(extinf),
+                        "key": get_entry_key(extinf, stream_url),
                         "extinf": extinf,
                         "extras": extras,
                         "url": stream_url,
@@ -223,14 +210,14 @@ def sync_all_blocks(existing_text: str, incoming_blocks: list[dict]) -> tuple[st
                 s = lines[j].strip()
                 if s.startswith("#"):
                     extras.append(s)
-                elif re.match(r"^https?://", s, re.IGNORECASE):
+                elif is_http_url(s):
                     stream_url = s
                     break
                 j += 1
 
             if stream_url:
                 existing_blocks.append({
-                    "key": get_entry_key(extinf),
+                    "key": get_entry_key(extinf, stream_url),
                     "extinf": extinf,
                     "extras": extras,
                     "url": stream_url,
@@ -240,33 +227,41 @@ def sync_all_blocks(existing_text: str, incoming_blocks: list[dict]) -> tuple[st
         else:
             i += 1
 
-    incoming_map = {}
+    # যে ব্লকগুলোর stream_url একই আছে সেগুলো URL দিয়ে ম্যাপ করা যাতে JSON এবং M3U মিলে গেলে ডুপ্লিকেট না হয়
+    incoming_by_key = {}
+    incoming_by_url = {}
     for blk in incoming_blocks:
-        incoming_map[blk["key"]] = blk
+        incoming_by_key[blk["key"]] = blk
+        incoming_by_url[blk["url"]] = blk
 
     seen_keys = set()
+    seen_urls = set()
     output_blocks = []
     added_count = 0
     updated_count = 0
 
     for blk in existing_blocks:
         k = blk["key"]
-        if k in incoming_map:
-            new_blk = incoming_map[k]
-            if blk["url"] != new_blk["url"] or blk["raw"] != new_blk["raw"]:
-                output_blocks.append(new_blk["raw"])
+        u = blk["url"]
+        matched = incoming_by_key.get(k) or incoming_by_url.get(u)
+        if matched:
+            if blk["url"] != matched["url"] or blk["raw"] != matched["raw"]:
+                output_blocks.append(matched["raw"])
                 updated_count += 1
             else:
                 output_blocks.append(blk["raw"])
-            seen_keys.add(k)
+            seen_keys.add(matched["key"])
+            seen_urls.add(matched["url"])
         else:
             output_blocks.append(blk["raw"])
+            seen_keys.add(k)
+            seen_urls.add(u)
 
     for blk in incoming_blocks:
-        k = blk["key"]
-        if k not in seen_keys:
+        if blk["key"] not in seen_keys and blk["url"] not in seen_urls:
             output_blocks.append(blk["raw"])
-            seen_keys.add(k)
+            seen_keys.add(blk["key"])
+            seen_urls.add(blk["url"])
             added_count += 1
 
     header_text = "\n".join(header_lines).strip()
