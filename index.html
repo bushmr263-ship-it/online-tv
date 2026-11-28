@@ -382,7 +382,6 @@
             border-color: var(--accent-color);
         }
 
-        /* মূল টাইল গ্রিড সিস্টেম */
         .channel-list {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -805,7 +804,6 @@
             color: #000;
         }
 
-        /* মূল টাইল বাটন স্টাইল */
         .ch-btn {
             position: relative;
             background: #21262d;
@@ -1125,6 +1123,7 @@
     </style>
 </head>
 <body>
+
     <div id="pbLoginOverlay">
         <div class="pb-login-card">
             <h2>PB TV LOGIN</h2>
@@ -1433,7 +1432,6 @@
         let currentServerIndex = 0;
         let stallCheckInterval = null;
         let loadTimeoutTimer = null;
-        let fallbackStepTimer = null;
         let loadSessionId = 0;
         let sessionFallbackState = {};
         let shakaPlayerRef = null;
@@ -1444,14 +1442,12 @@
         let clapprUiHideTimer = null;
         let clapprUiPollTimer = null;
 
-        const RESPONSIVE_PLAY_TIMEOUT_MS = 10000;
-        const DEAD_LINK_CACHE_MS = 90000;
-        const deadLinkTimestamps = new Map();
+        const RESPONSIVE_PLAY_TIMEOUT_MS = 20000;
 
         // আপনার Cloudflare Worker প্রক্সি URL বসান (যেমন: "https://pb-stream-proxy.YOUR-SUBDOMAIN.workers.dev/?url=")
         const STREAM_PROXY_BASE = "https://YOUR-STREAM-PROXY.workers.dev/?url=";
 
-        // এই ডোমেইনগুলো বা #EXTVLCOPT:http-referrer থাকা সব লিংক স্বয়ংক্রিয়ভাবে প্রক্সি দিয়ে যাবে
+        // এই ডোমেইনগুলো বা #EXTVLCOPT:http-referrer থাকা সব লিংক স্বয়ংক্রিয়ভাবে প্রক্সি দিয়ে যাবে
         const ALWAYS_PROXY_HOSTS = ["techandeat.online"];
 
         const SELECTED_TOFFEE_CHANNELS = [
@@ -1463,27 +1459,6 @@
         ];
 
         const corsBlockedUrls = new Set();
-
-        function isKnownDeadUrl(cleanUrl) {
-            if (!cleanUrl) return false;
-            const ts = deadLinkTimestamps.get(cleanUrl);
-            if (!ts) return false;
-            if (Date.now() - ts > DEAD_LINK_CACHE_MS) {
-                deadLinkTimestamps.delete(cleanUrl);
-                return false;
-            }
-            return true;
-        }
-
-        function markUrlDead(cleanUrl) {
-            if (!cleanUrl) return;
-            deadLinkTimestamps.set(cleanUrl, Date.now());
-        }
-
-        function clearUrlDead(cleanUrl) {
-            if (!cleanUrl) return;
-            deadLinkTimestamps.delete(cleanUrl);
-        }
 
         function isProxyConfigured() {
             return Boolean(STREAM_PROXY_BASE && !STREAM_PROXY_BASE.includes("YOUR-STREAM-PROXY"));
@@ -2169,13 +2144,11 @@
                 });
 
                 video.addEventListener("waiting", () => {
-                    if (activeBackendView !== "shaka") return;
                     status.textContent = "Buffering...";
                     setCenterWaitVisible(true);
                 });
 
                 video.addEventListener("playing", () => {
-                    if (activeBackendView !== "shaka") return;
                     if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
                     setCenterBadgeState('none');
                     setOfflineScreenVisible(false);
@@ -2188,7 +2161,6 @@
                 });
 
                 player.addEventListener("error", () => {
-                    if (activeBackendView !== "shaka") return;
                     if (loadTimeoutTimer) clearTimeout(loadTimeoutTimer);
                     status.textContent = "Playback Error";
                 });
@@ -2275,10 +2247,6 @@
             if (loadTimeoutTimer) {
                 clearTimeout(loadTimeoutTimer);
                 loadTimeoutTimer = null;
-            }
-            if (fallbackStepTimer) {
-                clearTimeout(fallbackStepTimer);
-                fallbackStepTimer = null;
             }
             removeClapprInterface();
             setCenterBadgeState('none');
@@ -2404,13 +2372,6 @@
             await cleanupPreviousPlayers();
             if (sessionId !== loadSessionId) return;
 
-            if (isKnownDeadUrl(cleanBaseUrl)) {
-                setCenterWaitVisible(false);
-                setOfflineScreenVisible(true);
-                statusEl.textContent = "Offline";
-                return;
-            }
-
             statusEl.textContent = "Loading...";
             setCenterWaitVisible(true);
 
@@ -2439,7 +2400,6 @@
                 if (sessionId !== loadSessionId) return;
                 fbState.gotServerResponse = true;
                 fbState.hasStartedPlaying = true;
-                clearUrlDead(cleanBaseUrl);
                 hideClapprErrorCanvas();
                 setCenterBadgeState('none');
                 setOfflineScreenVisible(false);
@@ -2447,10 +2407,6 @@
                 if (loadTimeoutTimer) {
                     clearTimeout(loadTimeoutTimer);
                     loadTimeoutTimer = null;
-                }
-                if (fallbackStepTimer) {
-                    clearTimeout(fallbackStepTimer);
-                    fallbackStepTimer = null;
                 }
                 statusEl.textContent = "Playing";
             };
@@ -2461,11 +2417,6 @@
                     clearTimeout(loadTimeoutTimer);
                     loadTimeoutTimer = null;
                 }
-                if (fallbackStepTimer) {
-                    clearTimeout(fallbackStepTimer);
-                    fallbackStepTimer = null;
-                }
-                markUrlDead(cleanBaseUrl);
                 hideClapprErrorCanvas();
                 setCenterWaitVisible(false);
                 setOfflineScreenVisible(true);
@@ -2485,8 +2436,6 @@
                 }
             };
 
-            armResponsivePlayTimer();
-
             const handleNextStep = (fromStage, isCorsOriginBlock = false) => {
                 if (sessionId !== loadSessionId || isMpd || isFlv) return;
                 hideClapprErrorCanvas();
@@ -2503,16 +2452,11 @@
                     corsBlockedUrls.add(cleanBaseUrl);
                 }
 
-                if (fallbackStepTimer) {
-                    clearTimeout(fallbackStepTimer);
-                    fallbackStepTimer = null;
-                }
-
                 if (fromStage === 'clappr' && !fbState.movedToHlsOnce) {
                     fbState.movedToHlsOnce = true;
                     statusEl.textContent = "Loading...";
                     setCenterWaitVisible(true);
-                    fallbackStepTimer = setTimeout(() => {
+                    setTimeout(() => {
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                             loadChannelUrl(rawUrl, 'hls_once', false);
                         }
@@ -2524,7 +2468,7 @@
                     fbState.movedToHtml5Once = true;
                     statusEl.textContent = "Loading...";
                     setCenterWaitVisible(true);
-                    fallbackStepTimer = setTimeout(() => {
+                    setTimeout(() => {
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                             loadChannelUrl(rawUrl, 'html5_cors_only', false);
                         }
@@ -2590,7 +2534,7 @@
                         if (sessionId === loadSessionId) armResponsivePlayTimer();
                     });
 
-                    mpegtsPlayer.on(mpegts.Events.ERROR, () => {
+                    mpegtsPlayer.on(mpegts.Events.ERROR, (errType, errDetail) => {
                         if (sessionId === loadSessionId && !fbState.hasStartedPlaying) {
                             markStreamOffline();
                         }
@@ -2701,18 +2645,19 @@
                 const mobile = isMobileView();
 
                 mainVideo.onwaiting = () => {
-                    if (sessionId !== loadSessionId || activeBackendView !== 'shaka') return;
-                    statusEl.textContent = "Buffering...";
-                    setCenterWaitVisible(true);
-                    applyAdaptiveBitrateDownshift(null, mainVideo, true);
+                    if (sessionId === loadSessionId) {
+                        statusEl.textContent = "Buffering...";
+                        setCenterWaitVisible(true);
+                        applyAdaptiveBitrateDownshift(null, mainVideo, true);
+                    }
                 };
                 mainVideo.onplaying = () => {
-                    if (sessionId !== loadSessionId || activeBackendView !== 'shaka') return;
-                    markStreamStarted();
+                    if (sessionId === loadSessionId) {
+                        markStreamStarted();
+                    }
                 };
                 mainVideo.ontimeupdate = () => {
-                    if (sessionId !== loadSessionId || activeBackendView !== 'shaka') return;
-                    if (!mainVideo.paused && mainVideo.currentTime > 0) {
+                    if (sessionId === loadSessionId && !mainVideo.paused && mainVideo.currentTime > 0) {
                         markStreamStarted();
                     }
                 };
@@ -2741,7 +2686,7 @@
                         }
                         : {
                             enableWorker: false,
-                            lowLatencyMode: false,
+                            lowLatencyMode: true,
                             capLevelToPlayerSize: true,
                             startLevel: 0,
                             abrEwmaDefaultEstimate: 500000,
@@ -2809,6 +2754,8 @@
             ensureClapprInterface(null);
             hideClapprErrorCanvas();
 
+            let clapprProgressed = false;
+
             clapprInstance = new Clappr.Player({
                 source: finalUrl,
                 parentId: "#clappr-container",
@@ -2820,7 +2767,6 @@
                 playback: {
                     hlsjsConfig: {
                         enableWorker: false,
-                        lowLatencyMode: false,
                         capLevelToPlayerSize: true,
                         startLevel: 0,
                         abrEwmaDefaultEstimate: 350000,
@@ -2859,6 +2805,7 @@
                     });
                     const onVideoActivePlay = () => {
                         if (sessionId === loadSessionId) {
+                            clapprProgressed = true;
                             markStreamStarted();
                         }
                     };
@@ -2866,11 +2813,13 @@
                     innerVideo.addEventListener("canplay", () => {
                         if (sessionId === loadSessionId) armResponsivePlayTimer();
                         if (sessionId === loadSessionId && !innerVideo.paused) {
+                            clapprProgressed = true;
                             markStreamStarted();
                         }
                     });
                     innerVideo.addEventListener("timeupdate", () => {
                         if (sessionId === loadSessionId && !innerVideo.paused && innerVideo.currentTime > 0) {
+                            clapprProgressed = true;
                             markStreamStarted();
                         }
                     });
@@ -2917,6 +2866,7 @@
                 if (Clappr.Events.PLAY) {
                     clapprInstance.on(Clappr.Events.PLAY, () => {
                         if (sessionId === loadSessionId) {
+                            clapprProgressed = true;
                             markStreamStarted();
                         }
                     });
