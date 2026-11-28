@@ -2,6 +2,10 @@
 # CATEGORY: BANGLA
 #------------------------------------------------------------------------------
 
+
+#EXTINF:-1 tvg-logo="http://ujm.from-in.com/panel/imageicon/4a9ad93.png" group-title="INDIAN",IN: Colors TV FHD (US)
+http://tv.cloudcdn.me:80/live.ts?channelId=134329&uid=5005&deviceMac=00:1A:79:8C:0C:E9
+
 #EXTINF:-1 tvg-logo="https://static.wikia.nocookie.net/etv-gspn-bangla/images/6/6e/T_Sports_HD_logo_2021.png" group-title="Bangla",T Sports
 https://tvsen5.aynaott.com/TnMn5kZz8/index.m3u8  https://tvsen5.aynaott.com/kP9vX2mZ7qL5wN3t/index.m3u8    https://online-tv-rho.vercel.app/api/proxy?url=http://live.ftpbdlive.com:8080/live/FTPBD-LIVETV/FTPBD-2026/11.m3u8  
 
