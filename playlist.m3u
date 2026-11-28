@@ -3,16 +3,6 @@
 #------------------------------------------------------------------------------
 
 
-
-
-#EXTINF:-1 tvg-id="151" tvg-name="Movies Now HD" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Movies_Now_HD.png" group-title="Jiotv+ ♨️English", Movies Now HD
-#KODIPROP:inputstream.adaptive.manifest_type=mpd
-#KODIPROP:inputstream.adaptive.license_type=clearkey
-#KODIPROP:inputstream.adaptive.license_key=40f019b86241d23ef075633fd7f1e927:058dec845bd340178a388edd104a015e
-#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36
-https://jiostbplus.saregojo99.workers.dev/proxy?url=https%3A%2F%2Ftimes-ott-live.akamaized.net%2Fmoviesnow_wv_drm%2Findex.mpd
-
-
 #EXTINF:-1 tvg-logo="https://static.wikia.nocookie.net/etv-gspn-bangla/images/6/6e/T_Sports_HD_logo_2021.png" group-title="Bangla",T Sports
 https://tvsen5.aynaott.com/TnMn5kZz8/index.m3u8  https://tvsen5.aynaott.com/kP9vX2mZ7qL5wN3t/index.m3u8    https://online-tv-rho.vercel.app/api/proxy?url=http://live.ftpbdlive.com:8080/live/FTPBD-LIVETV/FTPBD-2026/11.m3u8  
 
@@ -413,9 +403,7 @@ https://tvsen3.aynaott.com/UC6a8nsf/index.m3u8
 #KODIPROP:inputstream.adaptive.license_type=clearkey
 #KODIPROP:inputstream.adaptive.license_key=40f019b86241d23ef075633fd7f1e927:058dec845bd340178a388edd104a015e
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36
-#EXTHTTP:{"cookie":"__hdnea__=st=1795665767~exp=1795687367~acl=/*~hmac=61a05ddcc20b38f6854dcdc1bf01eb52ae987ca177c3a5f2af9b951b5d20c4e2"}
 https://jiostbplus.saregojo99.workers.dev/proxy?url=https%3A%2F%2Ftimes-ott-live.akamaized.net%2Fmoviesnow_wv_drm%2Findex.mpd
-
 
 
 #------------------------------------------------------------------------------
