@@ -12,6 +12,25 @@ SONY_M3U_URL = (
     "https://raw.githubusercontent.com/bushmr263-ship-it/"
     "SonyLiv_Event_Playlist/refs/heads/main/SonyLiv.m3u"
 )
+
+FANCODE_JSON_URL = (
+    "https://raw.githubusercontent.com/bushmr263-ship-it/"
+    "Fancode_Auto_Update_Playlist/refs/heads/main/Fancode_data.json"
+)
+FANCODE_M3U_URL = (
+    "https://raw.githubusercontent.com/bushmr263-ship-it/"
+    "Fancode_Auto_Update_Playlist/refs/heads/main/Fancode.m3u"
+)
+
+TAPMAD_JSON_URL = (
+    "https://raw.githubusercontent.com/bushmr263-ship-it/"
+    "Tapmad_Auto_Update_Playlist/refs/heads/main/Tapmad_data.json"
+)
+TAPMAD_M3U_URL = (
+    "https://raw.githubusercontent.com/bushmr263-ship-it/"
+    "Tapmad_Auto_Update_Playlist/refs/heads/main/Tapmad.m3u"
+)
+
 EAMIN_M3U_URL = (
     "https://raw.githubusercontent.com/bushmr263-ship-it/"
     "sm-eamin-playlists/refs/heads/main/playlists/eamin-tv.m3u"
@@ -102,34 +121,129 @@ def fetch_json(url: str) -> dict:
     return resp.json()
 
 
-def parse_sony_json_blocks(data: dict) -> list[dict]:
+def find_direct_url_in_match(match_obj: dict) -> str | None:
+    candidate_keys = [
+        "stream_link",
+        "stream_url",
+        "streamUrl",
+        "url",
+        "m3u8",
+        "m3u8_url",
+        "hls_url",
+        "play_url",
+        "video_url",
+        "link",
+        "stream",
+        "raw_url",
+        "rawUrl",
+    ]
+    for k in candidate_keys:
+        val = match_obj.get(k)
+        if is_http_url(val):
+            return val.strip()
+
+    for k, val in match_obj.items():
+        if k in {"src", "image", "logo", "poster", "thumbnail", "thumb"}:
+            continue
+        if isinstance(val, str) and is_http_url(val):
+            s = val.strip()
+            if ".m3u8" in s.lower() or "hdnea=" in s.lower() or "/hls/" in s.lower():
+                return s
+
+    return None
+
+
+def resolve_m3u_url_for_match(
+    match_obj: dict, m3u_blocks: list[dict], used_indices: set[int]
+) -> tuple[str | None, int | None]:
+    cid = normalize_text(
+        match_obj.get("contentId")
+        or match_obj.get("match_id")
+        or match_obj.get("content_entity_id")
+        or ""
+    )
+    ename = normalize_text(
+        match_obj.get("match_name")
+        or match_obj.get("title")
+        or match_obj.get("event_name")
+        or ""
+    )
+    lang = normalize_text(match_obj.get("audioLanguageName") or "")
+    bchan = normalize_text(match_obj.get("broadcast_channel") or "")
+
+    if cid:
+        for idx, blk in enumerate(m3u_blocks):
+            if idx in used_indices:
+                continue
+            blk_id = blk.get("tvg_id", "")
+            if blk_id and (blk_id == cid or blk_id.startswith(cid) or cid in blk_id):
+                if not lang or lang in normalize_text(blk.get("name", "")):
+                    return blk["url"], idx
+
+    for idx, blk in enumerate(m3u_blocks):
+        if idx in used_indices:
+            continue
+        bname = normalize_text(blk.get("name", ""))
+        if ename and ename in bname:
+            if not lang or lang in bname:
+                return blk["url"], idx
+
+    for idx, blk in enumerate(m3u_blocks):
+        if idx in used_indices:
+            continue
+        bname = normalize_text(blk.get("name", ""))
+        if bchan and bchan in bname:
+            if not lang or lang in bname:
+                return blk["url"], idx
+
+    return None, None
+
+
+def build_json_blocks(
+    data: dict, m3u_blocks: list[dict], source_prefix: str = "", default_cat: str = "Sports"
+) -> list[dict]:
     matches = data.get("matches", [])
     if not isinstance(matches, list):
         return []
 
+    used_m3u_indices: set[int] = set()
     blocks = []
+
     for m in matches:
         if not isinstance(m, dict):
             continue
 
-        stream_url = m.get("stream_link") or m.get("stream_url") or m.get("url")
-        if not is_http_url(stream_url):
-            continue
-        stream_url = stream_url.strip()
+        stream_url = find_direct_url_in_match(m)
+        if not stream_url:
+            stream_url, matched_idx = resolve_m3u_url_for_match(m, m3u_blocks, used_m3u_indices)
+            if matched_idx is not None:
+                used_m3u_indices.add(matched_idx)
 
-        content_id = str(m.get("contentId") or "").strip()
+        if not stream_url:
+            continue
+
+        raw_id = str(
+            m.get("contentId")
+            or m.get("match_id")
+            or m.get("content_entity_id")
+            or ""
+        ).strip()
+        lang = str(m.get("audioLanguageName") or "").strip()
         match_name = str(m.get("match_name") or "").strip()
         event_name = str(m.get("event_name") or "").strip()
-        lang = str(m.get("audioLanguageName") or "").strip()
+        title = str(m.get("title") or "").strip()
+        header_name = str(m.get("header_name") or "").strip()
         channel_name = str(m.get("broadcast_channel") or "").strip()
-        category = str(m.get("event_category") or "Sports").strip()
-        logo = str(m.get("src") or "").strip()
+        category = str(m.get("event_category") or default_cat).strip()
+        logo = str(m.get("src") or m.get("image") or m.get("logo") or "").strip()
 
-        display_name = match_name or event_name or channel_name or "SonyLiv Live"
+        display_name = match_name or title or event_name or header_name or channel_name or "Live Event"
         if lang and f"[{lang.upper()}]" not in display_name.upper():
             display_name = f"{display_name} [{lang}]"
 
-        tvg_id_val = content_id
+        tvg_id_val = raw_id
+        if tvg_id_val and source_prefix and not tvg_id_val.lower().startswith(source_prefix.lower()):
+            tvg_id_val = f"{source_prefix}_{tvg_id_val}"
         if tvg_id_val and lang and not tvg_id_val.lower().endswith(f"_{lang.lower()}"):
             tvg_id_val = f"{tvg_id_val}_{lang}"
 
@@ -148,6 +262,10 @@ def parse_sony_json_blocks(data: dict) -> list[dict]:
             "url": stream_url,
             "raw": "\n".join([extinf, stream_url]),
         })
+
+    for idx, blk in enumerate(m3u_blocks):
+        if idx not in used_m3u_indices:
+            blocks.append(blk)
 
     return blocks
 
@@ -177,6 +295,8 @@ def parse_m3u_blocks(m3u_text: str, allowed_names: set[str] | None = None) -> li
                 if allowed_names is None or ch_name in allowed_names:
                     blocks.append({
                         "key": get_entry_key(extinf, stream_url),
+                        "tvg_id": normalize_text(extract_tvg_id(extinf)),
+                        "name": extract_channel_name(extinf),
                         "extinf": extinf,
                         "extras": extras,
                         "url": stream_url,
@@ -227,7 +347,6 @@ def sync_all_blocks(existing_text: str, incoming_blocks: list[dict]) -> tuple[st
         else:
             i += 1
 
-    # যে ব্লকগুলোর stream_url একই আছে সেগুলো URL দিয়ে ম্যাপ করা যাতে JSON এবং M3U মিলে গেলে ডুপ্লিকেট না হয়
     incoming_by_key = {}
     incoming_by_url = {}
     for blk in incoming_blocks:
@@ -303,24 +422,31 @@ def sync_all_blocks(existing_text: str, incoming_blocks: list[dict]) -> tuple[st
     return final_text, added_count, updated_count
 
 
+def load_source_pair(json_url: str, m3u_url: str, prefix: str, label: str) -> list[dict]:
+    m3u_blocks = []
+    try:
+        m3u_text = fetch_text(m3u_url)
+        m3u_blocks = parse_m3u_blocks(m3u_text, allowed_names=None)
+        print(f"{label} M3U লোড হয়েছে: {len(m3u_blocks)} টি")
+    except Exception as e:
+        print(f"{label} M3U লোড করতে সমস্যা: {e}")
+
+    try:
+        json_data = fetch_json(json_url)
+        combined = build_json_blocks(json_data, m3u_blocks, source_prefix=prefix)
+        print(f"{label} JSON + M3U প্রস্তুত হয়েছে: {len(combined)} টি ব্লক")
+        return combined
+    except Exception as e:
+        print(f"{label} JSON লোড করতে সমস্যা: {e}")
+        return m3u_blocks
+
+
 def main() -> None:
     all_incoming = []
 
-    try:
-        json_data = fetch_json(SONY_JSON_URL)
-        json_blocks = parse_sony_json_blocks(json_data)
-        all_incoming.extend(json_blocks)
-        print(f"SonyLiv_data.json থেকে পাওয়া গেছে: {len(json_blocks)} টি ব্লক")
-    except Exception as e:
-        print(f"SonyLiv_data.json লোড করতে সমস্যা: {e}")
-
-    try:
-        sony_m3u_text = fetch_text(SONY_M3U_URL)
-        sony_m3u_blocks = parse_m3u_blocks(sony_m3u_text, allowed_names=None)
-        all_incoming.extend(sony_m3u_blocks)
-        print(f"SonyLiv.m3u থেকে পাওয়া গেছে: {len(sony_m3u_blocks)} টি ব্লক")
-    except Exception as e:
-        print(f"SonyLiv.m3u লোড করতে সমস্যা: {e}")
+    all_incoming.extend(load_source_pair(SONY_JSON_URL, SONY_M3U_URL, "", "SonyLiv"))
+    all_incoming.extend(load_source_pair(FANCODE_JSON_URL, FANCODE_M3U_URL, "fancode", "Fancode"))
+    all_incoming.extend(load_source_pair(TAPMAD_JSON_URL, TAPMAD_M3U_URL, "tapmad", "Tapmad"))
 
     try:
         eamin_m3u_text = fetch_text(EAMIN_M3U_URL)
